@@ -1,0 +1,131 @@
+*******************************************************************
+* TrustSense Layer 1 / Part 1 - Photodiode Transimpedance Amplifier
+* Two-stage Miller-compensated op-amp, shunt-feedback TIA
+* Feedback element: MOS-bipolar pseudo-resistor (Rf ~ 1 GOhm incremental)
+* Process: SkyWater sky130A
+*
+* NOTE: device sizes / currents below are hand-calculated starting
+* points (see docs/TIA-DESIGN.md for the derivation). They have NOT
+* been executed in ngspice yet in this environment - run
+* simulation/spice/run-tia-sim.sh with $PDK_ROOT set to confirm, then
+* trim Cf / device W,L to converge on the target 4.8-5.0kHz -3dB point.
+*******************************************************************
+
+.lib "${PDK_ROOT:-/usr/share/pdk}/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global vdpwr vgnd vcm
+
+*=================================================================
+* Supplies
+*=================================================================
+VPWR   vdpwr  0        DC 3.3
+VGND   vgnd   0        DC 0
+VCM    vcm    0        DC 1.65
+
+*=================================================================
+* Photodiode model
+* Reverse-biased photodiode: current source + junction cap + series R
+* + shunt (dark leakage) resistance. Cathode drives the TIA summing
+* node (photodiode_in); anode returned to vgnd.
+*=================================================================
+Iph      anode_int  photodiode_in   DC 0 AC 1p SIN(0 1p 1k)
+Cj       photodiode_in  anode_int   10p
+Rs       anode_int  vgnd            100
+Rsh      photodiode_in  vgnd        500Meg
+
+*=================================================================
+* Bias reference branch (~2uA reference, mirrored around the chip)
+*   M8   : NMOS diode reference, sets 2uA via Rbias
+*   M8n  : NMOS mirror device, pulls the same 2uA out of node 'pbias'
+*   M8p  : PMOS diode, self-biases to source 2uA into 'pbias'
+*          -> node 'pbias' is now a clean PMOS gate-bias reference
+*=================================================================
+Rbias    vdpwr   nbias   1.2Meg
+M8       nbias   nbias   vgnd   vgnd   sky130_fd_pr__nfet_g5v0d10v5  W=4  L=2
+M8n      pbias   nbias   vgnd   vgnd   sky130_fd_pr__nfet_g5v0d10v5  W=4  L=2
+M8p      pbias   pbias   vdpwr  vdpwr  sky130_fd_pr__pfet_g5v0d10v5  W=4  L=2
+
+*=================================================================
+* Stage 1: PMOS-input differential pair, 5T OTA
+*   M1/M2 : input pair             (4uA/leg, tail = 8uA)
+*   M3/M4 : NMOS mirror load
+*   M5    : PMOS tail current source, mirrored off 'pbias' (4x ref -> 8uA)
+*=================================================================
+M5       tail1   pbias   vdpwr  vdpwr  sky130_fd_pr__pfet_g5v0d10v5  W=16  L=2
+M1       n1out   photodiode_in  tail1  vdpwr  sky130_fd_pr__pfet_g5v0d10v5  W=40  L=2
+M2       n2out   vcm            tail1  vdpwr  sky130_fd_pr__pfet_g5v0d10v5  W=40  L=2
+M3       n1out   n1out  vgnd  vgnd     sky130_fd_pr__nfet_g5v0d10v5  W=20  L=2
+M4       n2out   n1out  vgnd  vgnd     sky130_fd_pr__nfet_g5v0d10v5  W=20  L=2
+
+*=================================================================
+* Stage 2: common-source NMOS gain stage w/ PMOS current-source load
+*   M6 : gain device (10uA)
+*   M7 : PMOS current source load, mirrored off 'pbias' (5x ref -> 10uA)
+* Miller compensation Cc + nulling resistor Rz, node n2out -> amp_out
+*=================================================================
+M6       amp_out  n2out   vgnd    vgnd  sky130_fd_pr__nfet_g5v0d10v5  W=20  L=2
+M7       amp_out  pbias   vdpwr   vdpwr sky130_fd_pr__pfet_g5v0d10v5  W=20  L=2
+
+Cc       n2out       amp_out_cc  4.2p
+Rz       amp_out_cc  amp_out     11k
+
+*=================================================================
+* Output buffer: NMOS source follower, drives TIA output / next stage
+* (PGA) input capacitance. M10 tail mirrored off 'nbias' (3.2x ref -> 6.4uA)
+*=================================================================
+M9       vdpwr    amp_out  tia_out  vgnd  sky130_fd_pr__nfet_g5v0d10v5  W=20    L=1
+M10      tia_out  nbias    vgnd     vgnd  sky130_fd_pr__nfet_g5v0d10v5  W=12.8  L=2
+Cload    tia_out  vgnd     2p
+
+*=================================================================
+* Feedback network: MOS-bipolar pseudo-resistor (Rf ~ 1 GOhm
+* incremental resistance around the virtual-ground bias point) +
+* explicit small compensation cap Cf.
+* Two thin-oxide NFETs, gate+drain tied, connected anti-series so the
+* structure is symmetric for either sign of small-signal current.
+* Both ends sit at ~VCM DC, so 1.8V-rated devices are safe here even
+* though the rest of the amp runs off the 3.3V rail.
+*=================================================================
+MPR1     photodiode_in  photodiode_in  pr_mid  vgnd  sky130_fd_pr__nfet_01v8  W=1  L=1
+MPR2     tia_out        tia_out        pr_mid  vgnd  sky130_fd_pr__nfet_01v8  W=1  L=1
+
+Cf       photodiode_in  tia_out  20f
+
+*=================================================================
+* Analysis
+*=================================================================
+.control
+  op
+  print v(photodiode_in) v(tia_out) v(amp_out) v(nbias) v(pbias)
+  let power_op = -i(VPWR) * 3.3
+  print power_op
+
+  ac dec 50 10 100k
+  let gain_v_per_a = mag(v(tia_out)) / mag(i(Iph))
+  let vdb_out = db(v(tia_out))
+  meas ac gain_dc find gain_v_per_a at=10
+  meas ac gain_db_dc find vdb_out at=10
+  meas ac bw_3db when vdb_out=(gain_db_dc-3)
+  print gain_dc bw_3db
+  wrdata tia_ac.txt vdb_out
+
+  * output noise integrated 10Hz-100kHz, referred back to input current
+  noise v(tia_out) Iph dec 50 10 100k
+  print inoise_total onoise_total
+  let noise_rti = onoise_total / gain_v_per_a
+  print noise_rti
+
+  tran 1u 1m 0 1u
+  meas tran vmin_out MIN v(tia_out) FROM=0 TO=1m
+  meas tran vmax_out MAX v(tia_out) FROM=0 TO=1m
+  meas tran trise TRIG v(tia_out) VAL='vmin_out+0.1*(vmax_out-vmin_out)' RISE=1
+  +                TARG v(tia_out) VAL='vmin_out+0.9*(vmax_out-vmin_out)' RISE=1
+  let power_inst = -i(VPWR) * 3.3
+  meas tran power_total AVG power_inst FROM=0 TO=1m
+  wrdata tia_tran.txt i(Iph) v(photodiode_in) v(tia_out)
+
+  write tia.raw
+  quit
+.endc
+
+.end

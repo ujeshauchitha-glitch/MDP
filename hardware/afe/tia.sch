@@ -1,0 +1,87 @@
+v {xschem version=3.4.5 file_version=1.2}
+G {}
+K {}
+V {}
+S {}
+E {}
+T {TrustSense Layer 1 / Part 1 -- Photodiode TIA
+Two-stage Miller op-amp, shunt feedback, MOS-bipolar pseudo-resistor Rf
+sky130A -- hand-authored from simulation/spice/tia.spice, NOT yet opened
+in xschem GUI. Open, run ERC, and auto-route wires before relying on
+the drawing for layout. tia.spice is the verified source of truth.} -20 -480 0 0 0.25 0.25 {}
+
+# ---------------------------------------------------------------
+# Supplies
+# ---------------------------------------------------------------
+C {devices/vsource.sym} -320 -400 0 0 {name=VPWR value=3.3 lab=vdpwr}
+C {devices/vsource.sym} -320 -320 0 0 {name=VGND value=0 lab=vgnd}
+C {devices/vsource.sym} -320 -240 0 0 {name=VCM value=1.65 lab=vcm}
+C {devices/lab_pin.sym} -280 -400 0 0 {name=p1 sig_type=std_logic lab=vdpwr}
+C {devices/lab_pin.sym} -280 -320 0 0 {name=p2 sig_type=std_logic lab=vgnd}
+C {devices/lab_pin.sym} -280 -240 0 0 {name=p3 sig_type=std_logic lab=vcm}
+
+# ---------------------------------------------------------------
+# Photodiode model: Iph (AC 1p SIN 1kHz) || Cj 10p, Rs 100, Rsh 500Meg
+# ---------------------------------------------------------------
+C {devices/isource.sym} -160 -80 0 0 {name=Iph value="DC 0 AC 1p SIN(0 1p 1k)" lab_p=photodiode_in lab_m=anode_int}
+C {devices/capa.sym} -80 -80 0 0 {name=Cj value=10p m=1 lab_p=photodiode_in lab_m=anode_int}
+C {devices/res.sym} -40 -20 0 0 {name=Rs value=100 lab_p=anode_int lab_m=vgnd}
+C {devices/res.sym} -200 -20 0 0 {name=Rsh value=500Meg lab_p=photodiode_in lab_m=vgnd}
+C {devices/lab_pin.sym} -160 -120 0 0 {name=p4 sig_type=std_logic lab=photodiode_in}
+C {devices/lab_pin.sym} -40 -60 0 0 {name=p5 sig_type=std_logic lab=anode_int}
+
+# ---------------------------------------------------------------
+# Bias reference: Rbias + M8 (NMOS diode, 2uA) -> nbias
+# M8n/M8p translate nbias into PMOS gate reference 'pbias'
+# ---------------------------------------------------------------
+C {devices/res.sym} 40 -400 0 0 {name=Rbias value=1.2Meg lab_p=vdpwr lab_m=nbias}
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 40 -320 0 0 {name=M8 model=sky130_fd_pr__nfet_g5v0d10v5 W=4 L=2 lab_d=nbias lab_g=nbias lab_s=vgnd lab_b=vgnd}
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 120 -320 0 0 {name=M8n model=sky130_fd_pr__nfet_g5v0d10v5 W=4 L=2 lab_d=pbias lab_g=nbias lab_s=vgnd lab_b=vgnd}
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} 120 -400 0 0 {name=M8p model=sky130_fd_pr__pfet_g5v0d10v5 W=4 L=2 lab_d=pbias lab_g=pbias lab_s=vdpwr lab_b=vdpwr}
+C {devices/lab_pin.sym} 40 -360 0 0 {name=p6 sig_type=std_logic lab=nbias}
+C {devices/lab_pin.sym} 120 -360 0 0 {name=p7 sig_type=std_logic lab=pbias}
+
+# ---------------------------------------------------------------
+# Stage 1: PMOS diff pair M1/M2, NMOS mirror load M3/M4, tail M5
+# ---------------------------------------------------------------
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} 220 -240 0 0 {name=M5 model=sky130_fd_pr__pfet_g5v0d10v5 W=16 L=2 lab_d=tail1 lab_g=pbias lab_s=vdpwr lab_b=vdpwr}
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} 180 -160 0 0 {name=M1 model=sky130_fd_pr__pfet_g5v0d10v5 W=40 L=2 lab_d=n1out lab_g=photodiode_in lab_s=tail1 lab_b=vdpwr}
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} 260 -160 0 0 {name=M2 model=sky130_fd_pr__pfet_g5v0d10v5 W=40 L=2 lab_d=n2out lab_g=vcm lab_s=tail1 lab_b=vdpwr}
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 180 -80 0 0 {name=M3 model=sky130_fd_pr__nfet_g5v0d10v5 W=20 L=2 lab_d=n1out lab_g=n1out lab_s=vgnd lab_b=vgnd}
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 260 -80 0 0 {name=M4 model=sky130_fd_pr__nfet_g5v0d10v5 W=20 L=2 lab_d=n2out lab_g=n1out lab_s=vgnd lab_b=vgnd}
+C {devices/lab_pin.sym} 220 -280 0 0 {name=p8 sig_type=std_logic lab=tail1}
+C {devices/lab_pin.sym} 180 -200 0 0 {name=p9 sig_type=std_logic lab=n1out}
+C {devices/lab_pin.sym} 260 -200 0 0 {name=p10 sig_type=std_logic lab=n2out}
+
+# ---------------------------------------------------------------
+# Stage 2: common-source M6 + PMOS load M7, Miller Cc + Rz
+# ---------------------------------------------------------------
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 360 -80 0 0 {name=M6 model=sky130_fd_pr__nfet_g5v0d10v5 W=20 L=2 lab_d=amp_out lab_g=n2out lab_s=vgnd lab_b=vgnd}
+C {sky130_fd_pr/pfet_g5v0d10v5.sym} 360 -240 0 0 {name=M7 model=sky130_fd_pr__pfet_g5v0d10v5 W=20 L=2 lab_d=amp_out lab_g=pbias lab_s=vdpwr lab_b=vdpwr}
+C {devices/capa.sym} 420 -160 0 0 {name=Cc value=4.2p lab_p=n2out lab_m=amp_out_cc}
+C {devices/res.sym} 460 -120 0 0 {name=Rz value=11k lab_p=amp_out_cc lab_m=amp_out}
+C {devices/lab_pin.sym} 360 -280 0 0 {name=p11 sig_type=std_logic lab=amp_out}
+
+# ---------------------------------------------------------------
+# Output buffer: NMOS source follower M9 + tail current source M10
+# ---------------------------------------------------------------
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 520 -240 0 0 {name=M9 model=sky130_fd_pr__nfet_g5v0d10v5 W=20 L=1 lab_d=vdpwr lab_g=amp_out lab_s=tia_out lab_b=vgnd}
+C {sky130_fd_pr/nfet_g5v0d10v5.sym} 520 -160 0 0 {name=M10 model=sky130_fd_pr__nfet_g5v0d10v5 W=12.8 L=2 lab_d=tia_out lab_g=nbias lab_s=vgnd lab_b=vgnd}
+C {devices/capa.sym} 580 -160 0 0 {name=Cload value=2p lab_p=tia_out lab_m=vgnd}
+C {devices/lab_pin.sym} 520 -280 0 0 {name=p12 sig_type=std_logic lab=tia_out}
+
+# ---------------------------------------------------------------
+# Feedback: pseudo-resistor MPR1/MPR2 (anti-series diode NFETs) + Cf
+# ---------------------------------------------------------------
+C {sky130_fd_pr/nfet_01v8.sym} 300 -400 0 0 {name=MPR1 model=sky130_fd_pr__nfet_01v8 W=1 L=1 lab_d=photodiode_in lab_g=photodiode_in lab_s=pr_mid lab_b=vgnd}
+C {sky130_fd_pr/nfet_01v8.sym} 420 -400 0 0 {name=MPR2 model=sky130_fd_pr__nfet_01v8 W=1 L=1 lab_d=tia_out lab_g=tia_out lab_s=pr_mid lab_b=vgnd}
+C {devices/lab_pin.sym} 360 -440 0 0 {name=p13 sig_type=std_logic lab=pr_mid}
+C {devices/capa.sym} 360 -480 0 0 {name=Cf value=20f lab_p=photodiode_in lab_m=tia_out}
+
+# ---------------------------------------------------------------
+# Top-level I/O pins (for use as a symbol inside a larger AFE sheet)
+# ---------------------------------------------------------------
+C {ipin.sym} -360 -80 0 0 {name=p14 lab=photodiode_in}
+C {opin.sym} 620 -240 0 0 {name=p15 lab=tia_out}
+C {iopin.sym} -360 -400 0 0 {name=p16 lab=vdpwr}
+C {iopin.sym} -360 -320 0 0 {name=p17 lab=vgnd}
