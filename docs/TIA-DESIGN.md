@@ -1,10 +1,10 @@
 # TrustSense Layer 1 / Part 1 — Transimpedance Amplifier (TIA)
 
-Status: **hand-calculated first pass, not yet simulated.** No ngspice/sky130
-toolchain was available in the environment these files were generated in.
-Run `simulation/spice/run-tia-sim.sh` (see [Expected vs. measured](#expected-vs-measured))
-and update the "measured" column below before treating any number here as
-verified.
+Status: **simulated (ngspice 47, sky130 tt corner, hand-fixed netlist).** The
+hand-calculated first pass did not work as written; see §9 for what the first
+real run found and what was changed. §1-§6 below are the original hand
+derivation and are **partly superseded by §9** (pseudo-resistor, bandwidth,
+noise). Reproduce with `simulation/spice/run-tia-sim.sh`.
 
 ## 0. A spec conflict worth flagging first
 
@@ -198,11 +198,11 @@ bandwidth and stability targets simultaneously with this topology.
 
 | Metric | Target | Hand-calculated expectation | Measured (run the sim) |
 |---|---|---|---|
-| DC gain | 1 mV/pA (1 GΩ) ± 5% | ~1 GΩ (loop gain ≫ 20 makes closed-loop error ≪ 1%) | TBD |
-| -3 dB bandwidth | 4.8–5.0 kHz | ~5 kHz by construction (GBW solved for this) | TBD |
-| Output noise (RTI SNR) | <100 µV RMS / >50 dB | **~360 µV RMS / ~6 dB — see §0, §4** | TBD |
-| Rise time (latency) | <100 ns | Not yet estimated — GBW ~1.9 MHz suggests slew/BW-limited rise time closer to ~1–2 µs for a 1kHz-band signal, likely missing the <100 ns target; needs the `.measure tran trise` result | TBD |
-| Power | <100 µW (target 87 µW) | 87.1 µW by budget construction | TBD |
+| DC gain | 1 mV/pA (1 GΩ) ± 5% | ~1 GΩ (loop gain ≫ 20 makes closed-loop error ≪ 1%) | **0.997 GΩ (pass)** |
+| -3 dB bandwidth | 4.8–5.0 kHz | ~5 kHz by construction (GBW solved for this) | **2.33 kHz (miss, see §9)** |
+| Output noise (RTI SNR) | <100 µV RMS / >50 dB | **~360 µV RMS / ~6 dB — see §0, §4** | **1.56 mV RMS, 10 Hz–100 kHz (fail, see §9)** |
+| Rise time (latency) | <100 ns | Not yet estimated — GBW ~1.9 MHz suggests slew/BW-limited rise time closer to ~1–2 µs for a 1kHz-band signal, likely missing the <100 ns target; needs the `.measure tran trise` result | **136 µs (fail, ~1000x over target, see §9)** |
+| Power | <100 µW (target 87 µW) | 87.1 µW by budget construction | **85.3 µW (pass)** |
 
 Run `simulation/spice/run-tia-sim.sh` (needs ngspice + sky130A PDK on
 PATH/`PDK_ROOT`) and fill in the last column. Expect at least one or two
@@ -226,3 +226,75 @@ first pass.
   amplifier — worth revisiting once `trise` comes back from simulation;
   may need a faster (higher-power) buffer stage if this is a hard
   requirement rather than a rough target.
+
+## 9. Simulation results and what the first run found (2026-10-15)
+
+Tooling: ngspice 47 (Windows build), sky130 models from
+`google/skywater-pdk-libs-sky130_fd_pr` (tt corner; the runner generates a
+trimmed model library because the full `sky130.lib.spice` fails in ngspice on
+the nvt/esd models). Numbers below are from `tia.spice` / `tia_wide.spice` as
+committed.
+
+**Defects in the hand-written netlist, found only by running it:**
+
+1. MOS devices were instantiated as `M...`; sky130 devices are subcircuits and
+   need `X...` instances, plus `.option scale=1u` for W/L in µm. The netlist
+   did not load.
+2. `Rsh` (500 MΩ photodiode shunt to ground) out-competes the pA-level DC path
+   of the pseudo-resistor and pins the input near 0 V. Removed (dark current
+   belongs in Iph's DC term).
+3. The NMOS pseudo-resistor (gates on the outer terminals, bulk at gnd) is
+   one-sided: it measured ~650 GΩ and could not pull the input to VCM. Replaced
+   with the standard back-to-back PMOS pair (gates on the shared node, body on
+   source); W=94 µm, L=0.15 µm, m=2 gives 0.997 GΩ. This is **not** "~2 µm² of
+   silicon" as §2 assumed (~190 µm of total width).
+4. The circuit has a second, latched DC state (`amp_out` railed at 3.3 V).
+   A `.nodeset` steers the solver to the intended state. Whether it settles
+   there by itself at power-up in silicon is **not verified** (needs a
+   start-up transient or reset switch).
+5. `i(Iph)` is not valid for a current source in ngspice; gain now uses the
+   known 1 pA AC magnitude. Rise time is measured on a 1 pA step (the output
+   falls: the TIA inverts).
+
+**Slow path (Path A), measured:**
+
+| Metric | Target | Measured |
+|---|---|---|
+| DC transimpedance | 1 GΩ ±5% | 0.997 GΩ |
+| -3 dB bandwidth | 4.8–5.0 kHz | **2.33 kHz** |
+| Peaking | none | 0 dB |
+| 10-90% rise time | <100 ns | **136 µs** |
+| Output noise 10 Hz–100 kHz | <100 µV | **1.56 mV RMS** |
+| Power (op / transient) | <100 µW | 85.3 µW |
+
+- **Bandwidth is not GBW-limited.** Cc from 4.2 pF down to 0.5 pF moved BW
+  only 1.79 → 1.64 kHz. The pole is Rf × (Cf + pseudo-resistor parasitics),
+  about 0.1 pF effective, set mostly by ~190 µm of PMOS width. §3's
+  "GBW 1.9 MHz → 5 kHz" derivation does not apply. Reaching 5 kHz at 1 GΩ needs
+  less parasitic capacitance per GΩ (not demonstrated here).
+- **Rise time ≈ 0.35/BW**, so <100 ns is unreachable by ~3 orders of magnitude
+  for any 1 GΩ, kHz-class TIA. Drop the target or move it to the wideband path.
+- **The 1.56 mV noise is a wide-band integral** (10 Hz–100 kHz) dominated by
+  out-of-band noise gain; it has not been re-integrated over the signal band,
+  so the 360 µV hand estimate in §4 is neither confirmed nor refuted.
+- No loop-gain/phase-margin (`stb`) run was done. Stability is inferred from
+  zero closed-loop peaking and a clean step.
+
+## 10. Wideband path (Path B), `simulation/spice/tia_wide.spice`
+
+Same two-stage op-amp with Rbias 600 kΩ (about 2x currents), Cc 2 pF, ideal
+Rf = 314 kΩ (placeholder; to become a poly resistor) and Cf = 1.4 pF for
+peaking control. Found by sweeping Rbias/Cc/Cf: at the original bias with
+Cf≈0 the amp peaked 10–19 dB.
+
+| Metric | Target (afe-architecture §3) | Measured |
+|---|---|---|
+| Transimpedance | 314 kΩ | 314 kΩ |
+| -3 dB bandwidth | 480 kHz | 483 kHz |
+| Peaking | none | 0 dB |
+| 10–90% rise time (1 nA step) | ≤ 1 chip period (2.1 µs) | 0.77 µs |
+| Power | "~87 µW class" | **169 µW** |
+| Input-referred noise | 236 fA/√Hz (I_DC = 10 nA) | **363 fA/√Hz @10 kHz, 391 @100 kHz, 724 @316 kHz, 505 @1 MHz** |
+
+Noise is 1.5x the budget at low frequency and about 3x near the top of the
+code band (op-amp noise, as the caveat in afe-architecture §4 predicted).

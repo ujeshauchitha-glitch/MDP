@@ -302,3 +302,22 @@ flagged as a future trap, not a live problem given the chip-code design.
 | Clinical limitation | named, verbatim | §7 |
 | Wavelength reinforcement | yes, compounds in thermal regime | §7, illustrative k only |
 | I_pert convention | peak = RMS (square code) | §8, checked not assumed |
+
+## 11. Simulation check of this spec (2026-10-15)
+
+First ngspice runs exist now (details in [`TIA-DESIGN.md`](TIA-DESIGN.md) §9–§10).
+They change the picture in §3–§6:
+
+- Rf_wide = 314 kΩ at 483 kHz is achievable, but the amp needs **169 µW**, not
+  the "87 µW class" assumed in §3.
+- Measured input-referred noise is **363–391 fA/√Hz** in the chip-rate band
+  (**~724 fA/√Hz** near 316 kHz), vs the 236 fA/√Hz in §4. That is a 3.7 dB
+  (low band) to ~10 dB (316 kHz) SNR loss vs §5. At m = 2 %, I_DC = 10 nA the
+  §5 figure of 21.6 dB drops to roughly 17–18 dB at 100 kHz-band noise, below
+  the 18.8 dB required in §6 (hand-adjusted from the §5 formula, not
+  re-simulated with a coherent-detection testbench).
+- The "shared input buffer" of §1 is **not designed and not simulated**. A
+  source-follower buffer cannot feed a shunt-feedback TIA (which needs its
+  own virtual ground at the photodiode node), so the two-path split needs an
+  explicit topology decision (e.g. current-mode splitting through a
+  regulated cascode / current mirror). Open.
