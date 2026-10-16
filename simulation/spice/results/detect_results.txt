@@ -1,0 +1,28 @@
+N=48 chips @ 480 kchip/s, T_int=100 us, Pfa=1e-08, eta=5.61 sigma
+required d = 8.70 (18.8 dB) for Pd = 0.999
+
+I_DC=10n: rx delay 0.65 us, sigma0=24.066 uV, noise-only skew=+0.001 kurt=3.105 P(|z|>3s)=0.0034 (Gauss 0.0027) P(|z|>4s)=0.00005 (Gauss 6.3e-5)
+   m= 2.0%  d=  1.75  SNR=  4.9 dB  Pd@Pfa1e-8=5.752e-05 (empirical 0.0001)
+   m= 1.0%  d=  0.87  SNR= -1.2 dB  Pd@Pfa1e-8=9.758e-07 (empirical 0.0000)
+   m= 0.5%  d=  0.43  SNR= -7.3 dB  Pd@Pfa1e-8=8.461e-08 (empirical 0.0000)
+
+I_DC=30n: rx delay 0.65 us, sigma0=23.833 uV, noise-only skew=+0.016 kurt=3.033 P(|z|>3s)=0.0029 (Gauss 0.0027) P(|z|>4s)=0.00005 (Gauss 6.3e-5)
+   m= 2.0%  d=  5.29  SNR= 14.5 dB  Pd@Pfa1e-8=0.3767 (empirical 0.3752)
+   m= 1.0%  d=  2.66  SNR=  8.5 dB  Pd@Pfa1e-8=0.001797 (empirical 0.0024)
+   m= 0.5%  d=  1.33  SNR=  2.4 dB  Pd@Pfa1e-8=1.142e-05 (empirical 0.0001)
+
+I_DC=100n: rx delay 0.65 us, sigma0=24.134 uV, noise-only skew=-0.009 kurt=3.060 P(|z|>3s)=0.0031 (Gauss 0.0027) P(|z|>4s)=0.00005 (Gauss 6.3e-5)
+   m= 2.0%  d= 17.45  SNR= 24.8 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+   m= 1.0%  d=  8.71  SNR= 18.8 dB  Pd@Pfa1e-8=0.998 (empirical 0.9977)
+   m= 0.5%  d=  4.36  SNR= 12.8 dB  Pd@Pfa1e-8=0.1116 (empirical 0.1095)
+
+I_DC=300n: rx delay 0.65 us, sigma0=24.824 uV, noise-only skew=-0.005 kurt=3.021 P(|z|>3s)=0.0027 (Gauss 0.0027) P(|z|>4s)=0.00000 (Gauss 6.3e-5)
+   m= 2.0%  d= 50.80  SNR= 34.1 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+   m= 1.0%  d= 25.42  SNR= 28.1 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+   m= 0.5%  d= 12.71  SNR= 22.1 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+
+I_DC=1u: rx delay 0.65 us, sigma0=26.920 uV, noise-only skew=+0.055 kurt=3.038 P(|z|>3s)=0.0028 (Gauss 0.0027) P(|z|>4s)=0.00000 (Gauss 6.3e-5)
+   m= 2.0%  d=156.23  SNR= 43.9 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+   m= 1.0%  d= 78.10  SNR= 37.9 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+   m= 0.5%  d= 39.05  SNR= 31.8 dB  Pd@Pfa1e-8=1 (empirical 1.0000)
+

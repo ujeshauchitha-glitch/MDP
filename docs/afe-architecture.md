@@ -521,3 +521,58 @@ measurably worse while making the slow path ~29x quieter.**
   IBX sweep for this topology were not run; the slow-path noise is expected
   to be insensitive to IBX, the wideband noise sensitive (as in §12).
 - No coherent-detection (chip-code) simulation of the end-to-end SNR yet.
+
+## 16. End-to-end coherent detection, option-1 front end (2026-10-17)
+
+Testbench: `simulation/detect/coherent_mc.py`; channel data from ngspice in
+`simulation/spice/results/chan_<I_DC>.txt` (extracted by
+`simulation/spice/tools/afe_wide_channel.py`); raw output in
+`simulation/spice/results/detect_results.txt`.
+
+**Method.** The front end is linear for these signals, so ngspice supplies the
+complex wideband response H(f) and the output noise PSD (device noise; I_DC
+= 10 n…1 µ, IBX = 1 µA, Cc = 50 pF, servo as a fixed gate bias). A Monte Carlo
+then drives random **48-chip** bipolar codes (480 kchip/s, T_int = 100 µs,
+peak amplitude m·I_DC) through H(f) with Gaussian noise (SPICE device noise
++ photodiode shot noise 2qI_DC added at the input), 5 consecutive random
+symbols per trial so inter-symbol interference is included, and correlates
+the middle one with the known code after a fixed receiver delay (0.65 µs,
+picked to maximise the mean). Threshold η = 5.61 σ (Pfa = 1e-8 by the
+Gaussian tail), 20 000 trials per point. Detection SNR is d = μ/σ₀ with
+20·log10(d) quoted; 18.8 dB (d = 8.70) is the §6 requirement for
+Pd = 99.9 %.
+
+**Noise-only correlator output is Gaussian where it can be checked:**
+kurtosis 3.02–3.11, skew |≤0.06|, P(|z|>3σ) = 0.0027–0.0034 (Gaussian 0.0027).
+Tails at 1e-8 cannot be verified by Monte Carlo (needs ~1e9 trials), so Pfa
+= 1e-8 rests on the Gaussian-noise assumption, not on measurement.
+
+| I_DC | m = 2 % | m = 1 % | m = 0.5 % |
+|---|---|---|---|
+| 10 nA | 4.9 dB, Pd 6e-5 | −1.2 dB, Pd 1e-6 | −7.3 dB |
+| 30 nA | 14.5 dB, Pd 0.38 | 8.5 dB, Pd 0.002 | 2.4 dB |
+| 100 nA | 24.8 dB, Pd ≈ 1 | **18.8 dB, Pd 0.998** | 12.8 dB, Pd 0.11 |
+| 300 nA | 34.1 dB, Pd 1 | 28.1 dB | 22.1 dB, Pd 1 |
+| 1 µA | 43.9 dB, Pd 1 | 37.9 dB | 31.8 dB |
+
+(Pd at Pfa = 1e-8; empirical Pd from the Monte Carlo agrees with the Gaussian
+formula to within trial statistics.)
+
+**Minimum I_DC for Pd ≥ 99.9 % at Pfa = 1e-8** (d is linear in m·I_DC, since
+σ₀ is nearly constant at 24–27 µV): **≈ 50 nA at m = 2 %, ≈ 100 nA at
+m = 1 %, ≈ 200 nA at m = 0.5 %.**
+
+**Versus the §5/§6 hand budget:** that analysis claimed 21.6 dB at (10 nA,
+2 %) and a pass at every I_DC ≥ 10 nA for m = 2 % (≥ 31 nA for m = 0.5 %). The
+simulated front end gives 4.9 dB at (10 nA, 2 %), i.e. **~16.7 dB worse**,
+and needs ~5x (m = 2 %) to ~6x (m = 0.5 %) more photocurrent. The gap is the
+noise: the effective input-referred noise that reproduces the simulated d is
+about 1.6 pA/√Hz versus the 0.236 pA/√Hz budget (consistent with the
+1.1–1.7 pA/√Hz measured at 100–316 kHz in §15), plus lost matched-filter
+gain from the 280–300 kHz channel bandwidth.
+
+**This is a result for the AWGN false-alarm and detection requirement only**
+(it says nothing about an adversary), and it still rests on: ideal IBX and
+cancel currents, a behavioral servo (fixed gate bias here), tt corner / room
+temperature, ideal timing recovery, noise limited to the 3.84 MHz sampling
+band, and the Gaussian-tail assumption above.
