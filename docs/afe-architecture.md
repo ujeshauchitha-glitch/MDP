@@ -752,3 +752,56 @@ needed.
 **Not done:** mismatch Monte Carlo (only global corners here), supply
 variation, and a Monte Carlo of the coherent detector at the 125 °C and
 ss/125 channels (analytic figure of merit only for the corners).
+
+## 20. Slow-path feedback made PVT-robust: poly T-network (2026-10-17)
+
+§19 showed the PMOS pseudo-resistor spans 0.8 MΩ – 120 GΩ over PVT. Replaced
+by a **poly T-network**: R1 = R2 = 10 MΩ in series from the photodiode node `x`
+to `s_out`, R3 = 102 kΩ from their junction to VCM, Cf = 50 fF across the
+whole feedback. Rf_eff = R1 + R2 + R1·R2/R3 ≈ 1.0 GΩ is set by resistor
+*ratios*, so it does not move with the subthreshold device physics.
+(Netlist option `tnet=1 t1= t3= tcf=` in `tools/wide_noise_sweep.py`; poly
+resistors are ideal in SPICE, so thermal noise is included but absolute
+tolerance and tempco are not.) Raw data:
+`simulation/spice/results/corner_sweep_tnet.txt`.
+
+**PVT results, I_DC = 100 nA, real bias mirror (§18), Msv gate bisected per
+corner:**
+
+| corner / temp | slow Z @10 Hz | slow -3 dB | slow noise RMS 0.5–100 Hz | wide RTI @100 kHz | wide min I_DC (m = 2 %) |
+|---|---|---|---|---|---|
+| tt / 27 °C | 0.993 GΩ | 2.82 kHz | 8.4 pA | 624 fA/√Hz | 24.1 nA |
+| tt / −40 °C | 0.993 GΩ | 2.82 kHz | 9.5 pA | 546 | 21.3 nA |
+| tt / 125 °C | 0.992 GΩ | 2.66 kHz | 7.4 pA | 736 | 28.0 nA |
+| ss / 125 °C | 0.990 GΩ | 2.52 kHz | 7.6 pA | 745 | 28.4 nA |
+| ff / −40 °C | 0.995 GΩ | 2.99 kHz | 9.2 pA | 542 | 21.0 nA |
+| sf / 27 °C | 0.995 GΩ | 2.82 kHz | 8.0 pA | 629 | 24.3 nA |
+| fs / 27 °C | 0.986 GΩ | 2.66 kHz | 8.7 pA | 620 | 23.9 nA |
+
+Compared with the pseudo-resistor at the same corners: transimpedance now
+within 1.5 % of 1 GΩ at every corner (was 0.79 MΩ … 120 GΩ), `s_out` centres
+at all of them (it did not at cold and sf), bandwidth 2.5–3.0 kHz everywhere
+(was 2.5 kHz … 224 kHz), and slow-path noise does not degrade (7.4–9.5 pA vs
+8.2 pA at tt27). **Side benefit:** the worst wideband case improves from
+52.4 nA (tt/125 °C) to **28.4 nA (ss/125 °C)**; the 0.8 MΩ pseudo-resistor was
+a thermal-noise shunt on the shared node `x` at high temperature.
+
+**Wideband minimum I_DC across all seven corners with the T-network: 21 – 28 nA
+(m = 2 %)**, i.e. ≤ 1.2x the typical value.
+
+**Limits of this check:**
+- Poly resistor absolute tolerance (typ. ±20 %) shifts Rf_eff proportionally
+  (R1·R2/R3 scales with the same factor), so the *gain* is not within 1.5 % in
+  silicon, only the corner-to-corner device spread is gone; ratio mismatch of R3
+  vs R1/R2 (~1 %) changes Rf_eff by about 1 %. The slow gain is then a
+  calibratable constant, not a drifting nonlinear element.
+- Area: 20 MΩ of series poly (≈ 10 000 squares of xhigh-ρ poly, assumed ≈
+  1–2 k µm²) plus R3 and a 50 fF cap; not laid out.
+- Wideband numbers at each corner were taken with default solver tolerances;
+  the slow-path numbers with tight tolerances (abstol 1e-16 A). Reason: same
+  netlist, tight tolerances intermittently gave a wideband `.noise` result ~40 %
+  too low (e.g. 391 vs 624 fA/√Hz at tt27, changing with R3 = 102 k vs 101 k),
+  which was treated as an analysis artifact. This also means the earlier §19
+  table's wideband entries (run with tight tolerances) should be read with that
+  caveat; this section supersedes them.
+- Only I_DC = 100 nA; mismatch Monte Carlo and supply variation not done.

@@ -66,6 +66,10 @@ def netlist(o):
         lib = tt.replace("__tt.", f"__{c}.").replace("/tt/", f"/{c}/")
         (B / f"sky130_min_{c}.lib").write_text(lib, encoding="utf-8")
         s = s.replace('.include "sky130_min.lib"', f'.include "sky130_min_{c}.lib"')
+    if o.get("tnet") == "1":   # poly T-network feedback (R1=R2=t1, R3=t3 to VCM) instead of the PMOS pseudo-resistor
+        s = re.sub(r"^XMPR1_s [^\n]*\n", f"R1_s   x tn_s {o.get('t1','10Meg')}\n", s, flags=re.M)
+        s = re.sub(r"^XMPR2_s [^\n]*\n", f"R2_s   tn_s s_out {o.get('t1','10Meg')}\nR3_s   tn_s vcm {o.get('t3','102k')}\n", s, flags=re.M)
+        s = s.replace("Cf_s x s_out 1f", f"Cf_s x s_out {o.get('tcf','50f')}")
     if o.get("tight") == "1":   # pA-level cancel currents through multi-GOhm feedback need tight solver tolerances
         s = s.replace(".option scale=1u", ".option scale=1u\n.option abstol=1e-16 vntol=1e-9 reltol=1e-5", 1)
     if "temp" in o:
