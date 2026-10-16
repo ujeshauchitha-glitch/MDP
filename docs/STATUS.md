@@ -1,0 +1,100 @@
+# TrustSense Layer 1 AFE: status (2026-10-17)
+
+One-page summary of where the design stands. Details, derivations and every
+failed attempt are in [`afe-architecture.md`](afe-architecture.md) (§ numbers
+below) and [`TIA-DESIGN.md`](TIA-DESIGN.md). Everything here is **simulated in
+ngspice 47 with the sky130 models, not built or measured**.
+
+## Current design (what the numbers below are for)
+
+```
+                     Cj (10 pF assumed)
+ photodiode ──► x ──────────────────────────────► slow TIA ► PPG
+                │       (T-network 1 GΩ, 2.8 kHz,  ▲
+                │        NMOS sink cancels I_DC) ──┘ digital-assisted servo
+                │
+                └─ Cc 50 pF ─► common-gate PMOS Mc ─► NMOS mirror (4x, degenerated)
+                                                       ─► wideband TIA 314 kΩ ─► correlator
+   bias: degenerated PMOS mirror, IBX = 300 nA (also cancels at the TIA input)
+```
+
+* **Slow path (PPG):** photodiode node straight into a two-stage TIA with a
+  poly **T-network** feedback (R1 = R2 = 10 MΩ, R3 = 102 kΩ, Cf 50 fF) =
+  0.99 GΩ, ~2.8 kHz. DC photocurrent is cancelled by an NMOS sink driven by a
+  **digital-assisted servo** (modelled as a behavioral integrator + real
+  device). (§15, §20)
+* **Wideband path (anti-spoof verifier):** AC-coupled (50 pF) common-gate PMOS,
+  4x NMOS current mirror with 200 kΩ source degeneration, 314 kΩ TIA. Bias
+  from a 3 MΩ-degenerated PMOS mirror. (§15, §17, §18)
+* Code: 48 chips, 480 kchip/s, one decision per 100 µs, bipolar ±m·I_DC.
+
+## Headline results
+
+| item | result | where |
+|---|---|---|
+| Slow-path gain | 0.986–0.995 GΩ at all 7 PVT corners | §20 |
+| Slow-path noise (0.5–100 Hz, I_DC = 100 nA) | 7.4–9.5 pA RMS | §14, §20 |
+| Wideband bandwidth / gain | ≈ 250–300 kHz (target 480), 314 kΩ | §15 |
+| Wideband input noise | ≈ 0.6 pA/√Hz at 100 kHz (hand budget was 0.24) | §17 |
+| **Min I_DC for Pd ≥ 99.9 % at Pfa = 1e-8** | **24 nA (m = 2 %), 49 nA (1 %), 97 nA (0.5 %)** | §18 |
+| Same across PVT (m = 2 %) | 21–28 nA | §20 |
+| Bias current spread over PVT | 284–319 nA (nominal 300) | §19 |
+| Chip-rate trade | 240→480 kchip/s costs only 12 %; T_int 200 µs cuts need by 37 % | §21 |
+
+Detection is evaluated by a Monte Carlo of random 48-chip codes through the
+simulated channel (`simulation/detect/coherent_mc.py`), noise-only correlator
+output Gaussian to 4σ. **Pfa = 1e-8 relies on the Gaussian-noise assumption**
+(cannot be verified empirically).
+
+## What the original brief / early docs claimed that is now wrong
+
+* "1 kV/pA", noise < 100 µV, rise time < 100 ns at 1 GΩ: unreachable (§0 of
+  TIA-DESIGN; rise time is ~0.35/BW ≈ 130 µs).
+* The hand-derived wideband budget (236 fA/√Hz, pass at all I_DC ≥ 10 nA for
+  m = 2 %): the simulated front end is ~2.6x noisier and needs **≥ 24 nA** at
+  m = 2 % (≥ 97 nA at m = 0.5 %). 10 nA / 2 % reaches only ≈ 11.5 dB vs the
+  18.8 dB required.
+* PMOS pseudo-resistor "1 GΩ": measures 0.8 MΩ – 120 GΩ over PVT. Replaced.
+* "Regulated cascode" input: the booster never regulated (gate pinned at 0 V);
+  it is a plain common-gate PMOS and the booster adds noise (§17).
+* A shared buffer / mirror in the slow path: costs 29x in slow-path noise, so
+  the slow path now connects directly to the photodiode (§14, §15).
+* §3–§6 of afe-architecture.md (Rf_wide/N tables, SNR tables) are the
+  *pre-simulation* hand analysis; keep for the derivations, not the numbers.
+
+## Open items and risks (most important first)
+
+1. **Spec miss at low photocurrent.** Below ≈ 24 nA (2 % modulation) the
+   verifier cannot reach Pd 99.9 % at Pfa 1e-8; low perfusion / high melanin
+   patients are exactly where I_DC is lowest. Mitigations seen: longer
+   integration (T_int 200 µs: −37 %), adaptive wavelength (§7).
+2. **Digital servo is not designed.** ADC + digital integrator + current DAC,
+   including its noise and the ~0.1 Hz corner, is only modelled by a behavioral
+   source. Start-up: the circuit has a latched wrong DC state; only a power-up
+   transient with acquisition boost reaches the right one (§13).
+3. **Code generator security** (LFSR vs CSPRNG, §1a): untouched; needs a
+   cryptographer, not simulation.
+4. **Not simulated:** mismatch Monte Carlo, supply variation, ambient light
+   (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,
+   the 50 pF coupling cap area (~25 000 µm², about a third of a 334×225 µm
+   tile) and ~20 MΩ of series poly.
+5. Poly resistors are ideal in SPICE; absolute tolerance (±20 %) moves the slow
+   gain proportionally (a calibratable constant).
+6. Ideal elements still in the netlist: the digital servo, Rref/Rs/R1–R3, the
+   wide TIA's ideal Rf (314 kΩ).
+7. `hardware/afe/tia.sch` matches the old single-TIA netlist, not
+   `afe_direct.spice`.
+
+## Reproduce
+
+```
+export NGSPICE=<path>/ngspice_con.exe  SKY130_FD_PR=<skywater-pdk-libs-sky130_fd_pr checkout>
+bash simulation/spice/run-tia-sim.sh                         # builds sky130_min.lib, slow TIA alone
+python simulation/spice/tools/gen_afe_direct.py              # writes afe_direct.spice
+TAG=k_ python simulation/spice/tools/corner_run.py NAME tt 27 100n tnet=1 t1=10Meg t3=102k tcf=50f
+TAG=o_ REAL=1 python simulation/spice/tools/make_chan_opt.py 100n 0.5522   # channel file
+python simulation/detect/coherent_mc.py simulation/spice/results_real     # Pd / Pfa Monte Carlo
+python simulation/detect/chip_rate_sweep.py                               # §21
+```
+(`TAG` prefixes scratch files so runs can go in parallel; results live in
+`simulation/spice/results*/`.)

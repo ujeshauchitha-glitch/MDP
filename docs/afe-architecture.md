@@ -1,6 +1,10 @@
 # TrustSense Layer 1 — AFE Architecture Spec
 
-Status: derived, unsimulated. Every number below is tagged **[DERIVED §n]**
+> **Current status: see [`STATUS.md`](STATUS.md).** §3–§6 below are the
+> pre-simulation hand analysis; simulated results are in §11–§21 and several
+> of the numbers here were superseded.
+
+Status (original, v2): derived, unsimulated. Every number below is tagged **[DERIVED §n]**
 (traceable to a section in this doc) or **[UNMEASURED]** (needs a bench
 number, listed in §9). Nothing here has been run through ngspice — no
 sky130 toolchain was available where this was written. This file
