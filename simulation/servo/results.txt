@@ -1,0 +1,18 @@
+# Digital servo co-simulation results (servo_loop.py / study.py / spice_check.py), tt/27C, VCM 1.4 V, T-network slow TIA
+# plant fit (I_DC=100n data): Z0=1.02e9, f0=2339 Hz, Q=0.84 (log-mag rms err 0.186)
+## power-up acquisition (with analog noise), lock = DAC mean within +/-50 pA of final for 50 ms
+10n 88.5 ms | 30n 88.5 | 100n 88.5 | 300n 88.5 | 1u 88.4 | 2u 101.2   (noiseless 100n: 25.2 ms to 100.00 nA)
+## PPG 1.2 Hz through the closed loop (gain_sched off, boost on), 10-12 s runs
+I_DC=100n fc=0.02 Hz amp 150 pA: gain 0.9948 phase +0.6 deg noise 8.6 pA
+I_DC=100n fc=0.05 Hz amp 150 pA: gain 0.9937 phase +2.1 deg noise 8.5 pA   (with boost: gain 0.9932 phase +2.7 noise 8.6)
+I_DC=100n fc=0.10 Hz amp 150 pA: gain 0.9906 phase +4.5 deg noise 8.5 pA
+I_DC=10n  fc=0.05 Hz amp 100 pA: gain 0.9978 phase +2.3 deg noise 1.6 pA
+I_DC=300n fc=0.05 Hz amp 150 pA: gain 0.9830 phase +1.6 deg noise 24.9 pA
+I_DC=1u   fc=0.05 Hz amp 150 pA: gain 0.8112 phase +5.4 deg noise 115.2 pA, 1 spurious re-acquisition  (FAILS)
+I_DC=100n fc=0.05 Hz amp 300 pA (boost on): gain 0.5664 noise 159 pA, 53 re-acquisitions  (FAILS: peaks reach the 0.3 V threshold)
+## ambient-light steps at I_DC=100n (fc=0.05, boost on); settle = 50 ms mean |out-VCM| < 30 mV
++100 pA: peak 176 mV, settles 952 ms   (without boost: 4478 ms)
++1 nA:   peak 450 mV (clipped), settles 83 ms (re-acquisition)
++10 nA / +100 nA (no boost, earlier run): settles 113 ms / 83 ms ; I_DC=10n +20 nA: 52 ms
+## transistor-level check (spice_check.py): Python DAC current into the SPICE slow TIA, 150 pA PPG at I_DC=100n
+SPICE s_out pk-pk 269.1 mV vs Python plant 271.8 mV, rms difference 3.59 mV, mean offset spice +29.5 mV python -10.0 mV

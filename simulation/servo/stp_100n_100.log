@@ -1,0 +1,1 @@
+I_DC=100n step +100 pA at t=2 s: peak |out-VCM| 176 mV, settles (50 ms mean < 30 mV) after 952 ms, re-acquisitions 2, final DAC error -2.6 pA

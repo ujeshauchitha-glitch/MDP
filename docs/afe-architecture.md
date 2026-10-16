@@ -913,3 +913,79 @@ at tt/27/3.3 V). Supply noise/PSRR was not simulated (DC supply levels only).
 The photodiode reverse bias is set by `x`, so lowering VCM reduces it by 0.25 V
 (the PPG/photodiode model here has no bias dependence; real junction
 capacitance rises as reverse bias falls, which was not modelled).
+
+## 23. Digital DC-cancellation servo: sizing and closed-loop simulation (2026-10-17)
+
+Code: `simulation/servo/servo_loop.py` (loop + plant), `study.py` (studies),
+`spice_check.py` (transistor-level cross-check), plant/noise data from ngspice in
+`simulation/servo/data/`, summarised results in `simulation/servo/results.txt`.
+Replaces the behavioral integrator of §13.
+
+**Architecture simulated.** Slow TIA output `s_out` → **10-bit ADC**
+(±0.5 V around VCM, LSB 0.98 mV ≈ 1 pA at 1 GΩ, 0.5 LSB rms noise, 2 kS/s) →
+digital controller → **12-bit coarse current DAC** (LSB 0.5 nA, range 2.05 µA)
+**plus a first-order sigma-delta fine path** clocked at 100 kHz from a
+24-bit-equivalent accumulator (so the effective resolution is ~pA, avoiding a
+0.5 nA = 500 mV output step per LSB at 1 GΩ). Controller: **(1) SAR
+acquisition** (12 bits, 3 ADC samples wait per decision, ≈ 24 ms) at power-up
+and whenever |error| > 0.3 V for 5 ms; **(2) integrator** tracking with a
+0.05 Hz high-pass corner (gain 2π·fc/Fs per sample); **(3) boost ×20** when
+the 2 s signed mean of the error exceeds 30 mV (a PPG waveform averages out, a
+DC step does not). The plant is a 2nd-order fit (Z0 = 1.02 GΩ, f0 = 2.3 kHz,
+Q = 0.84) to the transistor-level slow TIA; analog noise is the simulated
+slow-path input-referred PSD at the same I_DC (it already includes the real
+NMOS cancel device). Both PPG tests below use a 1.2 Hz sine.
+
+**Power-up acquisition.** Locks (DAC mean within ±50 pA of final for 50 ms) in
+**≈ 88 ms for every I_DC from 10 nA to 1 µA (101 ms at 2 µA)**; the noiseless
+run locks in 25 ms to 100.00 nA, so most of the 88 ms is the 50 ms hold
+criterion plus a few noise-induced SAR corrections.
+
+**Steady state (I_DC = 100 nA, 150 pA PPG):**
+
+| fc | PPG gain | phase | added noise 0.5–100 Hz |
+|---|---|---|---|
+| 0.02 Hz | 0.995 | +0.6° | 8.6 pA |
+| 0.05 Hz | 0.994 | +2.1° | 8.5 pA |
+| 0.10 Hz | 0.991 | +4.5° | 8.5 pA |
+
+At I_DC = 10 nA: gain 0.998, 1.6 pA; at 300 nA: 0.983, 24.9 pA. These noise
+values equal the analog SPICE results (8.4 / 1.6 / 24.4 pA), i.e. **the ADC,
+the DAC quantisation and the sigma-delta loop add no measurable noise**.
+Chosen: **fc = 0.05 Hz** (≤ 0.7 % gain loss and ≤ 2.5° at the PPG fundamental).
+
+**Ambient-light steps (I_DC = 100 nA):** +100 pA settles in **0.95 s** (4.5 s
+without the boost); ≥ +1 nA steps clip the output (±0.45 V) and are re-acquired
+in **53–113 ms**, each costing one SAR pass of PPG data.
+
+**Failures found by the simulation (not fixable by the loop):**
+1. **PPG amplitude ceiling at 1 GΩ: ≈ ±150–250 pA.** A 1 nA PPG (1 % of
+   100 nA) is 1 V at the output and clips; with a 300 pA amplitude the output
+   peaks reach the 0.3 V re-acquire threshold and the loop collapses (gain
+   0.57, 53 re-acquisitions). The slow path therefore needs a **switchable
+   transimpedance** (e.g. 1 GΩ / 100 MΩ / 10 MΩ via R3 or the T-network) and a
+   range-select policy; the 1 GΩ setting is only usable for I_DC ≲ 15–25 nA at
+   1 % modulation.
+2. **I_DC ≳ 1 µA at 1 GΩ is unusable:** the cancel device's 1/f noise grows
+   ∝ I_DC (1.6 pA at 10 nA → 78 pA at 1 µA → 150 pA at 2 µA, 0.5–100 Hz); at 1 µA
+   with 150 pA PPG the loop reports gain 0.81, 115 pA of noise and a spurious
+   re-acquisition. Again solved by a lower transimpedance range.
+3. An early version with a fast gain-schedule threshold (20 mV) erased the
+   PPG (gain 0.23): the threshold must sit above the PPG amplitude; the error
+   is now handled by the 2 s mean detector and the re-acquire threshold instead.
+
+**Transistor-level check.** The Python DAC current waveform (sigma-delta
+toggling included) was fed into the actual SPICE slow TIA (afe_direct.spice,
+tt/27 °C, VCM 1.4 V) with the same 150 pA photocurrent: SPICE s_out is 269 mV
+p-p versus 272 mV from the Python plant, rms difference 3.6 mV (≈ 3 % of the
+PPG rms), DC offset difference ≈ 40 mV (≈ 40 pA, inside what the integrator
+would remove). The behavioral plant is adequate for this sizing.
+
+**Not done / assumed:** the DAC is behavioral (ideal steps, no INL, glitch,
+output impedance or mismatch); its noise is taken equal to the single NMOS
+sink used in §14–§20, which a segmented DAC of many unit cells may beat or
+miss (unverified); the sigma-delta ripple at the TIA output (0.5 nA toggling
+at up to 100 kHz) was only checked inside the SPICE comparison, not
+spectrally; the digital block's power, ADC/DAC circuit design, the range
+switch and its glitch, temperature/corner variation of the loop, and
+reset/start-up sequencing are not designed.

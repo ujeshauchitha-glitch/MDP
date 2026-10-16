@@ -1,0 +1,2 @@
+DAC PWL points: 370
+SPICE s_out pk-pk 269.1 mV, Python plant pk-pk 271.8 mV, rms difference 3.59 mV (0.0 % of PPG rms), mean offset spice +0.0295 V python -0.0100 V

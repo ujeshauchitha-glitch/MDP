@@ -113,6 +113,11 @@ sel = (fn >= 0.5) & (fn <= 100)
 rms_s = float(np.sqrt(np.trapezoid(dens[sel] ** 2, fn[sel]))) * 1e12
 d10 = dens[int(np.argmin(np.abs(np.log(fn / 10))))] * 1e15
 
+if os.environ.get("DUMP"):   # plant + noise data for the digital-servo co-simulation
+    dd = pathlib.Path(os.environ["DUMP"]); dd.mkdir(parents=True, exist_ok=True)
+    np.savetxt(dd / f"slow_psd_{idc}.txt", np.c_[fn, dens], header="f[Hz] input-referred slow-path noise [A/rtHz]")
+    np.savetxt(dd / f"slow_plant_{idc}.txt", np.c_[f, np.abs(Hs), np.unwrap(np.angle(Hs))], header="f[Hz] |Z|[V/A] phase[rad] (Iph->s_out)")
+
 # --- wideband path: default tolerances ---
 h0, n0, _ = analyze(vsg, "0", "w")
 fw_all = h0[:, 0]

@@ -72,10 +72,13 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    verifier cannot reach Pd 99.9 % at Pfa 1e-8; low perfusion / high melanin
    patients are exactly where I_DC is lowest. Mitigations seen: longer
    integration (T_int 200 µs: −37 %), adaptive wavelength (§7).
-2. **Digital servo is not designed.** ADC + digital integrator + current DAC,
-   including its noise and the ~0.1 Hz corner, is only modelled by a behavioral
-   source. Start-up: the circuit has a latched wrong DC state; only a power-up
-   transient with acquisition boost reaches the right one (§13).
+2. **Digital servo: sized and simulated, not built (§23).** 10-bit ADC @ 2 kS/s,
+   12-bit 0.5 nA DAC + sigma-delta fine path, SAR acquisition (≈ 24 ms) then a
+   0.05 Hz integrator; locks in ≈ 90 ms from power-up, adds no measurable noise,
+   PPG gain 0.994. Still open: the DAC/ADC circuits, DAC noise (assumed = one
+   NMOS sink), glitch/INL, power, and **a switchable transimpedance range**,
+   because 1 GΩ clips PPG amplitudes above ≈ 150–250 pA and is unusable above
+   ≈ 1 µA of I_DC.
 3. **Code generator security** (LFSR vs CSPRNG, §1a): untouched; needs a
    cryptographer, not simulation.
 4. **Not simulated:** mismatch Monte Carlo, supply variation, ambient light
