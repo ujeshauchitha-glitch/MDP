@@ -277,8 +277,11 @@ committed.
 - **The 1.56 mV noise is a wide-band integral** (10 Hz–100 kHz) dominated by
   out-of-band noise gain; it has not been re-integrated over the signal band,
   so the 360 µV hand estimate in §4 is neither confirmed nor refuted.
-- No loop-gain/phase-margin (`stb`) run was done. Stability is inferred from
-  zero closed-loop peaking and a clean step.
+- **Loop gain / phase margin** (AC voltage injected in series with the
+  feedback path, `simulation/spice/loopgain_pm.py`): DC loop gain 82.5 dB,
+  unity-gain at 12.4 kHz, **phase margin 81°**. Single-injection method (the
+  feedback network is GΩ-class vs. a low-impedance follower output, so the
+  Middlebrook correction is small); not cross-checked with a two-injection run.
 
 ## 10. Wideband path (Path B), `simulation/spice/tia_wide.spice`
 
@@ -298,3 +301,6 @@ Cf≈0 the amp peaked 10–19 dB.
 
 Noise is 1.5x the budget at low frequency and about 3x near the top of the
 code band (op-amp noise, as the caveat in afe-architecture §4 predicted).
+
+Loop gain / phase margin (same method as §9): DC loop gain 72.6 dB, unity-gain
+at 711 kHz, **phase margin 67°**.
