@@ -60,9 +60,27 @@ def netlist(o):
         s = s.replace("Ibx   vdpwr xc DC {IBX}", "Ibx   vdpwr xc DC {IBX}\nVgc   gc 0 DC " + o["vgc"])
     s = s.replace("Rib   pbias_b vgnd 1.5Meg", f"Rib   pbias_b vgnd {o.get('rib','1.5Meg')}")
     s = s.replace("Rbias_w vdpwr nbias_w 600k", f"Rbias_w vdpwr nbias_w {o.get('rbw','600k')}")
+    extra = ""
+    if o.get("real") == "1":
+        # Real PMOS mirror bias replaces the ideal Ibx (into xc) and Icompw (into w_in).
+        # Reference: diode PMOS + Rref to ground, filter cap on the gate; two 1:1
+        # outputs. Equal source degeneration Rs in all three legs.
+        rs, rref, cref = o.get("rs", "1Meg"), o.get("rref", "6.5Meg"), o.get("cref", "20p")
+        pw, pl = o.get("pw", "10"), o.get("pl", "4")
+        dev = "sky130_fd_pr__pfet_g5v0d10v5"
+        blk = (f"* ---- real PMOS bias mirror (replaces ideal Ibx / Icompw) ----\n"
+               f"Rs0   vdpwr s0 {rs}\nXMp0  pref pref s0 vdpwr {dev} W={pw} L={pl}\n"
+               f"Rref  pref vgnd {rref}\nCref  pref vdpwr {cref}\n"
+               f"Rsx   vdpwr sx {rs}\nXMpx  xc   pref sx vdpwr {dev} W={pw} L={pl}\n"
+               f"Rsw   vdpwr sw {rs}\nXMpw  w_in pref sw vdpwr {dev} W={pw} L={pl}\n")
+        assert "Icompw vdpwr w_in DC {IBX}" in s and "Ibx   vdpwr xc DC {IBX}" in s
+        s = s.replace("Icompw vdpwr w_in DC {IBX}", "* Icompw replaced by XMpw")
+        s = s.replace("Ibx   vdpwr xc DC {IBX}", blk)
+        s = s.replace(".nodeset ", ".nodeset v(pref)=1.0 v(s0)=3.2 v(sx)=3.2 v(sw)=3.2 ", 1)
+        extra = " v(s0) v(sx) v(sw) v(pref)"
     ctl = f""".control
   op
-  print v(x) v(xc) v(dmir) v(gc) v(w_in) v(w_out)
+  print v(x) v(xc) v(dmir) v(gc) v(w_in) v(w_out){extra}
   let p = -i(VPWR)*3.3
   print p
   ac dec 40 1k 20meg
@@ -72,6 +90,8 @@ def netlist(o):
   wrdata {TAG}n.txt onoise_spectrum
   quit
 .endc"""
+    if o.get("oponly") == "1":
+        ctl = f".control\n  op\n  print v(x) v(xc) v(dmir) v(gc) v(w_in) v(w_out){extra}\n  quit\n.endc"
     return re.sub(r"\.control.*?\.endc", lambda m: ctl, s, flags=re.S)
 
 

@@ -17,16 +17,19 @@ import wide_noise_sweep as w   # noqa: E402
 
 idc, vsg = sys.argv[1], sys.argv[2]
 o = dict(slow="1", vsg=vsg, idc=idc, vgc="0", mcw="80", ibx="300n", mm="4", rdeg="200k", cc="50p")
+REAL = os.environ.get("REAL") == "1"
+if REAL:   # real PMOS bias mirror (Rs=3M, Rref trimmed to 300 nA), see real_bias_sweep.py
+    o.update(real="1", rs="3Meg", rref="3.6314Meg", cref="20p")
 text = w.netlist(o).replace("print v(x) v(xc)", "print v(s_out) v(x) v(xc)")
 (w.B / f"{w.TAG}v.spice").write_text(text, encoding="utf-8")
 out = subprocess.run([w.NG, "-b", f"{w.TAG}v.spice"], cwd=w.B, capture_output=True, text=True).stdout
 m = re.search(r"^v\(s_out\)\s*=\s*([-\d.e+]+)", out, re.M)
 rd = lambda f: np.loadtxt(w.B / (w.TAG + f))
 h, n = rd("h.txt"), rd("n.txt")
-dst = pathlib.Path(__file__).resolve().parent.parent / "results_opt"
+dst = pathlib.Path(__file__).resolve().parent.parent / ("results_real" if REAL else "results_opt")
 dst.mkdir(exist_ok=True)
 with open(dst / f"chan_{idc}.txt", "w") as fh:
-    fh.write(f"# OPTIMISED front end IDC={idc} Vsg={vsg} s_out={m.group(1) if m else 'n/a'}\n")
+    fh.write(f"# {'REAL-BIAS' if REAL else 'IDEAL-BIAS'} OPTIMISED front end IDC={idc} Vsg={vsg} s_out={m.group(1) if m else 'n/a'}\n")
     for a, b in zip(h, n):
         fh.write(f"{a[0]:.6e} {a[1]/1e-9:.6e} {a[2]/1e-9:.6e} {b[1]:.6e}\n")
 print("IDC", idc, "s_out =", m.group(1) if m else "n/a")

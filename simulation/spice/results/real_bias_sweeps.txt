@@ -1,0 +1,7 @@
+# real PMOS bias mirror sweeps (min I_DC at m=2%, Pd 99.9% @ Pfa 1e-8)
+R1_Rs1M_C20p               Rref=6.1120Meg Ixc/Iw=301/301nA w_in=1.6505 sigma0= 9.13uV minIDC(m2%)= 23.2nA RTI@30k/100k/316k=541/607/1217fA |H|100k=2.15e+05 P=172uW
+R2_Rs300k_C20p             Rref=7.1039Meg Ixc/Iw=300/299nA w_in=1.6505 sigma0= 9.68uV minIDC(m2%)= 24.7nA RTI@30k/100k/316k=583/651/1277fA |H|100k=2.15e+05 P=172uW
+R3_Rs3M_C20p               Rref=3.6314Meg Ixc/Iw=298/298nA w_in=1.6505 sigma0= 8.83uV minIDC(m2%)= 22.5nA RTI@30k/100k/316k=518/585/1193fA |H|100k=2.14e+05 P=172uW
+R4_Rs1M_C2p                Rref=6.1120Meg Ixc/Iw=301/301nA w_in=1.6505 sigma0= 9.15uV minIDC(m2%)= 23.3nA RTI@30k/100k/316k=542/609/1218fA |H|100k=2.15e+05 P=172uW
+R5_Rs1M_C100p              Rref=6.1120Meg Ixc/Iw=301/301nA w_in=1.6505 sigma0= 9.13uV minIDC(m2%)= 23.2nA RTI@30k/100k/316k=541/607/1217fA |H|100k=2.15e+05 P=172uW
+R6_Rs1M_C20p_W20L8         Rref=6.0929Meg Ixc/Iw=301/301nA w_in=1.6505 sigma0= 9.13uV minIDC(m2%)= 23.3nA RTI@30k/100k/316k=541/607/1217fA |H|100k=2.15e+05 P=172uW

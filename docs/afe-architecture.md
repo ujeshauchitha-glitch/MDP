@@ -649,3 +649,59 @@ sources; at I_DC = 1 µA the fixed servo bias leaves s_out at 1.70 V (not
 bisected for the pre-optimisation netlist); tt corner, 27 °C; degeneration
 resistors were assumed ideal poly (their thermal noise is in the PSD but
 mismatch/area are not evaluated); same Gaussian-noise assumption for Pfa as §16.
+
+## 18. Real PMOS bias mirror replaces the ideal sources (2026-10-17)
+
+The §17 stage used three ideal sources: IBX into the cascode node `xc`, an
+equal cancel current into the wideband TIA input `w_in`, and a fixed gate
+voltage on `Mc`. In the real stage:
+- the **gate "source" is Vgc = 0 V, i.e. a wire to ground** (the booster that
+  would have needed a bias was removed in §17), so it needs no circuit;
+- IBX and the cancel current come from a **degenerated PMOS mirror**: a
+  diode-connected reference PMOS programmed by a resistor to ground (Rref,
+  gate filtered by Cref to the supply) and two 1:1 output PMOS (one into `xc`,
+  one into `w_in`), all with the same source resistor Rs, W/L = 10/4 µm.
+  Rref is trimmed to 300 nA (`tools/real_bias_sweep.py`, `make_chan_opt.py
+  REAL=1`).
+
+**Noise/figure-of-merit penalty (analytic, wideband path, I_DC = 100 nA, min
+I_DC for Pd 99.9 % at Pfa 1e-8, m = 2 %):**
+
+| bias | min I_DC | σ₀ | notes |
+|---|---|---|---|
+| ideal sources (§17) | 22.0 nA | 8.64 µV | |
+| real mirror, Rs = 300 kΩ | 24.7 nA | 9.68 µV | |
+| real mirror, Rs = 1 MΩ | 23.2 nA | 9.13 µV | Rref 6.11 MΩ |
+| real mirror, **Rs = 3 MΩ** | **22.5 nA** | 8.83 µV | Rref 3.63 MΩ (chosen) |
+
+Cref (2 / 20 / 100 pF) and the mirror device size (10/4 vs 20/8 µm) change
+nothing: with source degeneration the output currents are insensitive to
+reference-gate noise, and the dominant added noise is the thermal noise of
+Rs (about 4kT/Rs per leg). Output currents match the reference (301 / 301 nA
+at 300 nA target) and `w_in` stays at 1.6505 V.
+
+**Full Monte Carlo with the real mirror** (Rs = 3 MΩ; all five I_DC, slow path
+and servo-as-fixed-bias included, 20 000 trials per point; noise-only
+correlator kurtosis 3.00–3.03):
+
+| I_DC | m = 2 % | m = 1 % | m = 0.5 % |
+|---|---|---|---|
+| 10 nA | 11.5 dB, Pd 0.039 | 5.5 dB | −0.6 dB |
+| 30 nA | 21.1 dB, Pd 1 | 15.0 dB, Pd 0.52 | 9.0 dB |
+| 100 nA | 31.1 dB | 25.1 dB | 19.1 dB, Pd 0.9975 |
+| 300 nA | 39.7 dB | 33.7 dB | 27.6 dB |
+| 1 µA | 47.7 dB | 41.7 dB | 35.7 dB |
+
+vs §17 (ideal sources): 11.7 / 21.3 / 31.3 dB at (10 nA, 30 nA, 100 nA; m =
+2 %), so the real bias costs **≈ 0.1–0.2 dB of SNR**. **Minimum I_DC for Pd ≥
+99.9 % at Pfa = 1e-8: ≈ 24.3 nA (m = 2 %), ≈ 48.6 nA (m = 1 %), ≈ 97 nA
+(m = 0.5 %)**, about 2.5 % above the ideal-source numbers.
+
+**Caveats:** (i) tt corner, 27 °C, no mismatch/Monte Carlo: output-leg
+mismatch only changes the DC current into the 314 kΩ TIA (10 % of IBX = 30 nA
+→ ≈ 9 mV of output offset), which is harmless here, but this was not simulated;
+(ii) Rs, Rref are ideal resistors in SPICE (their thermal noise is included,
+temperature coefficient and mismatch are not); 3 MΩ + 3 MΩ + 3 MΩ + 3.6 MΩ of
+poly and a 20 pF reference-gate cap were not sized for area; (iii) the Msv
+servo bias is still a fixed gate voltage standing in for the digital/DAC
+loop, and the wideband bandwidth shortfall (§15, §17) is unchanged.
