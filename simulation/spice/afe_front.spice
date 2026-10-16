@@ -8,8 +8,10 @@
 *******************************************************************
 .include "sky130_min.lib"
 .option scale=1u
+* floating integrator node: default gmin (1e-12 S) leaks more than the fine loop drives
+.option gmin=1e-17
 .global vdpwr vgnd vcm
-.nodeset v(x)=1.0 v(dmir)=0.6 v(gc)=0.4 v(s_in)=1.65 v(w_in)=1.65 v(s_out)=1.65 v(w_out)=1.65
+.nodeset v(x)=1.0 v(dmir)=0.6 v(gc)=0.4 v(s_in)=1.65 v(vc_s)=2.4 v(w_in)=1.65 v(s_out)=1.65 v(w_out)=1.65
 + v(amp_out_s)=1.8 v(n2out_s)=1.1 v(amp_out_w)=1.8 v(n2out_w)=1.1
 
 VPWR vdpwr 0 DC 3.3
@@ -37,7 +39,15 @@ Rib   pbias_b vgnd 1.5Meg
 * IBX offset only shifts DC; the slow path needs it cancelled: Icomp is an
 * IDEAL stand-in for a DC servo (NOT designed yet).
 Ibx   vdpwr x DC {IBX}
-Icomp vdpwr s_in DC {IBX+IDC}
+* Slow-path DC servo: PMOS source Msv injects the DC that Mo2 sinks (IBX+IDC).
+* Behavioral integrator (out above vcm -> need more injected current ->
+* lower gate). Real implementation = ADC-measured DC + current DAC, because a
+* ~1 rad/s corner with a 1 GOhm TIA would need tens of nF analog.
+XMsv  s_in vc_s vdpwr vdpwr sky130_fd_pr__pfet_g5v0d10v5 W=100 L=2
+* Cint is referenced to vdpwr so Msv starts OFF as the rail ramps
+* coarse acquisition: integrator gain x FAST while |s_out-vcm| > 0.15 V
+Bint  vc_s vdpwr I='{GMI}*(1+{FAST}*(abs(v(s_out)-1.65)>0.15))*(v(s_out)-1.65)'
+Cint  vc_s vdpwr {CINT}
 Icompw vdpwr w_in DC {IBX}
 
 * ---- 1:1 mirror, long L for accuracy ----
@@ -169,6 +179,9 @@ Cf_w w_in w_out 1.4p
 
 .param IDC=10n
 .param IBX=1u
+.param GMI=3.3e-14
+.param CINT=1n
+.param FAST=1e5
 .control
   op
   print v(x) v(dmir) v(gc) v(s_in) v(s_out) v(w_in) v(w_out)
