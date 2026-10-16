@@ -1,0 +1,14 @@
+32-bit LFSR
+  observed    40 chips (    83 us): linear complexity   21, next-5000-chip prediction accuracy  51.62 %
+  observed    64 chips (   133 us): linear complexity   32, next-5000-chip prediction accuracy 100.00 %
+  observed    96 chips (   200 us): linear complexity   32, next-5000-chip prediction accuracy 100.00 %
+  observed   200 chips (   417 us): linear complexity   32, next-5000-chip prediction accuracy 100.00 %
+  observed  1000 chips (  2083 us): linear complexity   32, next-5000-chip prediction accuracy 100.00 %
+keyed hash stream (ideal CSPRNG stand-in)
+  observed    40 chips (    83 us): linear complexity   18, next-5000-chip prediction accuracy  50.84 %
+  observed    64 chips (   133 us): linear complexity   32, next-5000-chip prediction accuracy  50.32 %
+  observed    96 chips (   200 us): linear complexity   49, next-5000-chip prediction accuracy  50.06 %
+  observed   200 chips (   417 us): linear complexity  101, next-5000-chip prediction accuracy  50.20 %
+  observed  1000 chips (  2083 us): linear complexity  500, next-5000-chip prediction accuracy  49.62 %
+
+One 48-chip symbol lasts 100 us; 64 chips (2L for L = 32) take 133 us.

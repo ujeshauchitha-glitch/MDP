@@ -1,0 +1,27 @@
+trials/point 6000; sigma0 = 9.06 uV, eta = 50.9 uV, legit mean z/sigma = 35.59
+residual energy [V^2]: legit mean 1.237e-08, 99.9% quantile 1.585e-08 (threshold); noise-only mean 1.237e-08
+LEGITIMATE detection: D0 Pd = 1.0000, D1 Pd = 0.9990  (D1 loss 0.10 %-points)
+
+attack                     D0 accepts   D1 accepts   median residual / threshold
+blind A=0x                    0.0000      0.0000          0.78
+blind A=1x                    0.1623      0.0000          8.82
+blind A=3x                    0.3697      0.0000         73.31
+blind A=10x                   0.4655      0.0000        802.74
+blind A=30x                   0.4902      0.0000       7214.44
+blind A=100x                  0.4970      0.0000      80196.85
+blind A=300x                  0.5065      0.0000      724852.70
+partial f=0.5 A=1x            0.9912      0.0000          6.77
+partial f=0.75 A=1x           1.0000      0.0008          4.27
+partial f=0.9 A=1x            1.0000      0.0838          2.19
+partial f=0.95 A=1x           1.0000      0.2860          1.48
+partial f=0.75 A=10x          1.0000      0.0000        350.32
+partial f=0.9 A=10x           1.0000      0.0122        139.35
+partial f=0.95 A=10x          1.0000      0.0793         68.05
+
+real-time relay attacker (perfect chip observation, re-emits each chip tau late, same amplitude as legit):
+  tau =     20 ns (  1.0 % of a chip): mean z/sigma  35.5  D0 accepts 1.0000  D1 accepts 0.9992  median resid/thr   0.78
+  tau =     50 ns (  2.4 % of a chip): mean z/sigma  35.5  D0 accepts 1.0000  D1 accepts 0.9958  median resid/thr   0.79
+  tau =    130 ns (  6.2 % of a chip): mean z/sigma  35.3  D0 accepts 1.0000  D1 accepts 0.9703  median resid/thr   0.84
+  tau =    260 ns ( 12.5 % of a chip): mean z/sigma  34.7  D0 accepts 1.0000  D1 accepts 0.3348  median resid/thr   1.04
+  tau =    520 ns ( 25.0 % of a chip): mean z/sigma  32.2  D0 accepts 1.0000  D1 accepts 0.0000  median resid/thr   1.79
+  tau =   1040 ns ( 49.9 % of a chip): mean z/sigma  23.3  D0 accepts 1.0000  D1 accepts 0.0000  median resid/thr   4.07

@@ -1054,3 +1054,80 @@ transient when a range changes are not simulated); the 1 MΩ range for
 > 1.25 µA is not built; Cf sizing is by peaking only (no loop-gain check
 per range); policy thresholds assume ≤ 2 % PPG modulation; the DAC full scale
 (2.05 µA) limits I_DC to ~2 µA.
+
+## 25. Spoofing resistance: detector hardening, relay attacks, code generator (2026-10-17)
+
+Tools: `simulation/detect/spoof_mc.py` (output `spoof_results.txt`),
+`simulation/detect/codegen_security.py` (output `codegen_results.txt`). Setup: the
+simulated I_DC = 100 nA channel (real bias mirror), legitimate m = 2 % (the
+detector sees d ≈ 35σ), 48 chips at 480 kchip/s, 6000 trials per point. The
+attacker injects light into the photodiode (same channel and noise as the
+legitimate signal, the LED path absent) and knows the chip clock. An
+acceptance count of 0 means < 1/6000, not zero probability.
+
+**This section corrects §1a.** There I wrote that a blind attacker succeeds with
+probability 2^-N "even with unlimited SNR". That holds only if the detector
+bounds the received energy. For the correlation-threshold detector (D0) used
+everywhere above, it is false.
+
+**Detectors.** D0: correlation z > 5.61σ (Pfa 1e-8 for noise alone). D1: D0
+**and** a residual (goodness-of-fit) test: subtract the least-squares fit of the
+known template (the front end's response to the true code, including
+neighbouring-symbol ISI) and require the leftover energy to be consistent with
+noise (threshold = 99.9 % quantile of the legitimate distribution). D1 costs
+0.10 percentage points of legitimate Pd (1.0000 → 0.9990 at I_DC = 100 nA).
+
+| attacker (same amplitude as legit unless noted) | D0 accepts | D1 accepts |
+|---|---|---|
+| blind random chips, 1x | **16.2 %** | 0 |
+| blind, 3x / 10x / 100x / 300x | 37 % / 47 % / 50 % / 51 % | 0 |
+| knows 50 % of the chips | **99.1 %** | 0 |
+| knows 75 % | 100 % | 0.08 % |
+| knows 90 % | 100 % | **8.4 %** |
+| knows 95 % | 100 % | **28.6 %** |
+| knows 90 % / 95 %, amplitude 10x | 100 % | 1.2 % / 7.9 % |
+
+So with D0 a blind attacker already wins 1 in 6 at the legitimate amplitude, and
+half the time when loud, because the AWGN-derived threshold is far below the
+attacker-correlation spread when the legitimate signal sits at 35σ. **D1
+removes the blind case entirely** but not an attacker who has most of the chips.
+
+**Real-time relay attacker** (observes every chip perfectly, re-emits it τ late,
+same amplitude): D1 accepts **99.9 % at τ = 20 ns, 99.6 % at 50 ns, 97.0 % at
+130 ns**, 33.5 % at 260 ns, 0 % at 520 ns and above (1 chip = 2083 ns). The
+front end's ~300 kHz bandwidth smooths the chip edges more than a 50–130 ns
+delay moves them, so the receiver cannot see the delay. A relay built from a
+fast photodiode, comparator and LED driver can have tens of nanoseconds of
+latency. **The chip code does not defend against a real-time optical relay at
+this bandwidth and SNR**, however random it is; D1 only forces the relay under
+~200 ns. Possible but unevaluated mitigations: more per-sample SNR (makes
+smaller delays visible), a second unobservable dimension per chip (e.g.
+per-chip wavelength or intensity ratios that the relay cannot sense), or limiting
+the claim to replay and blind injection.
+
+**Code generator.** Berlekamp–Massey on a 32-bit maximal LFSR: after 40 chips
+51.6 % prediction (no better than guessing), after **64 chips (133 µs, less than
+two symbols) it predicts the next 5000 chips with 100.00 % accuracy** and keeps
+doing so (linear complexity 32). A keyed hash-counter stream (ideal-CSPRNG
+stand-in, not a hardware proposal) stays at 50 % with linear complexity
+growing as n/2 (500 at 1000 chips). So a plain LFSR (or any linear-feedback or
+Gold-code generator) is **unacceptable** whenever an attacker can see even 64
+consecutive chips, which the relay scenario above gives them. A nonlinear
+keyed stream cipher with a per-session/per-frame reseed from a hardware TRNG
+is required; the choice (Trivium/Grain/ASCON-class vs AES-CTR), key
+storage (the repository's PUF/DICE paper is relevant) and area/power need a
+cryptographer and are **not** evaluated here.
+
+**Recommended detector rule (simulated here only as D1):** accept a decision
+only if (a) correlation exceeds the AWGN threshold, (b) the fitted amplitude is
+within a window around the *known* expected amplitude (the device knows
+m·I_DC), and (c) the residual energy fits noise. (b) was not simulated
+separately; (a)+(c) already reject all blind injection.
+
+**Caveats.** One operating point (I_DC = 100 nA, m = 2 %); the residual
+threshold was set from 6000 legitimate trials (99.9 % quantile), so the
+legitimate false-reject rate (1e-3) is empirical and the corresponding
+attacker acceptance at the 1e-6…1e-8 level is not measurable by Monte Carlo
+(Gaussian-tail extrapolation would be needed); attackers were given perfect
+timing and, for the relay, perfect chip observation; no analog attacker
+bandwidth limits.

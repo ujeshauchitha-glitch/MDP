@@ -79,8 +79,14 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    NMOS sink), glitch/INL, power, and **a switchable transimpedance range**,
    because 1 GΩ clips PPG amplitudes above ≈ 150–250 pA and is unusable above
    ≈ 1 µA of I_DC.
-3. **Code generator security** (LFSR vs CSPRNG, §1a): untouched; needs a
-   cryptographer, not simulation.
+3. **Security is weaker than the early docs claimed (§25).** A correlation-only
+   detector accepts a blind random injection 16 % of the time (50 % when loud);
+   a residual (goodness-of-fit) test fixes the blind case at 0.1 %-pt cost in
+   legitimate Pd, but attackers with ≥ 90 % of the chips pass 8–29 %, and a
+   **real-time optical relay with ≤ 130 ns latency passes 97–100 %**. A plain
+   LFSR chip generator is fully predictable after 64 observed chips (133 µs).
+   Needs a keyed nonlinear stream cipher + TRNG (cryptographer) and a decision
+   on whether relay attacks are in scope.
 4. **Not simulated:** mismatch Monte Carlo, supply variation, ambient light
    (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,
    the 50 pF coupling cap area (~25 000 µm², about a third of a 334×225 µm
