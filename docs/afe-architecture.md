@@ -460,3 +460,64 @@ irrelevant while the mirror is in the path.
 2. Bigger mirror area (4x gives ~1.8x less, costs input capacitance and
    wideband BW) and lower IBX.
 3. Source-degenerate the mirror.
+
+## 15. Option 1 simulated: slow path direct off the photodiode (2026-10-16)
+
+Netlist `simulation/spice/afe_direct.spice` (generator
+`tools/gen_afe_direct.py`, AC/noise driver `tools/afe_direct_noise.py`).
+Photodiode node `x` goes straight into the 1 GΩ slow TIA (virtual ground, no
+mirror). The wideband path hangs off `x` through a coupling capacitor `Cc`
+into the regulated cascode + mirror, biased at the cascode side by IBX, so
+**photodiode DC and IBX never touch the slow path or the mirror's DC**. The
+slow-path DC cancel is now an **NMOS sink** at `x` (the photocurrent enters
+`x`; the previous PMOS source would have added to it). I_DC = 100 nA, IBX =
+1 µA. Servo again replaced by a bisected fixed gate voltage for AC/noise.
+
+**Slow path (PPG):**
+
+| Cc | gain @10 Hz | -3 dB | density @10 Hz / 100 Hz / 1 kHz | RMS 0.5–100 Hz |
+|---|---|---|---|---|
+| 10 pF | 1.00 GΩ | 3.2 kHz | 1144 / 430 / 203 fA/√Hz | 8.3 pA |
+| 50 pF | 1.00 GΩ | 2.8 kHz | 1144 / 431 / 230 | 8.3 pA |
+| 200 pF | 1.00 GΩ | 1.6 kHz | 1145 / 445 / 468 | 8.3 pA |
+
+vs 237 pA RMS with the mirror in the path (IBX = 1 µA, §14): **~29x better**,
+and it no longer depends on IBX. Still ~2 orders above the Rf thermal floor
+(4 fA/√Hz); the remaining noise is 1/f-shaped (source not isolated: op-amp
+and the sink device are candidates). For a 1 % modulation at I_DC = 100 nA
+(1 nA) that is ~41 dB SNR in 0.5–100 Hz.
+
+**Node contention (the thing option 1 risked):** signal current at `x` splits
+between the slow TIA, `Cj` and the AC-coupled wideband branch.
+- Low frequency (PPG band): the wide branch takes 0.1–0.3 % of the current at
+  100 Hz, so the slow gain is unaffected (1.00 GΩ).
+- Crossover: wide path gain is 94 % of 314 kΩ at 3 kHz while the slow path has
+  fallen to 0.46 GΩ there; above 10 kHz the slow path is gone (<4 %).
+- At Cc = 200 pF a resonance between `Cc` and the slow TIA's rising input
+  impedance gives **+32 % gain peaking near 1 kHz** on the wide path.
+
+**Wideband path, gain as % of 314 kΩ and noise (referred to input at local gain):**
+
+| Cc | 3 kHz | 100 kHz | 316 kHz | 1 MHz | noise @10k / 100k / 316k / 1M (fA/√Hz) |
+|---|---|---|---|---|---|
+| 10 pF | 27 % | 48 % | 36 % | 12 % | 3488 / 1993 / 2233 / 4593 |
+| 50 pF | 94 % | 79 % | 56 % | 15 % | 1957 / 1262 / 1739 / 4373 |
+| 200 pF | 103 % | 89 % | 61 % | 15 % | 1736 / 1132 / 1663 / 4343 |
+
+At Cc = 50 pF the wideband -3 dB point is ≈ 280–300 kHz, essentially the
+same as the mirror-only front end (§12: 256 kHz at IBX = 1 µA) and noise at
+100 kHz is only ~1 dB worse (1262 vs 996 fA/√Hz). Neither meets the 480 kHz /
+236 fA/√Hz targets, but **option 1 does not make the wideband path
+measurably worse while making the slow path ~29x quieter.**
+
+**Cost / caveats:**
+- **Cc area.** ~2 fF/µm² MiM puts 50 pF at ~25,000 µm² (about a third of a
+  334×225 µm tile); 200 pF (~100,000 µm²) does not fit. Cc = 50 pF is the
+  practical choice; Cc = 10 pF loses half the wideband gain.
+- IBX and the wideband-input cancel `Icompw` are still **ideal current
+  sources**; the DC servo is still behavioral; the slow-path `.op` still
+  latches without the fixed-gate method (start-up not guaranteed).
+- Only I_DC = 100 nA and IBX = 1 µA were simulated. I_DC dependence and an
+  IBX sweep for this topology were not run; the slow-path noise is expected
+  to be insensitive to IBX, the wideband noise sensitive (as in §12).
+- No coherent-detection (chip-code) simulation of the end-to-end SNR yet.
