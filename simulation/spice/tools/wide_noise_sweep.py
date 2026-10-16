@@ -60,6 +60,16 @@ def netlist(o):
         s = s.replace("Ibx   vdpwr xc DC {IBX}", "Ibx   vdpwr xc DC {IBX}\nVgc   gc 0 DC " + o["vgc"])
     s = s.replace("Rib   pbias_b vgnd 1.5Meg", f"Rib   pbias_b vgnd {o.get('rib','1.5Meg')}")
     s = s.replace("Rbias_w vdpwr nbias_w 600k", f"Rbias_w vdpwr nbias_w {o.get('rbw','600k')}")
+    if o.get("corner", "tt") != "tt":   # process corner: swap the model library
+        c = o["corner"]
+        tt = (B / "sky130_min.lib").read_text(encoding="utf-8")
+        lib = tt.replace("__tt.", f"__{c}.").replace("/tt/", f"/{c}/")
+        (B / f"sky130_min_{c}.lib").write_text(lib, encoding="utf-8")
+        s = s.replace('.include "sky130_min.lib"', f'.include "sky130_min_{c}.lib"')
+    if o.get("tight") == "1":   # pA-level cancel currents through multi-GOhm feedback need tight solver tolerances
+        s = s.replace(".option scale=1u", ".option scale=1u\n.option abstol=1e-16 vntol=1e-9 reltol=1e-5", 1)
+    if "temp" in o:
+        s = s.replace(".option scale=1u", f".option scale=1u\n.temp {o['temp']}", 1)
     extra = ""
     if o.get("real") == "1":
         # Real PMOS mirror bias replaces the ideal Ibx (into xc) and Icompw (into w_in).
@@ -91,7 +101,8 @@ def netlist(o):
   quit
 .endc"""
     if o.get("oponly") == "1":
-        ctl = f".control\n  op\n  print v(x) v(xc) v(dmir) v(gc) v(w_in) v(w_out){extra}\n  quit\n.endc"
+        sx = "" if o.get("slow", "1") == "0" else " v(s_out)"
+        ctl = f".control\n  op\n  print v(x) v(xc) v(dmir) v(gc) v(w_in) v(w_out){sx}{extra}\n  quit\n.endc"
     return re.sub(r"\.control.*?\.endc", lambda m: ctl, s, flags=re.S)
 
 
@@ -122,7 +133,7 @@ def metric(f, H, Sn, idc_a):
     y = np.fft.irfft(np.fft.rfft(cu * idc_a, axis=1) * Hg, n=cm.L, axis=1)      # m = 1 (unit depth)
     z = (y[:, 2 * cm.NS + d: 3 * cm.NS + d] * cu[:, 2 * cm.NS: 3 * cm.NS]).sum(axis=1) / cm.NS
     mu1 = z.mean()
-    d_per_m = mu1 / sigma                    # detection SNR per unit modulation depth
+    d_per_m = abs(mu1) / sigma               # detection SNR per unit modulation depth (receiver may flip sign)
     idc_nA = idc_a * 1e9
     d_per_m_nA = d_per_m / idc_nA            # per (m * nA)
     need_nA_2pct = DREQ / (0.02 * d_per_m_nA)

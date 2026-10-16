@@ -705,3 +705,50 @@ temperature coefficient and mismatch are not); 3 MΩ + 3 MΩ + 3 MΩ + 3.6 MΩ o
 poly and a 20 pF reference-gate cap were not sized for area; (iii) the Msv
 servo bias is still a fixed gate voltage standing in for the digital/DAC
 loop, and the wideband bandwidth shortfall (§15, §17) is unchanged.
+
+## 19. Process corners and temperature (2026-10-17)
+
+Tool: `simulation/spice/tools/corner_run.py`; raw output
+`simulation/spice/results/corner_sweep.txt`. Optimised stage with the **real
+PMOS bias mirror** (§18), I_DC = 100 nA, servo replaced by a bisected fixed
+Msv gate voltage per corner (the job the digital servo would do), Rref
+**not** re-trimmed (it is a fixed resistor in silicon), solver tolerances
+tightened (abstol 1e-16 A) because picoamp cancel currents through multi-GΩ
+feedback are otherwise below the default resolution.
+
+| corner / temp | bias Ixc = Iw | w_in | slow-path Z @10 Hz | wide RTI @100 kHz | min I_DC (m = 2 %) |
+|---|---|---|---|---|---|
+| tt / 27 °C | 298 nA | 1.650 V | **1.0 GΩ** | 628 fA/√Hz | 24.3 nA |
+| tt / −40 °C | 284 nA | 1.650 V | 25 GΩ † | 331 | 14.2 nA |
+| tt / 125 °C | 319 nA | 1.651 V | **0.79 MΩ** | 1244 | **52.4 nA** |
+| ss / 125 °C | 309 nA | 1.651 V | 7.8 MΩ | 679 | 33.8 nA |
+| ff / −40 °C | 294 nA | 1.650 V | 42 GΩ † | 330 | 14.1 nA |
+| sf / 27 °C | 285 nA | 1.650 V | 120 GΩ † | 405 | 17.0 nA |
+| fs / 27 °C | 312 nA | 1.650 V | **14 MΩ** | 587 | 26.9 nA |
+
+† `s_out` could not be centred (1.75–1.85 V) even with a bisected gate
+voltage and tight tolerances; treat the gain as indicative only.
+
+**Wideband path: robust enough.** The degenerated mirror holds the bias
+current within 284–319 nA (≈ ±6 %) and `w_in` within 1 mV of 1.65 V at every
+corner. Minimum I_DC for Pd 99.9 % at Pfa = 1e-8 (m = 2 %) stays 14–34 nA
+except at 125 °C typical, where it doubles to **52 nA** (input-referred noise
+2x: ≈ 1244 fA/√Hz): that is the worst case found and sets the real photocurrent
+requirement if 125 °C operation is required (a wearable is not; at 85 °C it
+would sit between).
+
+**Slow path (PPG) is NOT robust: the pseudo-resistor is the problem.** The
+nominal 1 GΩ transimpedance spans **0.8 MΩ to 120 GΩ** (five decades) over
+PVT, because the back-to-back PMOS pseudo-resistor is a subthreshold device
+(current ∝ exp(q·V/nkT·...) with Vt shifting by corner). At 125 °C or in the
+fs corner the "1 GΩ" TIA is 1–14 MΩ: the PPG signal is 70–1000x smaller than
+planned and the 2-3 kHz bandwidth becomes MHz-class. At cold / sf it is
+25–120 GΩ and the DC window the servo must hit shrinks in proportion.
+Nothing in the §9–§18 slow-path results survives off tt/27 °C. A feedback
+element whose value is set by a *resistor* (poly T-network) or by a
+calibrated/replica-biased gate voltage, not a bare subthreshold device, is
+needed.
+
+**Not done:** mismatch Monte Carlo (only global corners here), supply
+variation, and a Monte Carlo of the coherent detector at the 125 °C and
+ss/125 channels (analytic figure of merit only for the corners).

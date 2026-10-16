@@ -1,0 +1,8 @@
+# PVT check, I_DC=100n, real-bias optimised front end (tools/corner_run.py); sorted
+ff_m40                 ff/-40C IDC=100n: Vsg=0.6630 s_out=1.745 | Ixc/Iw=294/294nA xc=1.42 dmir=0.80 w_in=1.650 | slow|Z|10Hz=4.19e+10 | wide |H|100k=2.15e+05 f-3dB=168k RTI100k=330fA | minIDC(m2%)=14.1nA
+fs_27                  fs/27C IDC=100n: Vsg=0.5953 s_out=1.650 | Ixc/Iw=312/312nA xc=1.27 dmir=0.77 w_in=1.650 | slow|Z|10Hz=1.39e+07 | wide |H|100k=2.2e+05 f-3dB=34k RTI100k=587fA | minIDC(m2%)=26.9nA
+sf_27                  sf/27C IDC=100n: Vsg=0.5091 s_out=1.788 | Ixc/Iw=285/285nA xc=1.47 dmir=0.66 w_in=1.650 | slow|Z|10Hz=1.2e+11 | wide |H|100k=2e+05 f-3dB=150k RTI100k=405fA | minIDC(m2%)=17.0nA
+ss_125                 ss/125C IDC=100n: Vsg=0.3736 s_out=1.650 | Ixc/Iw=309/309nA xc=1.27 dmir=0.57 w_in=1.651 | slow|Z|10Hz=7.77e+06 | wide |H|100k=2.1e+05 f-3dB=84k RTI100k=679fA | minIDC(m2%)=33.8nA
+tt_125                 tt/125C IDC=100n: Vsg=0.3432 s_out=1.650 | Ixc/Iw=319/319nA xc=1.20 dmir=0.54 w_in=1.651 | slow|Z|10Hz=7.88e+05 | wide |H|100k=1.67e+05 f-3dB=224k RTI100k=1244fA | minIDC(m2%)=52.4nA
+tt_27                  tt/27C IDC=100n: Vsg=0.5522 s_out=1.651 | Ixc/Iw=298/298nA xc=1.37 dmir=0.71 w_in=1.650 | slow|Z|10Hz=1e+09 | wide |H|100k=2.04e+05 f-3dB=112k RTI100k=628fA | minIDC(m2%)=24.3nA
+tt_m40                 tt/-40C IDC=100n: Vsg=0.6935 s_out=1.849 | Ixc/Iw=284/284nA xc=1.49 dmir=0.83 w_in=1.650 | slow|Z|10Hz=2.5e+10 | wide |H|100k=2.17e+05 f-3dB=168k RTI100k=331fA | minIDC(m2%)=14.2nA
