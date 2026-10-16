@@ -576,3 +576,76 @@ gain from the 280–300 kHz channel bandwidth.
 cancel currents, a behavioral servo (fixed gate bias here), tt corner / room
 temperature, ideal timing recovery, noise limited to the 3.84 MHz sampling
 band, and the Gaussian-tail assumption above.
+
+## 17. Wideband-noise reduction in the option-1 front end (2026-10-17)
+
+Tools: `simulation/spice/tools/wide_noise_sweep.py` (one variant per call),
+`make_chan_opt.py` (full-chain channel for the optimised stage); raw sweep
+output `simulation/spice/results/wide_noise_sweeps.txt`; final Monte Carlo
+`simulation/spice/results_opt/detect_results.txt`.
+
+**Figure of merit.** Detection SNR d = μ/σ₀ for the same 48-chip correlator as
+§16, with σ₀ computed analytically from the SPICE output-noise PSD
+(σ₀² = (N/N_S²)·∫S_out·D(f)df, rect-chip kernel D) and μ from a noise-free pass
+through H(f). Checked against the §16 Monte Carlo on the same channel: σ₀
+24.30 vs 24.13 µV, d 17.30 vs 17.45. Quoted as the I_DC needed for
+Pd = 99.9 % at Pfa = 1e-8 (d = 8.70) at m = 2 %.
+
+**Where the wideband noise comes from (m = 2 % minimum I_DC, nA):**
+
+| variant | min I_DC | note |
+|---|---|---|
+| full chain, §15 stage (baseline) | 50.3 | |
+| slow path removed | 48.6 | slow path adds only ~3 % |
+| mirror area x4 | 39.4 | mirror thermal/flicker is the biggest single term |
+| mirror degeneration 20 k / 50 k | 40.7 / 35.2 | |
+| IBX 300 nA / 3 µA | 31.2 / 93.6 | gm of the cascode and mirror scales with IBX |
+| Mc W x4, wide-TIA bias x2 | 48.9 / 48.7 | **no effect** |
+| Cc 100 pF | 45.4 | small gain, large area |
+
+**Findings that changed the design:**
+1. **The regulated-cascode booster was not regulating.** In every §12–§16
+   run the gate node `gc` sat at ~0 V (Mb pulling it to ground), so the stage
+   behaved as a plain common-gate PMOS. A thick-oxide PMOS needs ~1.0 V Vsg
+   but `gc` cannot go below 0 V from a ~1.0 V source node, so the loop cannot
+   close. Forcing it into regulation (thin-oxide Mc with its own n-well, Mb
+   re-sized, booster current raised) gave **worse** results (31–63 nA): the
+   booster's bias noise couples into Mc's gate. Removing the booster and
+   driving Mc's gate from a fixed voltage reproduces the best result at any
+   gate voltage (24.4 nA at Vgc = 0, 0.4 or 0.8 V). The Mb/Ib/Rib/Mc-gate
+   network is therefore unnecessary; the earlier "regulated cascode" label in
+   §12–§16 was a misdescription.
+2. **IBX has an optimum near 300 nA** (100 nA: 30 nA, 300 nA: 24–25 nA, 1 µA:
+   27–28 nA with the improved mirror). Too low and the input node (Zin ~ 1/gm)
+   is slow, too high and mirror noise rises.
+3. **The wide TIA op-amp is not the limiter** (2x bias: no change).
+
+**Optimised stage:** common-gate PMOS Mc (W = 80 µm, L = 1 µm, gate on a
+fixed DC voltage), IBX = 300 nA, mirror devices x4 (m = 4) with 200 kΩ source
+degeneration each, Cc = 50 pF, wide TIA unchanged (~170 µW total with the
+slow path). Analytic minimum I_DC = 22.0 nA (m = 2 %).
+
+**Full Monte Carlo on the optimised stage** (all five I_DC, slow path and
+servo-as-fixed-bias included; noise-only correlator kurtosis 3.00–3.03):
+
+| I_DC | m = 2 % | m = 1 % | m = 0.5 % |
+|---|---|---|---|
+| 10 nA | 11.7 dB, Pd 0.047 | 5.7 dB | −0.4 dB |
+| 30 nA | 21.3 dB, Pd 1 | 15.2 dB, Pd 0.56 | 9.2 dB |
+| 100 nA | 31.3 dB | 25.3 dB | **19.2 dB, Pd 0.9985** |
+| 300 nA | 39.8 dB | 33.8 dB | 27.8 dB |
+| 1 µA | 47.8 dB | 41.8 dB | 35.7 dB |
+
+**Minimum I_DC for Pd ≥ 99.9 % at Pfa = 1e-8:** ≈ **24 nA (m = 2 %),
+≈ 48 nA (m = 1 %), ≈ 95 nA (m = 0.5 %)**, versus 50 / 100 / 200 nA before: a
+**~2.1x improvement** (+6.9 dB SNR at fixed I_DC). The hand budget in §5/§6
+(pass at all I_DC ≥ 10 nA for m = 2 %) is still not met: 10 nA / 2 % reaches
+11.7 dB, 7 dB short of the 18.8 dB requirement.
+
+**Caveats:** the 480 kHz bandwidth target is still not met (|H| rolls off
+earlier; see §15); IBX, the wide-input cancel and the gate bias are ideal
+sources; at I_DC = 1 µA the fixed servo bias leaves s_out at 1.70 V (not
+1.65), and 300 nA / 100 nA at 1.636 / 1.644 V (the Msv gate voltages were
+bisected for the pre-optimisation netlist); tt corner, 27 °C; degeneration
+resistors were assumed ideal poly (their thermal noise is in the PSD but
+mismatch/area are not evaluated); same Gaussian-noise assumption for Pfa as §16.

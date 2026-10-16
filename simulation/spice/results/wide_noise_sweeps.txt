@@ -1,0 +1,65 @@
+# sweep batch 1
+A_full_base                  sigma0=  24.30uV  d/(m*nA)=8.6485  I_DC for Pd99.9@m2%=  50.3 nA  RTI fA/rtHz @30k/100k/316k=1461/1262/1740  |H|@100k=2.47e+05  P=270uW
+B_wide_only                  sigma0=  24.18uV  d/(m*nA)=8.9458  I_DC for Pd99.9@m2%=  48.6 nA  RTI fA/rtHz @30k/100k/316k=1429/1231/1702  |H|@100k=2.52e+05  P=185uW
+C_mirror_x4                  sigma0=  19.67uV  d/(m*nA)=11.0396  I_DC for Pd99.9@m2%=  39.4 nA  RTI fA/rtHz @30k/100k/316k=1063/1032/1596  |H|@100k=2.52e+05  P=185uW
+D_rdeg_20k                   sigma0=  20.08uV  d/(m*nA)=10.6997  I_DC for Pd99.9@m2%=  40.7 nA  RTI fA/rtHz @30k/100k/316k=1117/1052/1600  |H|@100k=2.5e+05  P=185uW
+E_rdeg_50k                   sigma0=  17.35uV  d/(m*nA)=12.3483  I_DC for Pd99.9@m2%=  35.2 nA  RTI fA/rtHz @30k/100k/316k=902/912/1515  |H|@100k=2.49e+05  P=185uW
+F_ibx_300n                   sigma0=  13.33uV  d/(m*nA)=13.9569  I_DC for Pd99.9@m2%=  31.2 nA  RTI fA/rtHz @30k/100k/316k=689/791/1689  |H|@100k=2.3e+05  P=180uW
+G_ibx_3u                     sigma0=  47.84uV  d/(m*nA)=4.6491  I_DC for Pd99.9@m2%=  93.6 nA  RTI fA/rtHz @30k/100k/316k=3110/2318/2291  |H|@100k=2.54e+05  P=198uW
+H_Mc_W80                     sigma0=  24.53uV  d/(m*nA)=8.8943  I_DC for Pd99.9@m2%=  48.9 nA  RTI fA/rtHz @30k/100k/316k=1430/1235/1726  |H|@100k=2.52e+05  P=185uW
+I_wideTIA_2x_bias            sigma0=  24.14uV  d/(m*nA)=8.9431  I_DC for Pd99.9@m2%=  48.7 nA  RTI fA/rtHz @30k/100k/316k=1430/1230/1700  |H|@100k=2.51e+05  P=332uW
+J_Cc_100p                    sigma0=  24.51uV  d/(m*nA)=9.5754  I_DC for Pd99.9@m2%=  45.4 nA  RTI fA/rtHz @30k/100k/316k=1312/1143/1651  |H|@100k=2.74e+05  P=185uW
+# sweep batch 2
+K_ibx300n_mm4                sigma0=  12.24uV  d/(m*nA)=15.1802  I_DC for Pd99.9@m2%=  28.7 nA  RTI fA/rtHz @30k/100k/316k=594/741/1655  |H|@100k=2.31e+05  P=180uW
+L_ibx300n_rdeg50k            sigma0=  12.57uV  d/(m*nA)=14.6747  I_DC for Pd99.9@m2%=  29.7 nA  RTI fA/rtHz @30k/100k/316k=631/761/1665  |H|@100k=2.29e+05  P=180uW
+M_ibx300n_mm4_rdeg50k        sigma0=  11.92uV  d/(m*nA)=15.4131  I_DC for Pd99.9@m2%=  28.2 nA  RTI fA/rtHz @30k/100k/316k=578/735/1653  |H|@100k=2.28e+05  P=180uW
+N_ibx500n_mm4_rdeg50k        sigma0=  13.82uV  d/(m*nA)=14.5655  I_DC for Pd99.9@m2%=  29.9 nA  RTI fA/rtHz @30k/100k/316k=664/773/1546  |H|@100k=2.42e+05  P=182uW
+O_ibx300n_mm4_rdeg100k       sigma0=  11.60uV  d/(m*nA)=15.7495  I_DC for Pd99.9@m2%=  27.6 nA  RTI fA/rtHz @30k/100k/316k=557/719/1640  |H|@100k=2.27e+05  P=180uW
+P_ibx200n_mm4_rdeg50k        sigma0=  10.47uV  d/(m*nA)=15.7264  I_DC for Pd99.9@m2%=  27.7 nA  RTI fA/rtHz @30k/100k/316k=528/735/1819  |H|@100k=2.07e+05  P=180uW
+Q_M_plus_cc100p              sigma0=  12.20uV  d/(m*nA)=16.0787  I_DC for Pd99.9@m2%=  27.1 nA  RTI fA/rtHz @30k/100k/316k=535/705/1640  |H|@100k=2.45e+05  P=180uW
+S_Mb_W4L2                    sigma0=  22.25uV  d/(m*nA)=9.5610  I_DC for Pd99.9@m2%=  45.5 nA  RTI fA/rtHz @30k/100k/316k=1423/1170/1282  |H|@100k=2.5e+05  P=185uW
+T_Mb_W10L2                   sigma0=  22.23uV  d/(m*nA)=9.5530  I_DC for Pd99.9@m2%=  45.5 nA  RTI fA/rtHz @30k/100k/316k=1423/1170/1283  |H|@100k=2.5e+05  P=185uW
+U_Mb_W4L2_ibx300n            sigma0=  11.19uV  d/(m*nA)=15.5065  I_DC for Pd99.9@m2%=  28.1 nA  RTI fA/rtHz @30k/100k/316k=677/708/1353  |H|@100k=2.17e+05  P=180uW
+V_Mb_W10L2_M                 sigma0=   9.59uV  d/(m*nA)=17.8127  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/637/1293  |H|@100k=2.14e+05  P=180uW
+# sweep batch 3
+V0_ref                       op xc/dmir/gc/w_in=1.42/0.65/0.00/1.650 sigma0=   9.59uV  d/(m*nA)=17.8127  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/637/1293  |H|@100k=2.14e+05  P=180uW
+W1_rib500k                   op xc/dmir/gc/w_in=1.43/0.65/0.01/1.650 sigma0=   9.59uV  d/(m*nA)=17.8628  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/635/1283  |H|@100k=2.15e+05  P=198uW
+W2_rib300k                   op xc/dmir/gc/w_in=1.43/0.65/0.02/1.650 sigma0=   9.59uV  d/(m*nA)=17.9074  I_DC for Pd99.9@m2%=  24.3 nA  RTI fA/rtHz @30k/100k/316k=561/633/1274  |H|@100k=2.15e+05  P=213uW
+W3_mbW30                     op xc/dmir/gc/w_in=1.42/0.65/0.00/1.650 sigma0=   9.59uV  d/(m*nA)=17.7278  I_DC for Pd99.9@m2%=  24.5 nA  RTI fA/rtHz @30k/100k/316k=562/640/1309  |H|@100k=2.13e+05  P=180uW
+W4_mbW20L1                   op xc/dmir/gc/w_in=1.42/0.65/0.00/1.650 sigma0=   9.58uV  d/(m*nA)=17.8045  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/637/1295  |H|@100k=2.14e+05  P=180uW
+W5_ibx200n_rib500k           op xc/dmir/gc/w_in=1.41/0.62/0.01/1.650 sigma0=   8.61uV  d/(m*nA)=17.3505  I_DC for Pd99.9@m2%=  25.1 nA  RTI fA/rtHz @30k/100k/316k=512/658/1608  |H|@100k=1.87e+05  P=197uW
+W6_mm8                       op xc/dmir/gc/w_in=1.42/0.61/0.00/1.651 sigma0=   9.38uV  d/(m*nA)=17.9558  I_DC for Pd99.9@m2%=  24.2 nA  RTI fA/rtHz @30k/100k/316k=551/633/1350  |H|@100k=2.13e+05  P=180uW
+W7_rdeg100k_rib500k          op xc/dmir/gc/w_in=1.43/0.67/0.01/1.650 sigma0=   9.24uV  d/(m*nA)=18.4296  I_DC for Pd99.9@m2%=  23.6 nA  RTI fA/rtHz @30k/100k/316k=540/615/1259  |H|@100k=2.14e+05  P=198uW
+# sweep batch 4
+X1_thinMc_V                  op xc/dmir/gc/w_in=0.92/0.65/0.02/1.650 sigma0=   9.69uV  d/(m*nA)=16.0552  I_DC for Pd99.9@m2%=  27.1 nA  RTI fA/rtHz @30k/100k/316k=571/715/1656  |H|@100k=1.95e+05  P=180uW
+X2_thinMc_ibx100n            op xc/dmir/gc/w_in=0.88/0.57/0.04/1.650 sigma0=   7.40uV  d/(m*nA)=14.2718  I_DC for Pd99.9@m2%=  30.5 nA  RTI fA/rtHz @30k/100k/316k=489/877/2854  |H|@100k=1.21e+05  P=179uW
+X3_thinMc_ibx1u              op xc/dmir/gc/w_in=0.98/0.77/0.02/1.650 sigma0=  13.45uV  d/(m*nA)=15.0508  I_DC for Pd99.9@m2%=  28.9 nA  RTI fA/rtHz @30k/100k/316k=792/793/1117  |H|@100k=2.43e+05  P=185uW
+X4_thinMc_rib500k            op xc/dmir/gc/w_in=0.96/0.65/0.06/1.650 sigma0=   9.71uV  d/(m*nA)=17.5111  I_DC for Pd99.9@m2%=  24.8 nA  RTI fA/rtHz @30k/100k/316k=564/649/1342  |H|@100k=2.13e+05  P=198uW
+X5_thinMc_Mb4                op xc/dmir/gc/w_in=0.96/0.65/0.06/1.650 sigma0=   9.94uV  d/(m*nA)=17.0661  I_DC for Pd99.9@m2%=  25.5 nA  RTI fA/rtHz @30k/100k/316k=566/668/1420  |H|@100k=2.13e+05  P=180uW
+X6_thinMc_ibx300n_base_mir   op xc/dmir/gc/w_in=1.36/0.70/0.46/1.650 sigma0=  24.54uV  d/(m*nA)=9.2935  I_DC for Pd99.9@m2%=  46.8 nA  RTI fA/rtHz @30k/100k/316k=729/1005/2418  |H|@100k=2.56e+05  P=180uW
+X7_thinMc_mm1_ibx1u          op xc/dmir/gc/w_in=1.37/0.77/0.40/1.651 sigma0=  31.37uV  d/(m*nA)=7.2267  I_DC for Pd99.9@m2%=  60.2 nA  RTI fA/rtHz @30k/100k/316k=1449/1387/2499  |H|@100k=2.55e+05  P=185uW
+# sweep batch 5
+Y1_thin_defMb_V              op xc/dmir/gc/w_in=1.36/0.65/0.46/1.650 sigma0=  22.74uV  d/(m*nA)=9.8595  I_DC for Pd99.9@m2%=  44.1 nA  RTI fA/rtHz @30k/100k/316k=627/970/2410  |H|@100k=2.54e+05  P=180uW
+Y2_thin_defMb_V_rib500k      op xc/dmir/gc/w_in=1.73/0.65/0.83/1.650 sigma0=  21.35uV  d/(m*nA)=10.5435  I_DC for Pd99.9@m2%=  41.3 nA  RTI fA/rtHz @30k/100k/316k=639/938/2108  |H|@100k=2.54e+05  P=197uW
+Y3_thin_defMb_ibx1u          op xc/dmir/gc/w_in=1.37/0.77/0.40/1.650 sigma0=  25.24uV  d/(m*nA)=8.8889  I_DC for Pd99.9@m2%=  48.9 nA  RTI fA/rtHz @30k/100k/316k=839/1086/2394  |H|@100k=2.53e+05  P=185uW
+Y4_thin_Mb2x8                op xc/dmir/gc/w_in=1.18/0.65/0.28/1.650 sigma0=  15.71uV  d/(m*nA)=13.6211  I_DC for Pd99.9@m2%=  31.9 nA  RTI fA/rtHz @30k/100k/316k=587/774/1756  |H|@100k=2.5e+05  P=180uW
+Y5_thin_Mb1x16               op xc/dmir/gc/w_in=1.59/0.65/0.70/1.650 sigma0=  33.61uV  d/(m*nA)=6.9041  I_DC for Pd99.9@m2%=  63.0 nA  RTI fA/rtHz @30k/100k/316k=681/1221/3245  |H|@100k=2.56e+05  P=180uW
+Y6_thin_defMb_ibx500n        op xc/dmir/gc/w_in=1.36/0.73/0.43/1.650 sigma0=  23.23uV  d/(m*nA)=9.6275  I_DC for Pd99.9@m2%=  45.2 nA  RTI fA/rtHz @30k/100k/316k=662/986/2394  |H|@100k=2.53e+05  P=182uW
+Y7_thin_defMb_ibx300n_rdeg100k_mm8 op xc/dmir/gc/w_in=1.36/0.63/0.46/1.650 sigma0=  20.49uV  d/(m*nA)=10.5087  I_DC for Pd99.9@m2%=  41.4 nA  RTI fA/rtHz @30k/100k/316k=603/960/2416  |H|@100k=2.5e+05  P=180uW
+# sweep batch 6
+Z1_cg_vgc0_V                 op xc/dmir/gc/w_in=1.42/0.65/0.00/1.650 sigma0=   9.58uV  d/(m*nA)=17.8434  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/636/1287  |H|@100k=2.14e+05  P=171uW
+Z2_cg_vgc0.4                 op xc/dmir/gc/w_in=1.75/0.65/0.40/1.650 sigma0=   9.57uV  d/(m*nA)=17.8529  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/635/1286  |H|@100k=2.14e+05  P=171uW
+Z3_cg_vgc0.8                 op xc/dmir/gc/w_in=2.08/0.65/0.80/1.650 sigma0=   9.56uV  d/(m*nA)=17.8573  I_DC for Pd99.9@m2%=  24.4 nA  RTI fA/rtHz @30k/100k/316k=562/635/1285  |H|@100k=2.14e+05  P=171uW
+Z4_cg_vgc0_mcW80             op xc/dmir/gc/w_in=1.37/0.65/0.00/1.650 sigma0=   9.56uV  d/(m*nA)=18.1685  I_DC for Pd99.9@m2%=  23.9 nA  RTI fA/rtHz @30k/100k/316k=560/623/1229  |H|@100k=2.18e+05  P=171uW
+Z5_cg_vgc0_ibx1u             op xc/dmir/gc/w_in=1.46/0.77/0.00/1.650 sigma0=  13.24uV  d/(m*nA)=15.8494  I_DC for Pd99.9@m2%=  27.5 nA  RTI fA/rtHz @30k/100k/316k=789/769/944  |H|@100k=2.47e+05  P=175uW
+Z6_cg_vgc0_ibx100n           op xc/dmir/gc/w_in=1.38/0.57/0.00/1.650 sigma0=   7.34uV  d/(m*nA)=14.4501  I_DC for Pd99.9@m2%=  30.1 nA  RTI fA/rtHz @30k/100k/316k=486/862/2804  |H|@100k=1.22e+05  P=169uW
+Z7_cg_thin_vgc0.3            op xc/dmir/gc/w_in=1.20/0.65/0.30/1.650 sigma0=   9.64uV  d/(m*nA)=14.9640  I_DC for Pd99.9@m2%=  29.1 nA  RTI fA/rtHz @30k/100k/316k=580/779/1930  |H|@100k=1.79e+05  P=171uW
+Z8_cg_thin_vgc0.5            op xc/dmir/gc/w_in=1.40/0.65/0.50/1.650 sigma0=   9.64uV  d/(m*nA)=14.9614  I_DC for Pd99.9@m2%=  29.1 nA  RTI fA/rtHz @30k/100k/316k=580/779/1930  |H|@100k=1.79e+05  P=171uW
+# sweep batch 7
+F1_cg_W80_i300n_m4_r100k     op xc/dmir/gc/w_in=1.37/0.67/0.00/1.650 sigma0=   9.20uV  d/(m*nA)=18.7547  I_DC for Pd99.9@m2%=  23.2 nA  RTI fA/rtHz @30k/100k/316k=539/604/1206  |H|@100k=2.16e+05  P=171uW
+F2_cg_W80_i200n_m4_r100k     op xc/dmir/gc/w_in=1.36/0.63/0.00/1.650 sigma0=   8.43uV  d/(m*nA)=17.8970  I_DC for Pd99.9@m2%=  24.3 nA  RTI fA/rtHz @30k/100k/316k=502/635/1546  |H|@100k=1.89e+05  P=170uW
+F3_cg_W80_i500n_m4_r100k     op xc/dmir/gc/w_in=1.39/0.73/0.00/1.650 sigma0=  10.21uV  d/(m*nA)=18.9675  I_DC for Pd99.9@m2%=  22.9 nA  RTI fA/rtHz @30k/100k/316k=597/613/957  |H|@100k=2.37e+05  P=172uW
+F4_cg_W80_i300n_m8_r100k     op xc/dmir/gc/w_in=1.37/0.63/0.00/1.650 sigma0=   9.03uV  d/(m*nA)=18.7259  I_DC for Pd99.9@m2%=  23.2 nA  RTI fA/rtHz @30k/100k/316k=532/604/1284  |H|@100k=2.14e+05  P=171uW
+F5_cg_W80_i300n_m4_r200k     op xc/dmir/gc/w_in=1.37/0.71/0.00/1.650 sigma0=   8.64uV  d/(m*nA)=19.7550  I_DC for Pd99.9@m2%=  22.0 nA  RTI fA/rtHz @30k/100k/316k=504/569/1169  |H|@100k=2.15e+05  P=171uW
+F6_cg_W80_i300n_m4_r100k_cc75p op xc/dmir/gc/w_in=1.37/0.67/0.00/1.650 sigma0=   9.25uV  d/(m*nA)=19.4285  I_DC for Pd99.9@m2%=  22.4 nA  RTI fA/rtHz @30k/100k/316k=510/581/1194  |H|@100k=2.26e+05  P=171uW
+F7_cg_W80_i300n_m4_r100k_cc30p op xc/dmir/gc/w_in=1.37/0.67/0.00/1.650 sigma0=   9.12uV  d/(m*nA)=17.5084  I_DC for Pd99.9@m2%=  24.9 nA  RTI fA/rtHz @30k/100k/316k=596/651/1233  |H|@100k=2e+05  P=171uW
