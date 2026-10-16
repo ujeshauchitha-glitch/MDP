@@ -989,3 +989,68 @@ at up to 100 kHz) was only checked inside the SPICE comparison, not
 spectrally; the digital block's power, ADC/DAC circuit design, the range
 switch and its glitch, temperature/corner variation of the loop, and
 reset/start-up sequencing are not designed.
+
+## 24. Switchable slow-path transimpedance (3 ranges) and auto-ranging (2026-10-17)
+
+§23 showed a fixed 1 GΩ clips PPG amplitudes above ≈ ±150–250 pA and is unusable
+above ≈ 1 µA of I_DC. Fix: three transimpedance ranges.
+
+**Implementation (SPICE, `rpar=` / `tcf=` options of `wide_noise_sweep.py`,
+`corner_run.py`).** The T-network of §20 (R1 = R2 = 10 MΩ, R3 = 102 kΩ) stays as
+the 1 GΩ range. Lower-gain ranges add a switched resistor **across the whole
+network** (switch Ron neglected; leaks negligible against the MΩ values) and a
+range-matched feedback capacitor:
+
+| range | extra resistor | Cf | Z @10 Hz (tt/27) | −3 dB | noise 0.5–100 Hz (input-referred) | PPG headroom (±0.3 V) |
+|---|---|---|---|---|---|---|
+| 1 GΩ | none | 50 fF | 0.996 GΩ | 2.8 kHz | 1.6 pA @ 10 nA | ±0.3 nA |
+| 100 MΩ | 111 MΩ | 100 fF | 99.9 MΩ | 9.5 kHz | 8.4 pA @ 100 nA | ±3 nA |
+| 10 MΩ | 10.1 MΩ | 500 fF | 10.0 MΩ | 25 kHz | 78 pA @ 1 µA | ±30 nA |
+
+Over PVT (raw data `simulation/spice/results/range_sweep.txt`): 100 MΩ range
+at 100 nA, ss/125 °C and ff/−40 °C: Z = 99.9 MΩ, BW 8.9 / 10 kHz, noise 7.6 / 9.2 pA;
+10 MΩ range at 1 µA: Z = 10.0 MΩ, BW 24 / 27 kHz, noise 70 / 86 pA; 1 GΩ range at
+10 nA, tt/125 °C, ss/125 °C, tt/−40 °C: Z = 0.995 – 0.997 GΩ, 2.7 – 3.0 kHz, 1.6 pA.
+Input-referred noise is range-independent (set by the cancel device, ∝ I_DC), so
+SNR is unchanged by ranging; only the output swing changes. Lock windows exist
+everywhere (the earlier "no lock" at 10 nA, ss/125 °C was my scan starting at
+Vgs = 0.2 V; the window there is 0.1–0.2 V Vgs, and the cancel device's off
+leakage at 125 °C is below 10 nA).
+
+**Auto-range policy (digital, `servo_loop.py`).** Power up in the safest range
+(10 MΩ). After the 12-bit SAR acquisition (≈ 24 ms) the DAC code *is* an
+I_DC measurement. After a 100 ms hold choose the highest-gain range whose
+headroom still fits a 2 % modulation with ~0.25 V swing:
+I_DC ≤ 12.5 nA → 1 GΩ; ≤ 125 nA → 100 MΩ; otherwise 10 MΩ (good to
+≈ 1.25 µA; a 1 MΩ range would be needed above that). Switching re-centres the
+output and keeps the DAC code, so no new SAR pass is needed.
+
+**Closed-loop results (fc = 0.05 Hz, 1.2 Hz PPG, `simulation/servo/results.txt`).**
+Fixed-range: every (range, I_DC, modulation) inside its headroom gives PPG
+gain 0.998–1.000, phase +2.3° and noise equal to the analog value (1G @ 10 nA
+1.6 pA; 100M @ 100 nA 8.6 pA; 10M @ 300 nA 25.5 pA; 10M @ 1 µA 80 pA); the
+10 MΩ range now handles 1 µA with a 20 nA (2 %) PPG at 204 mV swing and no
+re-acquisition, where 1 GΩ failed (§23). From power-up with auto-ranging:
+
+| I_DC | range chosen | PPG gain (last 3 s, 2 % mod.) | added noise | re-acq. |
+|---|---|---|---|---|
+| 5 nA | 1 GΩ | 0.9986 | 0.8 pA | 0 |
+| 30 nA | 100 MΩ | 0.9988 | 2.9 pA | 0 |
+| 100 nA | 100 MΩ | 0.9989 | 8.5 pA | 0 |
+| 300 nA | 10 MΩ | 0.9987 | 24.5 pA | 0 |
+| 1 µA | 10 MΩ | 0.9986 | 78.7 pA | 0 |
+
+(Switch at 0.125 s from power-up, SAR lock at 24 ms in all cases.)
+
+**Effect on the wideband path.** The extra range resistors and capacitors load
+the shared photodiode node slightly: wide min I_DC (m = 2 %) at tt/27 °C is
+24.1 nA (1 GΩ), 25.3 nA (100 MΩ range, I_DC = 100 nA) and 35.9–45 nA (10 MΩ
+range, I_DC = 1 µA, where the cancel device's noise at `x` also grows ∝ I_DC).
+These are *noise-limited minimum photocurrents at that I_DC*; at 1 µA the
+actual photocurrent is 20–40x above the minimum, so detection is unaffected.
+
+**Caveats.** Switches are ideal (Ron, charge injection, leakage, and the
+transient when a range changes are not simulated); the 1 MΩ range for
+> 1.25 µA is not built; Cf sizing is by peaking only (no loop-gain check
+per range); policy thresholds assume ≤ 2 % PPG modulation; the DAC full scale
+(2.05 µA) limits I_DC to ~2 µA.

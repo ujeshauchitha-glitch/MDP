@@ -70,6 +70,8 @@ def netlist(o):
         s = re.sub(r"^XMPR1_s [^\n]*\n", f"R1_s   x tn_s {o.get('t1','10Meg')}\n", s, flags=re.M)
         s = re.sub(r"^XMPR2_s [^\n]*\n", f"R2_s   tn_s s_out {o.get('t1','10Meg')}\nR3_s   tn_s vcm {o.get('t3','102k')}\n", s, flags=re.M)
         s = s.replace("Cf_s x s_out 1f", f"Cf_s x s_out {o.get('tcf','50f')}")
+        if "rpar" in o:   # lower-gain range: switched resistor in parallel with the whole T-network (switch Ron ignored)
+            s = s.replace(f"R3_s   tn_s vcm {o.get('t3','102k')}\n", f"R3_s   tn_s vcm {o.get('t3','102k')}\nRp_s   x s_out {o['rpar']}\n", 1)
     if "vcm" in o:   # common-mode level of both TIAs (default 1.65 V)
         v = o["vcm"]
         s = s.replace("VCM  vcm   0 DC 1.65", f"VCM  vcm   0 DC {v}")

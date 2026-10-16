@@ -70,3 +70,20 @@ if __name__ == "__main__":
         fin = (r["idac"][-int(0.5 / sl.DT):].mean() - (val + dI)) * 1e12
         print(f"I_DC={idc} step +{dI*1e12:.0f} pA at t=2 s: peak |out-VCM| {peak*1e3:.0f} mV, settles (50 ms mean < 30 mV) after {tset*1e3:.0f} ms, "
               f"re-acquisitions {r['srv'].reacq}, final DAC error {fin:.1f} pA", flush=True)
+    elif what == "rppg":      # fixed range: python study.py rppg RANGE IDC PCT TSTOP
+        rg, idc, pct, tstop = sys.argv[2], sys.argv[3], float(sys.argv[4]), float(sys.argv[5])
+        val = {"5n": 5e-9, "10n": 10e-9, "30n": 30e-9, "100n": 100e-9, "300n": 300e-9, "1u": 1e-6, "2u": 2e-6}[idc]
+        amp = pct / 100 * val
+        r = sl.simulate(idc, tstop, val, ppg=(amp, 1.2), fc=0.05, psd_idc=idc, gain_sched=False, rng=rg)
+        a, ph, rms, off = ppg_metrics(r, 1.2, amp, 1.5)
+        pk = np.abs(r["out"][r["t"] > 1.5] - sl.VCM).max()
+        print(f"range {rg:4s} I_DC={idc:4s} PPG {pct}% = {amp*1e12:.0f} pA ({amp*r['z0']*1e3:.0f} mV): gain {a:.4f} phase {ph:+.1f} deg, "
+              f"noise {rms*1e12:.1f} pA, peak |out| {pk*1e3:.0f} mV, DC offset {off*1e3:+.1f} mV, re-acq {r['srv'].reacq}", flush=True)
+    elif what == "auto":      # auto-range from power-up: python study.py auto IDC PCT TSTOP
+        idc, pct, tstop = sys.argv[2], float(sys.argv[3]), float(sys.argv[4])
+        val = {"5n": 5e-9, "10n": 10e-9, "30n": 30e-9, "100n": 100e-9, "300n": 300e-9, "1u": 1e-6, "2u": 2e-6}[idc]
+        amp = pct / 100 * val
+        r = sl.simulate(idc, tstop, val, ppg=(amp, 1.2), fc=0.05, psd_idc=idc, gain_sched=False, auto=True)
+        a, ph, rms, off = ppg_metrics(r, 1.2, amp, tstop - 3.0)
+        print(f"auto I_DC={idc:4s} PPG {pct}%: final range {r['cur']}, switched at {r['switch_t']} s, lock {r['srv'].t_lock}; "
+              f"PPG (last 3 s) gain {a:.4f} phase {ph:+.1f} noise {rms*1e12:.1f} pA, re-acq {r['srv'].reacq}", flush=True)

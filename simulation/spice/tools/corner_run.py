@@ -47,7 +47,7 @@ def op(vsg):
 
 def lock():
     prev = None
-    v = 0.20
+    v = 0.0
     while v < 1.40:
         _, so = op(v)
         if so is not None and prev is not None and prev[1] < T <= so:

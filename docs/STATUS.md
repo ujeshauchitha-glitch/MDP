@@ -32,7 +32,7 @@ ngspice 47 with the sky130 models, not built or measured**.
 
 | item | result | where |
 |---|---|---|
-| Slow-path gain | 0.986–0.997 GΩ at all PVT and ±10 % supply points | §20, §22 |
+| Slow-path gain | 0.986–0.997 GΩ at all PVT and ±10 % supply points; **3 ranges 1 GΩ / 100 MΩ / 10 MΩ**, auto-selected, PPG gain 0.9986–0.9989 from 5 nA to 1 µA | §20, §22, §24 |
 | Slow-path noise (0.5–100 Hz, I_DC = 100 nA) | 7.4–9.5 pA RMS | §14, §20 |
 | Wideband bandwidth / gain | ≈ 250–300 kHz (target 480), 314 kΩ | §15 |
 | Wideband input noise | ≈ 0.6 pA/√Hz at 100 kHz (hand budget was 0.24) | §17 |

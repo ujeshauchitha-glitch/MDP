@@ -1,0 +1,16 @@
+# slow-path range check (tools/corner_run.py with rpar/tcf), T-network R1=R2=10M R3=102k, VCM 1.4
+## ranges
+G100M_ff-40_100n       ff/-40C IDC=100n: Vsg=0.6632 s_out=1.400 | slow Z10Hz=9.99e+07 BW=1e+04Hz noise@10Hz=1268fA RMS0.5-100Hz=9.2pA | Ixc/Iw=294/294nA xc=1.42 w_in=1.400 | wide |H|100k=2.11e+05 RTI100k=555fA minIDC(m2%)=22.1nA
+G100M_ss125_100n       ss/125C IDC=100n: Vsg=0.3739 s_out=1.400 | slow Z10Hz=9.99e+07 BW=8.93e+03Hz noise@10Hz=1043fA RMS0.5-100Hz=7.6pA | Ixc/Iw=309/309nA xc=1.27 w_in=1.401 | wide |H|100k=1.88e+05 RTI100k=759fA minIDC(m2%)=29.8nA
+G100M_tt27_100n        tt/27C IDC=100n: Vsg=0.5524 s_out=1.400 | slow Z10Hz=9.99e+07 BW=9.45e+03Hz noise@10Hz=1158fA RMS0.5-100Hz=8.4pA | Ixc/Iw=298/298nA xc=1.37 w_in=1.400 | wide |H|100k=2.01e+05 RTI100k=637fA minIDC(m2%)=25.3nA
+G10M_ff-40_1u          ff/-40C IDC=1u: Vsg=0.7624 s_out=1.400 | slow Z10Hz=1e+07 BW=2.66e+04Hz noise@10Hz=11926fA RMS0.5-100Hz=86.1pA | Ixc/Iw=294/294nA xc=1.42 w_in=1.400 | wide |H|100k=1.74e+05 RTI100k=855fA minIDC(m2%)=42.6nA
+G10M_ss125_1u          ss/125C IDC=1u: Vsg=0.5478 s_out=1.400 | slow Z10Hz=1e+07 BW=2.38e+04Hz noise@10Hz=9708fA RMS0.5-100Hz=70.1pA | Ixc/Iw=309/309nA xc=1.27 w_in=1.401 | wide |H|100k=1.58e+05 RTI100k=1035fA minIDC(m2%)=49.9nA
+G10M_tt27_1u           tt/27C IDC=1u: Vsg=0.6819 s_out=1.400 | slow Z10Hz=1e+07 BW=2.52e+04Hz noise@10Hz=10848fA RMS0.5-100Hz=78.4pA | Ixc/Iw=298/298nA xc=1.37 w_in=1.400 | wide |H|100k=1.67e+05 RTI100k=925fA minIDC(m2%)=45.4nA
+G1G_ff-40_10n          ff/-40C IDC=10n: Vsg=0.5617 s_out=1.400 | slow Z10Hz=9.97e+08 BW=2.99e+03Hz noise@10Hz=2fA RMS0.5-100Hz=0.0pA | Ixc/Iw=294/294nA xc=1.42 w_in=1.400 | wide |H|100k=2.16e+05 RTI100k=526fA minIDC(m2%)=19.7nA
+G1G_ss125_10n          ss/125C IDC=10n: NO LOCK WINDOW for s_out=VCM (slow path cannot be centred)
+G1_tt27_10n            tt/27C IDC=10n: Vsg=0.4199 s_out=1.400 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=211fA RMS0.5-100Hz=1.6pA | Ixc/Iw=298/298nA xc=1.37 w_in=1.400 | wide |H|100k=2.06e+05 RTI100k=610fA minIDC(m2%)=22.9nA
+## 1G range at 10 nA, hot/cold (lock scan fixed to start at 0 V)
+G1G_ff-40_10n          ff/-40C IDC=10n: Vsg=0.5617 s_out=1.400 | slow Z10Hz=9.97e+08 BW=2.99e+03Hz noise@10Hz=2fA RMS0.5-100Hz=0.0pA | Ixc/Iw=294/294nA xc=1.42 w_in=1.400 | wide |H|100k=2.16e+05 RTI100k=526fA minIDC(m2%)=19.7nA
+G1G_ss125_10n          ss/125C IDC=10n: Vsg=0.1988 s_out=1.400 | slow Z10Hz=9.95e+08 BW=2.66e+03Hz noise@10Hz=216fA RMS0.5-100Hz=1.6pA | Ixc/Iw=309/309nA xc=1.27 w_in=1.401 | wide |H|100k=1.91e+05 RTI100k=733fA minIDC(m2%)=27.3nA
+G1G_tt-40_10n          tt/-40C IDC=10n: Vsg=0.5908 s_out=1.400 | slow Z10Hz=9.97e+08 BW=2.99e+03Hz noise@10Hz=215fA RMS0.5-100Hz=1.6pA | Ixc/Iw=284/284nA xc=1.49 w_in=1.400 | wide |H|100k=2.15e+05 RTI100k=530fA minIDC(m2%)=19.9nA
+G1G_tt125_10n          tt/125C IDC=10n: Vsg=0.1708 s_out=1.400 | slow Z10Hz=9.95e+08 BW=2.66e+03Hz noise@10Hz=208fA RMS0.5-100Hz=1.6pA | Ixc/Iw=319/319nA xc=1.20 w_in=1.401 | wide |H|100k=1.94e+05 RTI100k=724fA minIDC(m2%)=26.9nA

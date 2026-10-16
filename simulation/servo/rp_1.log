@@ -1,0 +1,1 @@
+range 10M  I_DC=1u   PPG 1.0% = 10000 pA (102 mV): gain 0.9987 phase +2.3 deg, noise 80.2 pA, peak |out| 116 mV, DC offset +5.3 mV, re-acq 0

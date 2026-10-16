@@ -1,0 +1,1 @@
+range 10M  I_DC=100n PPG 2.0% = 2000 pA (20 mV): gain 0.9988 phase +2.4 deg, noise 8.6 pA, peak |out| 26 mV, DC offset +0.4 mV, re-acq 0

@@ -33,13 +33,16 @@ ADC_FS = 1.0                # +/-0.5 V full scale
 ADC_NOISE = 0.5             # LSB rms
 N_DAC = 12
 LSB_C = 0.5e-9              # coarse DAC LSB [A]; full scale ~2.05 uA
+# transimpedance ranges: (plant data dir, plant file tag, I_DC above which the NEXT lower-gain range is chosen)
+RANGES = {"1G": ("data_1G", "10n", 12.5e-9), "100M": ("data_100M", "100n", 125e-9), "10M": ("data_10M", "1u", 1.25e-6)}
+ORDER = ["1G", "100M", "10M"]
 BOOST_THR = 0.03           # |2 s mean error| above this speeds up the integrator [V]
 BOOST_GAIN = 20.0
 SAR_WAIT = 3                # ADC samples to wait after each SAR decision
 
 
-def fit_plant(idc="100n"):
-    p = np.loadtxt(DATA / f"slow_plant_{idc}.txt")
+def fit_plant(idc="100n", datadir=None):
+    p = np.loadtxt((HERE / datadir if datadir else DATA) / f"slow_plant_{idc}.txt")
     f, mag = p[:, 0], p[:, 1]
     m = (f >= 1) & (f <= 1e5)
 
@@ -48,7 +51,7 @@ def fit_plant(idc="100n"):
         w = (f[m] / f0) ** 2
         h = z0 / np.sqrt((1 - w) ** 2 + w / q ** 2)
         return np.log(h) - np.log(mag[m])
-    r = least_squares(res, [1e9, 3e3, 0.8], bounds=([1e8, 300, 0.2], [1e10, 3e4, 5]))
+    r = least_squares(res, [1e9, 3e3, 0.8], bounds=([1e5, 300, 0.2], [1e10, 5e5, 5]))
     return r.x, float(np.sqrt(np.mean(r.fun ** 2)))
 
 
@@ -62,7 +65,11 @@ def make_plant(z0, f0, q):
 
 def noise_current(n, idc, seed):
     """Input-referred analog noise [A] from the SPICE PSD (nearest I_DC file)."""
-    d = np.loadtxt(DATA / f"slow_psd_{idc}.txt")
+    amps = {"5n": 5e-9, "10n": 10e-9, "30n": 30e-9, "100n": 100e-9, "300n": 300e-9, "1u": 1e-6, "2u": 2e-6}
+    have = [k for k in amps if (DATA / f"slow_psd_{k}.txt").exists()]
+    ref = min(have, key=lambda k: abs(math.log(amps[k] / amps[idc])))
+    d = np.loadtxt(DATA / f"slow_psd_{ref}.txt")
+    d[:, 1] *= amps[idc] / amps[ref]             # measured noise scales ~linearly with the cancelled DC
     f, a = d[:, 0], d[:, 1]
     fr = np.fft.rfftfreq(n, DT)
     lf = np.log(np.maximum(fr, 1e-3))
@@ -146,11 +153,22 @@ class Servo:
 
 
 def simulate(idc, tstop, i_dc, ppg=None, steps=(), fc=0.05, seed=3, noise=True, gain_sched=True,
-             adc_noise=ADC_NOISE, plant_idc="100n", psd_idc=None, ideal=False, boost=True):
+             adc_noise=ADC_NOISE, plant_idc="100n", psd_idc=None, ideal=False, boost=True, rng=None, auto=False, ppg_pct=None):
     """i_dc: DC photocurrent [A]; ppg=(amp,freq); steps=[(t, dI)].  Returns time series."""
     n = int(round(tstop / DT))
-    (z0, f0, q), _ = fit_plant(plant_idc)
-    Ad, Bd, Cd = make_plant(z0, f0, q)
+    if ppg_pct is not None:
+        ppg = (ppg_pct * i_dc, 1.2)
+    plants = {}
+    for nm, (dd, tag, _) in RANGES.items():
+        (zz, ff, qq), _ = fit_plant(tag, dd)
+        plants[nm] = (zz, make_plant(zz, ff, qq))
+    cur = rng or ("10M" if auto else None)
+    if cur is None:
+        (z0, f0, q), _ = fit_plant(plant_idc)
+        Ad, Bd, Cd = make_plant(z0, f0, q)
+    else:
+        z0, (Ad, Bd, Cd) = plants[cur]
+    switch_t, switch_to = None, None
     x = np.zeros(2)
     srv = Servo(fc=fc, gain_sched=gain_sched, seed=seed + 1, boost=boost)
     nz = noise_current(n, psd_idc or idc, seed) if noise else np.zeros(n)
@@ -172,9 +190,21 @@ def simulate(idc, tstop, i_dc, ppg=None, steps=(), fc=0.05, seed=3, noise=True, 
         out[k] = v; idac[k] = d
         if (not ideal) and k % adc_every == adc_every - 1:
             srv.sample(v, z0)
+            if auto and srv.mode == "TRACK" and srv.t_lock is not None and switch_t is None and t[k] - srv.t_lock > 0.1:
+                i_est = srv.acc                                  # the DAC code IS the DC photocurrent measurement
+                want = "10M"
+                for nm in ORDER:                                 # highest gain whose PPG headroom still holds
+                    if i_est <= RANGES[nm][2]:
+                        want = nm; break
+                if want != cur:
+                    cur = want; z0, (Ad, Bd, Cd) = plants[cur]
+                    x = np.zeros(2); srv.m = 0.0                 # switch: output re-centred, DAC code kept
+                    switch_t, switch_to = t[k], cur
+                else:
+                    switch_t = -1.0
             if srv.mode == "TRACK" and srv.t_lock is None and abs(v - VCM) < 0.005:
                 srv.t_lock = t[k]
-    return dict(t=t, out=out, idac=idac, i_ph=i_ph, srv=srv, z0=z0, fit=(z0, f0, q))
+    return dict(t=t, out=out, idac=idac, i_ph=i_ph, srv=srv, z0=z0, cur=cur, switch_t=switch_t)
 
 
 def lock_time(r, tol=0.005, hold=0.05):
