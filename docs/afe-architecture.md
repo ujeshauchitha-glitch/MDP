@@ -410,9 +410,53 @@ loop; it is **not** a circuit design for the DAC/ADC.
    (`.nodeset` does not rescue it); only the power-up **transient** gives the
    intended state. Bench/silicon start-up behavior is therefore not guaranteed.
 
-**Noise, NOT simulated, estimate only:** `Msv` carries IBX + I_DC ≈ 1.1–2 µA.
-In weak inversion its noise is about shot-noise level, √(2qI) ≈ 18–25 fA/√Hz,
-versus ~4 fA/√Hz for 1 GΩ thermal noise. So the DC-cancel path (largely IBX,
-which is there for the wideband path's sake) sets the slow-path noise floor,
-roughly 5x the Rf-limited figure in TIA-DESIGN §4. Lowering IBX trades this
-against wideband BW (see §12 table).
+**Noise: my first estimate here (shot-noise-level, ~18–25 fA/√Hz from `Msv`) was wrong by ~1000x. See §14 for the simulation.**
+
+## 14. Slow-path noise, simulated with the mirror and servo in place (2026-10-16)
+
+Method (`tools/afe_slow_noise.py`): the behavioral servo is replaced by a fixed
+`Msv` gate voltage bisected so `s_out` = VCM (the circuit has a latched wrong
+`.op` state, and the in-band window is only tens of µV wide); `Msv`'s own
+device noise is kept, the digital loop's is not. Input-referred noise =
+output noise / measured 1 GΩ gain. I_DC = 100 nA.
+
+| IBX | mirror area | density @10 Hz | @100 Hz | @1 kHz | RMS 0.5–100 Hz | RMS 0.5–5 kHz |
+|---|---|---|---|---|---|---|
+| 100 nA | 1x | 6975 fA/√Hz | 2520 | 861 | 50 pA | 70 pA |
+| 300 nA | 1x | 13233 | 4766 | 1583 | 95 pA | 132 pA |
+| 1 µA | 1x | 32892 | 11820 | 3835 | 237 pA | 325 pA |
+| 3 µA | 1x | 78748 | 28251 | 8687 | 567 pA | 763 pA |
+| 100 nA | 4x | 3593 | 1321 | 501 | 26 pA | 38 pA |
+| 1 µA | 4x | 18463 | 6659 | 2202 | 133 pA | 184 pA |
+
+Compare: Rf = 1 GΩ thermal noise is **4.07 fA/√Hz** (TIA-DESIGN §4), so the
+mirror-split slow path is 200–8000x above it.
+
+**What carries it:**
+- **The mirror (Mm, Mo1, Mo2), not the servo.** Quadrupling `Msv`'s area
+  (W×4) changes nothing (32.8 vs 32.9 pA/√Hz at 10 Hz); quadrupling the mirror
+  area drops it to 18.5 pA/√Hz (≈90 % of the noise power).
+- **It is flicker (1/f) noise** scaling with mirror gm: density falls ≈ 1/√f
+  (10 Hz → 1 kHz is ÷8.6) and rises roughly in proportion to total mirror
+  current (IBX + I_DC). Lowering IBX buys a lot, but not below the floor set by
+  I_DC itself, and IBX cannot go low without losing wideband bandwidth
+  (§12 table: 62 kHz at 100 nA).
+- Whether the HV g5v0d10v5 flicker model is pessimistic is **not checked**
+  (no bench or silicon data); treat these as model results.
+
+**Consequences for the slow path (PPG), all at I_DC = 100 nA:** a 1 % AC
+modulation is 1 nA; against 50–237 pA RMS (0.5–100 Hz) that is ~26 down to
+~13 dB SNR before any further averaging. At low perfusion (I_DC = 10 nA, 1 % =
+100 pA) the mirror current is smaller too, but the IBX-set part of the noise
+is unchanged, so SNR can fall below 0 dB at IBX = 1 µA. The design target of
+the TIA-DESIGN §4 hand estimate (Rf-limited, ~360 µV RMS output) is
+irrelevant while the mirror is in the path.
+
+**Options, none simulated yet:**
+1. Take the slow path **directly off the photodiode** (own low-impedance
+   TIA input, no mirror) and use the mirror/regulated cascode only for the
+   wideband path. Removes this noise entirely but needs the photodiode node
+   shared between two TIA inputs, i.e. the original contention problem.
+2. Bigger mirror area (4x gives ~1.8x less, costs input capacitance and
+   wideband BW) and lower IBX.
+3. Source-degenerate the mirror.
