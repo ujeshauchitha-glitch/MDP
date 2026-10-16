@@ -805,3 +805,49 @@ a thermal-noise shunt on the shared node `x` at high temperature.
   table's wideband entries (run with tight tolerances) should be read with that
   caveat; this section supersedes them.
 - Only I_DC = 100 nA; mismatch Monte Carlo and supply variation not done.
+
+## 21. Chip rate and code length vs. the real channel (2026-10-17)
+
+Tool: `simulation/detect/chip_rate_sweep.py` (analytic matched-filter figure of
+merit of §17 on the simulated wideband channel `results_real/chan_100n.txt`,
+real bias mirror, m = 2 %). Question: the channel's −3 dB bandwidth is only
+≈ 250–300 kHz, below the 480 kHz the 480 kchip/s code was sized for; does
+that shortfall matter, and is 480 kchip/s the right operating point?
+
+| chip rate | N | T_int | min I_DC (m = 2 %) |
+|---|---|---|---|
+| 240 kchip/s | 24 | 100 µs | 21.7 nA |
+| 320 kchip/s | 32 | 100 µs | 22.6 nA |
+| 400 kchip/s | 40 | 100 µs | 23.3 nA |
+| **480 kchip/s** | **48** | **100 µs** | **24.3 nA** |
+| 600 kchip/s | 60 | 100 µs | 26.0 nA |
+| 720 kchip/s | 72 | 100 µs | 27.6 nA |
+| 960 kchip/s | 96 | 100 µs | 31.0 nA |
+| 320 kchip/s | 48 | 150 µs | 18.3 nA |
+| 240 kchip/s | 48 | 200 µs | 15.3 nA |
+| 480 kchip/s | 96 | 200 µs | 17.2 nA |
+| 480 kchip/s | 144 | 300 µs | 14.0 nA |
+
+**Findings**
+1. **The bandwidth shortfall costs little.** At fixed T_int = 100 µs, going
+   from 240 to 480 kchip/s costs only 12 % in required photocurrent (≈ 1 dB),
+   and doubling again to 960 kchip/s costs a further 28 %. The channel is
+   not the bottleneck for detection; its noise is (§17).
+2. **Latency, not chip rate, is the real lever.** Holding N = 48 (the §1a
+   security target) and allowing T_int = 200 µs (a decision every other
+   100 µs sample, or a 200 µs window) cuts the required I_DC by 37 %
+   (24.3 → 15.3 nA at 240 kchip/s). Staying at 480 kchip/s and doubling N to 96
+   gives 17.2 nA but also doubles T_int.
+3. **Lowering the rate at fixed 100 µs shortens the code**, so N falls below
+   the §1a minimum (≥ 40–48 bits for 1e-6 break probability over a session):
+   240 kchip/s would be N = 24. The recommended point stays **480 kchip/s,
+   N = 48, 100 µs** unless the latency requirement relaxes, in which case
+   **240–320 kchip/s with N = 48 and T_int = 150–200 µs** gives the best SNR
+   per chip, and also loosens the wideband TIA bandwidth requirement
+   (≈ 160 kHz) and power.
+
+**Caveats:** one channel (I_DC = 100 nA, tt, 27 °C); no ISI penalty beyond what
+the 5-symbol Monte Carlo of §16 shows; the analytic figure of merit assumes
+Gaussian noise and the rectangular-chip correlator with a fixed receiver
+delay; security margin (§1a) is unchanged by the chip rate as long as N does not
+drop.

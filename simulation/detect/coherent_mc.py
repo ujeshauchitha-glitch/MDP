@@ -15,13 +15,13 @@ empirically (that would need ~1e9 trials).
 
 usage: python coherent_mc.py [results_dir]
 """
-import sys, pathlib, math
+import os, sys, pathlib, math
 import numpy as np
 from math import erfc, sqrt
 
 Q_E = 1.602176634e-19
-RCHIP = 480e3
-N = 48
+RCHIP = float(os.environ.get("RCHIP", 480e3))      # override for chip-rate sweeps
+N = int(os.environ.get("NCHIPS", 48))
 OS = 16                       # samples per chip
 FS = RCHIP * OS
 NS = N * OS                   # samples per symbol (100 us)
