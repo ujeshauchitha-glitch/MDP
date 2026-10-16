@@ -30,6 +30,8 @@ for kv in sys.argv[5:]:
     k, v = kv.split("=", 1)
     BASE[k] = v
 
+T = float(BASE.get("vcm", 1.65))        # servo target = TIA common-mode
+
 
 def parse(out, k):
     m = re.search(rf"^v\({k}\)\s*=\s*([-\d.e+]+)", out, re.M)
@@ -48,7 +50,7 @@ def lock():
     v = 0.20
     while v < 1.40:
         _, so = op(v)
-        if so is not None and prev is not None and prev[1] < 1.65 <= so:
+        if so is not None and prev is not None and prev[1] < T <= so:
             lo, hi = prev[0], v
             break
         if so is not None:
@@ -61,7 +63,7 @@ def lock():
         _, so = op(mid)
         if so is None:
             return None
-        lo, hi = (mid, hi) if so < 1.65 else (lo, mid)
+        lo, hi = (mid, hi) if so < T else (lo, mid)
     return (lo + hi) / 2
 
 
@@ -90,13 +92,14 @@ def analyze(vsg, tight, tag):
 
 vsg = lock()
 if vsg is None:
-    print(f"{name:22s} {corner}/{temp}C IDC={idc}: NO LOCK WINDOW for s_out=1.65 V (slow path cannot be centred)", flush=True)
+    print(f"{name:22s} {corner}/{temp}C IDC={idc}: NO LOCK WINDOW for s_out=VCM (slow path cannot be centred)", flush=True)
     sys.exit(0)
 
 out, so = op(vsg)
 R = 3e6
-ix = (3.3 - parse(out, "sx")) / R * 1e9
-iw = (3.3 - parse(out, "sw")) / R * 1e9
+VDD = float(BASE.get("vdd", 3.3))
+ix = (VDD - parse(out, "sx")) / R * 1e9
+iw = (VDD - parse(out, "sw")) / R * 1e9
 
 # --- slow path: tight tolerances ---
 h1, _, ns = analyze(vsg, "1", "s")

@@ -32,19 +32,23 @@ ngspice 47 with the sky130 models, not built or measured**.
 
 | item | result | where |
 |---|---|---|
-| Slow-path gain | 0.986–0.995 GΩ at all 7 PVT corners | §20 |
+| Slow-path gain | 0.986–0.997 GΩ at all PVT and ±10 % supply points | §20, §22 |
 | Slow-path noise (0.5–100 Hz, I_DC = 100 nA) | 7.4–9.5 pA RMS | §14, §20 |
 | Wideband bandwidth / gain | ≈ 250–300 kHz (target 480), 314 kΩ | §15 |
 | Wideband input noise | ≈ 0.6 pA/√Hz at 100 kHz (hand budget was 0.24) | §17 |
 | **Min I_DC for Pd ≥ 99.9 % at Pfa = 1e-8** | **24 nA (m = 2 %), 49 nA (1 %), 97 nA (0.5 %)** | §18 |
 | Same across PVT (m = 2 %) | 21–28 nA | §20 |
-| Bias current spread over PVT | 284–319 nA (nominal 300) | §19 |
+| Bias current spread over PVT / supply | 241–363 nA (nominal 300) | §19, §22 |
+| **Supply ±10 % × PVT (VCM 1.4 V)** | slow Z within 1.5 % of 1 GΩ; wide min I_DC 20.8–29.2 nA | §22 |
 | Chip-rate trade | 240→480 kchip/s costs only 12 %; T_int 200 µs cuts need by 37 % | §21 |
 
 Detection is evaluated by a Monte Carlo of random 48-chip codes through the
 simulated channel (`simulation/detect/coherent_mc.py`), noise-only correlator
 output Gaussian to 4σ. **Pfa = 1e-8 relies on the Gaussian-noise assumption**
 (cannot be verified empirically).
+
+**Common-mode level is VCM = 1.4 V, not 1.65 V:** at VDD = 2.97 V the source-follower
+outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
 
 ## What the original brief / early docs claimed that is now wrong
 

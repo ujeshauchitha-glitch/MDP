@@ -70,6 +70,13 @@ def netlist(o):
         s = re.sub(r"^XMPR1_s [^\n]*\n", f"R1_s   x tn_s {o.get('t1','10Meg')}\n", s, flags=re.M)
         s = re.sub(r"^XMPR2_s [^\n]*\n", f"R2_s   tn_s s_out {o.get('t1','10Meg')}\nR3_s   tn_s vcm {o.get('t3','102k')}\n", s, flags=re.M)
         s = s.replace("Cf_s x s_out 1f", f"Cf_s x s_out {o.get('tcf','50f')}")
+    if "vcm" in o:   # common-mode level of both TIAs (default 1.65 V)
+        v = o["vcm"]
+        s = s.replace("VCM  vcm   0 DC 1.65", f"VCM  vcm   0 DC {v}")
+        s = re.sub(r"(v\((?:x|s_out|w_in|w_out)\))=1\.65", lambda m: f"{m.group(1)}={v}", s)
+        s = s.replace("abs(v(s_out)-1.65)", f"abs(v(s_out)-{v})").replace("(1.65-v(s_out))", f"({v}-v(s_out))")
+    if "vdd" in o:   # supply sensitivity
+        s = s.replace("VPWR vdpwr 0 DC 3.3", f"VPWR vdpwr 0 DC {o['vdd']}")
     if o.get("tight") == "1":   # pA-level cancel currents through multi-GOhm feedback need tight solver tolerances
         s = s.replace(".option scale=1u", ".option scale=1u\n.option abstol=1e-16 vntol=1e-9 reltol=1e-5", 1)
     if "temp" in o:

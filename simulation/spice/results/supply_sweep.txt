@@ -1,0 +1,25 @@
+# supply sweep at VCM=1.65 (first 6) then VCM=1.4 matrix; I_DC=100n, T-network, real bias
+## VCM=1.65 V, VDD +/-10%
+VDD2.97_ff-40          ff/-40C IDC=100n: Vsg=0.6630 s_out=1.650 | slow Z10Hz=3.3e+08 BW=399Hz noise@10Hz=1269fA RMS0.5-100Hz=9.2pA | Ixc/Iw=250/250nA xc=1.37 w_in=1.638 | wide |H|100k=1.26e+04 RTI100k=2668fA minIDC(m2%)=135.3nA
+VDD2.97_ss125          ss/125C IDC=100n: Vsg=0.3737 s_out=1.651 | slow Z10Hz=5.61e+08 BW=563Hz noise@10Hz=1042fA RMS0.5-100Hz=7.6pA | Ixc/Iw=266/266nA xc=1.20 w_in=1.649 | wide |H|100k=1.78e+05 RTI100k=767fA minIDC(m2%)=29.0nA
+VDD2.97_tt27           tt/27C IDC=100n: Vsg=0.5522 s_out=1.649 | slow Z10Hz=4.17e+08 BW=447Hz noise@10Hz=1158fA RMS0.5-100Hz=8.4pA | Ixc/Iw=255/255nA xc=1.31 w_in=1.642 | wide |H|100k=3.04e+04 RTI100k=1454fA minIDC(m2%)=81.6nA
+VDD3.63_ff-40          ff/-40C IDC=100n: Vsg=0.6630 s_out=1.651 | slow Z10Hz=9.97e+08 BW=3.17e+03Hz noise@10Hz=1266fA RMS0.5-100Hz=9.2pA | Ixc/Iw=338/338nA xc=1.48 w_in=1.650 | wide |H|100k=2.21e+05 RTI100k=538fA minIDC(m2%)=20.8nA
+VDD3.63_ss125          ss/125C IDC=100n: Vsg=0.3736 s_out=1.650 | slow Z10Hz=9.95e+08 BW=2.66e+03Hz noise@10Hz=1040fA RMS0.5-100Hz=7.6pA | Ixc/Iw=352/352nA xc=1.33 w_in=1.651 | wide |H|100k=2e+05 RTI100k=727fA minIDC(m2%)=27.8nA
+VDD3.63_tt27           tt/27C IDC=100n: Vsg=0.5522 s_out=1.651 | slow Z10Hz=9.96e+08 BW=2.99e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=342/342nA xc=1.43 w_in=1.651 | wide |H|100k=2.13e+05 RTI100k=615fA minIDC(m2%)=23.7nA
+## VCM=1.4 V trial at tt27/ff-40
+V1.3_2.97_tt27         tt/27C IDC=100n: Vsg=0.5525 s_out=1.299 | slow Z10Hz=9.95e+08 BW=2.66e+03Hz noise@10Hz=1155fA RMS0.5-100Hz=8.4pA | Ixc/Iw=255/255nA xc=1.31 w_in=1.300 | wide |H|100k=1.97e+05 RTI100k=640fA minIDC(m2%)=24.6nA
+V1.4_2.97_ff-40        ff/-40C IDC=100n: Vsg=0.6632 s_out=1.402 | slow Z10Hz=9.95e+08 BW=2.82e+03Hz noise@10Hz=1266fA RMS0.5-100Hz=9.2pA | Ixc/Iw=250/250nA xc=1.37 w_in=1.400 | wide |H|100k=2.09e+05 RTI100k=550fA minIDC(m2%)=21.4nA
+V1.4_2.97_tt27         tt/27C IDC=100n: Vsg=0.5524 s_out=1.401 | slow Z10Hz=9.93e+08 BW=2.66e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=255/255nA xc=1.31 w_in=1.400 | wide |H|100k=1.97e+05 RTI100k=640fA minIDC(m2%)=24.6nA
+V1.4_3.3_tt27          tt/27C IDC=100n: Vsg=0.5524 s_out=1.400 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=298/298nA xc=1.37 w_in=1.400 | wide |H|100k=2.06e+05 RTI100k=624fA minIDC(m2%)=24.1nA
+V1.4_3.63_tt27         tt/27C IDC=100n: Vsg=0.5524 s_out=1.401 | slow Z10Hz=9.97e+08 BW=2.99e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=342/342nA xc=1.43 w_in=1.401 | wide |H|100k=2.13e+05 RTI100k=615fA minIDC(m2%)=23.7nA
+V1.5_2.97_tt27         tt/27C IDC=100n: Vsg=0.5523 s_out=1.501 | slow Z10Hz=9.69e+08 BW=2.37e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=255/255nA xc=1.31 w_in=1.500 | wide |H|100k=1.97e+05 RTI100k=639fA minIDC(m2%)=24.6nA
+## VCM=1.4 V corner x supply matrix
+ff-40_3.63             ff/-40C IDC=100n: Vsg=0.6632 s_out=1.399 | slow Z10Hz=9.97e+08 BW=3.17e+03Hz noise@10Hz=1266fA RMS0.5-100Hz=9.2pA | Ixc/Iw=338/338nA xc=1.48 w_in=1.400 | wide |H|100k=2.21e+05 RTI100k=538fA minIDC(m2%)=20.8nA
+fs27_2.97              fs/27C IDC=100n: Vsg=0.5955 s_out=1.400 | slow Z10Hz=9.86e+08 BW=2.52e+03Hz noise@10Hz=1203fA RMS0.5-100Hz=8.7pA | Ixc/Iw=268/268nA xc=1.22 w_in=1.400 | wide |H|100k=2e+05 RTI100k=633fA minIDC(m2%)=24.4nA
+sf27_2.97              sf/27C IDC=100n: Vsg=0.5093 s_out=1.400 | slow Z10Hz=9.95e+08 BW=2.66e+03Hz noise@10Hz=1106fA RMS0.5-100Hz=8.0pA | Ixc/Iw=242/242nA xc=1.40 w_in=1.400 | wide |H|100k=1.93e+05 RTI100k=647fA minIDC(m2%)=24.9nA
+ss125_2.97             ss/125C IDC=100n: Vsg=0.3739 s_out=1.400 | slow Z10Hz=9.9e+08 BW=2.37e+03Hz noise@10Hz=1040fA RMS0.5-100Hz=7.6pA | Ixc/Iw=266/266nA xc=1.20 w_in=1.401 | wide |H|100k=1.8e+05 RTI100k=773fA minIDC(m2%)=29.2nA
+ss125_3.63             ss/125C IDC=100n: Vsg=0.3739 s_out=1.400 | slow Z10Hz=9.96e+08 BW=2.66e+03Hz noise@10Hz=1040fA RMS0.5-100Hz=7.6pA | Ixc/Iw=352/352nA xc=1.33 w_in=1.401 | wide |H|100k=2e+05 RTI100k=727fA minIDC(m2%)=27.8nA
+tt-40_2.97             tt/-40C IDC=100n: Vsg=0.6937 s_out=1.400 | slow Z10Hz=9.92e+08 BW=2.66e+03Hz noise@10Hz=1306fA RMS0.5-100Hz=9.5pA | Ixc/Iw=241/241nA xc=1.43 w_in=1.400 | wide |H|100k=2.07e+05 RTI100k=555fA minIDC(m2%)=21.7nA
+tt-40_3.63             tt/-40C IDC=100n: Vsg=0.6937 s_out=1.399 | slow Z10Hz=9.97e+08 BW=3.17e+03Hz noise@10Hz=1306fA RMS0.5-100Hz=9.5pA | Ixc/Iw=328/328nA xc=1.55 w_in=1.400 | wide |H|100k=2.2e+05 RTI100k=541fA minIDC(m2%)=21.0nA
+tt125_2.97             tt/125C IDC=100n: Vsg=0.3439 s_out=1.401 | slow Z10Hz=9.92e+08 BW=2.52e+03Hz noise@10Hz=1010fA RMS0.5-100Hz=7.4pA | Ixc/Iw=276/275nA xc=1.13 w_in=1.401 | wide |H|100k=1.84e+05 RTI100k=761fA minIDC(m2%)=28.8nA
+tt125_3.63             tt/125C IDC=100n: Vsg=0.3439 s_out=1.401 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=1010fA RMS0.5-100Hz=7.4pA | Ixc/Iw=363/362nA xc=1.26 w_in=1.401 | wide |H|100k=2.02e+05 RTI100k=720fA minIDC(m2%)=27.5nA

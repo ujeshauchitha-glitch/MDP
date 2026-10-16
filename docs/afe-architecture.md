@@ -855,3 +855,61 @@ the 5-symbol Monte Carlo of §16 shows; the analytic figure of merit assumes
 Gaussian noise and the rectangular-chip correlator with a fixed receiver
 delay; security margin (§1a) is unchanged by the chip rate as long as N does not
 drop.
+
+## 22. Supply voltage sensitivity, and the fix: VCM 1.65 → 1.4 V (2026-10-17)
+
+Tool: `corner_run.py ... vdd=<V> vcm=<V>`; raw data
+`simulation/spice/results/supply_sweep.txt`. T-network slow path, real PMOS
+bias mirror, I_DC = 100 nA, Msv gate bisected per run.
+
+**Problem found.** With both TIAs centred at VCM = 1.65 V (VDD/2 at 3.3 V),
+**VDD = 2.97 V (−10 %) breaks the design**:
+
+| run (VCM = 1.65 V) | slow Z @10 Hz | slow -3 dB | wide \|H\|@100 kHz | wide min I_DC (m = 2 %) |
+|---|---|---|---|---|
+| tt/27 °C, 3.63 V | 0.996 GΩ | 3.0 kHz | 2.1e5 V/A | 23.7 nA |
+| tt/27 °C, **2.97 V** | **0.42 GΩ** | **447 Hz** | **3.0e4** | **81.6 nA** |
+| ff/−40 °C, **2.97 V** | 0.33 GΩ | 399 Hz | 1.3e4 | **135 nA** |
+| ss/125 °C, 2.97 V | 0.56 GΩ | 563 Hz | 1.8e5 | 29.0 nA |
+
+Cause: both op-amps end in an NMOS source follower (`M9`) whose output tops out
+near VDD − Vgs ≈ 1.6 V at typical device speed, so the output cannot sit at
+1.65 V when the rail drops (the slow Z falls because its output also clips,
+w_in/x lock at 1.64 V instead of 1.65). It is a headroom bug in the
+amplifier output stage, not noise.
+
+**Fix.** Move the common-mode level down to **VCM = 1.4 V** (a parameter,
+`vcm=1.4`; the servo target, node sets and cancel-current set point follow).
+With it (VDD = 2.97 V, tt/27 °C): slow Z 0.993 GΩ, 2.7 kHz, wide min I_DC
+24.6 nA; ff/−40 °C: 21.4 nA. VCM = 1.3 V works equally; VCM = 1.5 V is
+marginal (slow bandwidth 2.4 kHz).
+
+**PVT × supply matrix, VCM = 1.4 V, I_DC = 100 nA, m = 2 %:**
+
+| corner / temp / VDD | slow Z | slow -3 dB | slow noise (0.5–100 Hz) | wide min I_DC | IBX |
+|---|---|---|---|---|---|
+| tt / 27 / 3.3 | 0.996 GΩ | 2.8 kHz | 8.4 pA | 24.1 nA | 298 nA |
+| tt / 27 / 2.97 | 0.993 GΩ | 2.7 kHz | 8.4 pA | 24.6 nA | 255 nA |
+| tt / 27 / 3.63 | 0.997 GΩ | 3.0 kHz | 8.4 pA | 23.7 nA | 342 nA |
+| tt / −40 / 2.97 | 0.992 GΩ | 2.7 kHz | 9.5 pA | 21.7 nA | 241 nA |
+| tt / −40 / 3.63 | 0.997 GΩ | 3.2 kHz | 9.5 pA | 21.0 nA | 328 nA |
+| tt / 125 / 2.97 | 0.992 GΩ | 2.5 kHz | 7.4 pA | 28.8 nA | 276 nA |
+| tt / 125 / 3.63 | 0.996 GΩ | 2.8 kHz | 7.4 pA | 27.5 nA | 363 nA |
+| ss / 125 / 2.97 | 0.990 GΩ | 2.4 kHz | 7.6 pA | **29.2 nA** | 266 nA |
+| ss / 125 / 3.63 | 0.996 GΩ | 2.7 kHz | 7.6 pA | 27.8 nA | 352 nA |
+| ff / −40 / 2.97 | 0.995 GΩ | 2.8 kHz | 9.2 pA | 21.4 nA | 250 nA |
+| ff / −40 / 3.63 | 0.997 GΩ | 3.2 kHz | 9.2 pA | **20.8 nA** | 338 nA |
+| sf / 27 / 2.97 | 0.995 GΩ | 2.7 kHz | 8.0 pA | 24.9 nA | 242 nA |
+| fs / 27 / 2.97 | 0.986 GΩ | 2.5 kHz | 8.7 pA | 24.4 nA | 268 nA |
+
+Across all of these, **slow Z stays within 1.5 % of 1 GΩ, wide min I_DC is
+20.8 – 29.2 nA (≤ 1.21x the tt/27/3.3 V value), and IBX moves 241 – 363 nA
+(roughly ∝ supply, since the resistor-programmed reference is not
+supply-independent)**. IBX at 255 nA (low supply) costs nothing measurable.
+
+**Caveats.** Earlier sections (§13–§21) used VCM = 1.65 V at VDD = 3.3 V, where
+the numbers are unchanged to within 1 % by moving VCM to 1.4 V (24.1 vs 24.3 nA
+at tt/27/3.3 V). Supply noise/PSRR was not simulated (DC supply levels only).
+The photodiode reverse bias is set by `x`, so lowering VCM reduces it by 0.25 V
+(the PPG/photodiode model here has no bias dependence; real junction
+capacitance rises as reverse bias falls, which was not modelled).
