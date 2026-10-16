@@ -6,9 +6,10 @@ S {}
 E {}
 T {TrustSense Layer 1 / Part 1 -- Photodiode TIA
 Two-stage Miller op-amp, shunt feedback, MOS-bipolar pseudo-resistor Rf
-sky130A -- hand-authored from simulation/spice/tia.spice, NOT yet opened
-in xschem GUI. Open, run ERC, and auto-route wires before relying on
-the drawing for layout. tia.spice is the verified source of truth.} -20 -480 0 0 0.25 0.25 {}
+sky130A -- hand-authored to match simulation/spice/tia.spice (simulated in
+ngspice 47). NOT yet opened in the xschem GUI: open, run ERC and route
+wires before layout. tia.spice is the source of truth; in the netlist the
+sky130 devices are instantiated as X subckts with .option scale=1u.} -20 -480 0 0 0.25 0.25 {}
 
 # ---------------------------------------------------------------
 # Supplies
@@ -21,12 +22,12 @@ C {devices/lab_pin.sym} -280 -320 0 0 {name=p2 sig_type=std_logic lab=vgnd}
 C {devices/lab_pin.sym} -280 -240 0 0 {name=p3 sig_type=std_logic lab=vcm}
 
 # ---------------------------------------------------------------
-# Photodiode model: Iph (AC 1p SIN 1kHz) || Cj 10p, Rs 100, Rsh 500Meg
+# Photodiode model: Iph (AC 1p, 1pA step for tran) || Cj 10p, Rs 100.
+# No Rsh: a shunt resistor latches the DC loop (see TIA-DESIGN.md s9)
 # ---------------------------------------------------------------
-C {devices/isource.sym} -160 -80 0 0 {name=Iph value="DC 0 AC 1p SIN(0 1p 1k)" lab_p=photodiode_in lab_m=anode_int}
+C {devices/isource.sym} -160 -80 0 0 {name=Iph value="DC 0 AC 1p PULSE(0 1p 100u 1n 1n 500u 2m)" lab_p=photodiode_in lab_m=anode_int}
 C {devices/capa.sym} -80 -80 0 0 {name=Cj value=10p m=1 lab_p=photodiode_in lab_m=anode_int}
 C {devices/res.sym} -40 -20 0 0 {name=Rs value=100 lab_p=anode_int lab_m=vgnd}
-C {devices/res.sym} -200 -20 0 0 {name=Rsh value=500Meg lab_p=photodiode_in lab_m=vgnd}
 C {devices/lab_pin.sym} -160 -120 0 0 {name=p4 sig_type=std_logic lab=photodiode_in}
 C {devices/lab_pin.sym} -40 -60 0 0 {name=p5 sig_type=std_logic lab=anode_int}
 
@@ -71,12 +72,13 @@ C {devices/capa.sym} 580 -160 0 0 {name=Cload value=2p lab_p=tia_out lab_m=vgnd}
 C {devices/lab_pin.sym} 520 -280 0 0 {name=p12 sig_type=std_logic lab=tia_out}
 
 # ---------------------------------------------------------------
-# Feedback: pseudo-resistor MPR1/MPR2 (anti-series diode NFETs) + Cf
+# Feedback: pseudo-resistor MPR1/MPR2 (back-to-back PMOS, gates on pr_mid,
+# body on own source, W=94 L=0.15 m=2 => ~1 GOhm) + Cf
 # ---------------------------------------------------------------
-C {sky130_fd_pr/nfet_01v8.sym} 300 -400 0 0 {name=MPR1 model=sky130_fd_pr__nfet_01v8 W=1 L=1 lab_d=photodiode_in lab_g=photodiode_in lab_s=pr_mid lab_b=vgnd}
-C {sky130_fd_pr/nfet_01v8.sym} 420 -400 0 0 {name=MPR2 model=sky130_fd_pr__nfet_01v8 W=1 L=1 lab_d=tia_out lab_g=tia_out lab_s=pr_mid lab_b=vgnd}
+C {sky130_fd_pr/pfet_01v8.sym} 300 -400 0 0 {name=MPR1 model=sky130_fd_pr__pfet_01v8 W=94 L=0.15 m=2 lab_d=pr_mid lab_g=pr_mid lab_s=photodiode_in lab_b=photodiode_in}
+C {sky130_fd_pr/pfet_01v8.sym} 420 -400 0 0 {name=MPR2 model=sky130_fd_pr__pfet_01v8 W=94 L=0.15 m=2 lab_d=pr_mid lab_g=pr_mid lab_s=tia_out lab_b=tia_out}
 C {devices/lab_pin.sym} 360 -440 0 0 {name=p13 sig_type=std_logic lab=pr_mid}
-C {devices/capa.sym} 360 -480 0 0 {name=Cf value=20f lab_p=photodiode_in lab_m=tia_out}
+C {devices/capa.sym} 360 -480 0 0 {name=Cf value=1f lab_p=photodiode_in lab_m=tia_out}
 
 # ---------------------------------------------------------------
 # Top-level I/O pins (for use as a symbol inside a larger AFE sheet)
