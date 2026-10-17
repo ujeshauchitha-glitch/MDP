@@ -1308,3 +1308,64 @@ reference current is an ideal source (its noise, supply rejection and
 temperature behaviour in silicon are not modelled); the remaining
 300 kHz – 1 MHz coupling is untraced; the correlator Monte Carlo (§16–§21) was
 not re-run (it assumes a noiseless supply and the min-I_DC figure is unchanged).
+
+## 29. Supply rejection, second round: op-amp input-pair body effect (2026-10-17)
+
+After §28 the residual supply coupling at 100 Hz – 1 MHz was traced by **bisecting
+the circuit**: giving each block its own DC-only copy of VDD so the AC ripple
+reaches only the rest. Isolating the slow TIA's supply cut the slow-path ripple
+14–15x; isolating the wideband TIA's supply cut the 1 MHz wideband ripple 7x.
+(Three earlier guesses were falsified first: a cascode on the PMOS cancel leg, an
+AC capacitor on the op-amp's PMOS bias node, and the cascoded op-amp load of §28:
+none changed the numbers.)
+
+**Mechanism.** The slow-path coupling is `ω·C_eff` with C_eff ≈ 41 fF at 1 kHz,
+the gate-source capacitance of the op-amp's input PMOS times the **tail-node
+ripple of 0.23 V/V**, and the tail ripple is constant from 100 Hz to 1 MHz,
+i.e. resistive: both input devices sit in n-wells tied to VDD, so VDD ripple shifts
+their thresholds (body effect, the same mechanism as §28's Mc) and the
+common source node follows. The ripple on that node then couples through the input
+device's Cgs into the virtual-ground node `x`/`w_in` (asymmetrically, because the
+other input is the ideal VCM reference).
+
+**Fixes (all in the netlist builder, `inbulk=src`, `ibias=2u,4u`, plus §28's
+`mcbulk=vcm iref=300n`):**
+1. **Op-amp input pairs in their own n-wells tied to the tail node** (both TIAs).
+   By itself: slow 100 Hz 26.9 → 5.5 pA per V/√Hz, 1 kHz 257 → 26 pA; wide
+   100 kHz 27 → 3.7 nA, 1 MHz 3.7 µA → 0.68 µA, with **no** change in gain,
+   bandwidth or detection reach (min I_DC 24.2 nA).
+2. **Supply-independent op-amp bias currents** (ideal 2 µA / 4 µA sources into
+   the reference diodes instead of resistors from VDD, whose current is ∝ VDD).
+
+**Supply-induced input-equivalent current, per 1 V/√Hz** (1 GΩ range, I_DC =
+100 nA, tt/27 °C; raw data `results/psrr_final.txt`):
+
+| frequency | original (§27) | §28 fix | all four fixes (§29) | total gain |
+|---|---|---|---|---|
+| slow 10 Hz | 575 pA | 8.4 pA | **1.09 pA** | 527x |
+| slow 100 Hz | 5.75 nA | 26.9 pA | **2.06 pA** | 2800x |
+| slow 1 kHz | 57 nA | 257 pA | **17.9 pA** | 3200x |
+| wide 10 kHz | 131 nA | 0.63 nA | **10 pA** | 13000x |
+| wide 100 kHz | 1.06 µA | 27 nA | **1.8 nA** | 580x |
+| wide 300 kHz | 3.3 µA | 275 nA | **19.7 nA** | 167x |
+| wide 1 MHz | 8.0 µA | 3.7 µA | **330 nA** | 24x |
+
+Supply-noise limits for ≤ 20 % of the analog floor are now ≳ 0.2 mV/√Hz
+(slow, up to 100 Hz) and wide: ≲ 66 µV/√Hz at 100 kHz, ≲ 6 µV/√Hz at 300 kHz,
+**≲ 0.36 µV/√Hz at 1 MHz**; a tone ≤ 10 % of I_pert (200 pA) is tolerated up to
+≈ 110 µV at 1 MHz and ≈ 10 mV at 100 kHz. In practice any normal low-noise supply
+now meets the budget; a switching regulator with > 100 µV of ripple at ≥ 1 MHz
+would still need a filter.
+
+**PVT × supply with all four fixes** (11 points: tt 2.97/3.3/3.63 V, ss/125 °C and
+ff/−40 °C at ±10 % supply, sf and fs, tt/125 °C, tt/−40 °C): slow Z
+0.989 – 0.998 GΩ, −3 dB 2.5 – 3.0 kHz, slow noise 7.4 – 9.5 pA, bias current exactly
+300/300 nA everywhere, wideband **min I_DC 21.1 – 28.8 nA (m = 2 %)**: the same
+as before the supply fixes. The cascoded, follower-free op-amp (`opamp2`) was
+re-tested on top and is *worse* (slow 2.0 vs 1.1 pA at 10 Hz): not adopted.
+
+**Caveats.** Ideal current sources stand in for the bias references (their own
+supply rejection and noise are unmodelled); each fix needs isolated n-wells
+(Mc, and four input PMOS) and a quiet 1.4 V well bias for Mc; PSRR measured at tt/27 °C,
+I_DC = 100 nA, 1 GΩ range only; the isolated input-pair wells add well
+capacitance to the tail node, which had no visible effect on gain or noise here.

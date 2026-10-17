@@ -67,6 +67,13 @@ def netlist(o):
     s = re.sub(r"(XMo1 [^\n]*W=20 L=2)", r"\1" + mir_m, s)
     s = s.replace("XMc   dmir gc xc vdpwr sky130_fd_pr__pfet_g5v0d10v5 W=20 L=1",
                   f"XMc   dmir gc xc vdpwr sky130_fd_pr__pfet_g5v0d10v5 W={o.get('mcw','20')} L={o.get('mcl','1')}")
+    if "ibias" in o:   # supply-independent op-amp bias currents (ideal here) instead of R from VDD into the reference diode
+        s = re.sub(r"^Rbias_s [^\n]*$", "Ibs vdpwr nbias_s DC " + o["ibias"].split(",")[0], s, flags=re.M)
+        s = re.sub(r"^Rbias_w [^\n]*$", "Ibw vdpwr nbias_w DC " + o["ibias"].split(",")[1], s, flags=re.M)
+    if o.get("inbulk") == "src":   # op-amp input pairs in their own n-well tied to the tail node: no VDD body effect on Vt
+        s = re.sub(r"^(XM[12]_[sw]\s+\S+\s+\S+\s+(tail1_[sw]))\s+vdpwr", r"\1 \2", s, flags=re.M)
+    if "cpb" in o:   # AC-tie the PMOS gate-bias nodes to VDD so tail / load current sources see no Vgs ripple
+        s = s.replace(".param IDC", "Cpb_s pbias_s vdpwr " + o["cpb"] + "\nCpb_w pbias_w vdpwr " + o["cpb"] + "\n.param IDC", 1)
     if o.get("mcbulk") == "vcm":   # Mc well on the quiet VCM node: no VDD body path, well capacitance not on the signal node
         s = s.replace("XMc   dmir gc xc vdpwr", "XMc   dmir gc xc vcm", 1)
     if o.get("mcbulk") == "src":   # Mc in its own n-well tied to its source: no body-effect path from VDD ripple
@@ -116,6 +123,9 @@ def netlist(o):
                f"Rref  pref vgnd {rref}\nCref  pref vdpwr {cref}\n"
                f"Rsx   vdpwr sx {rs}\nXMpx  xc   pref sx vdpwr {dev} W={pw} L={pl}\n"
                f"Rsw   vdpwr sw {rs}\nXMpw  w_in pref sw vdpwr {dev} W={pw} L={pl}\n")
+        if o.get("ccas") == "1":   # cascode the cancel leg so its VDD-following gate/source/well caps do not drive the TIA input
+            blk = blk.replace(f"XMpw  w_in pref sw vdpwr {dev} W={pw} L={pl}\n",
+                              f"XMpw  wc pref sw vdpwr {dev} W={pw} L={pl}\nXMpwc w_in vcw wc wc {dev} W={pw} L={pl}\nVcw   vcw 0 DC {o.get('vcw', '0.75')}\n")
         if "iref" in o:   # supply-independent reference current (bandgap-derived in silicon; ideal here) instead of Rref to ground
             blk = blk.replace(f"Rref  pref vgnd {rref}\n", f"Iref  pref vgnd DC {o['iref']}\n")
         assert "Icompw vdpwr w_in DC {IBX}" in s and "Ibx   vdpwr xc DC {IBX}" in s
