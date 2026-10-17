@@ -89,7 +89,8 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    LFSR chip generator is fully predictable after 64 observed chips (133 µs).
    Needs a keyed nonlinear stream cipher + TRNG (cryptographer) and a decision
    on whether relay attacks are in scope.
-4. **Not simulated:** mismatch Monte Carlo, supply variation, ambient light
+4. **Not simulated:** random mismatch Monte Carlo (worst-case offsets only, §26: ≤ 1 %
+   effect), supply noise/PSRR, ambient light
    (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,
    the 50 pF coupling cap area (~25 000 µm², about a third of a 334×225 µm
    tile) and ~20 MΩ of series poly.

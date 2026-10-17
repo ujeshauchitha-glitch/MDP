@@ -1,0 +1,11 @@
+# mismatch worst-case sensitivity, wideband stage (tools/mismatch_sens.py), I_DC=100n, VCM 1.4, tt/27C
+base                 Ixc=  298nA Iw=  298nA  w_in=1.4005 V  w_out-VCM=   +1.0 mV  |H|100k=2.14e+05  RTI100k=585 fA  minIDC(m2%)=22.5 nA
+bias_Mpw_+5mV        Ixc=  298nA Iw=  297nA  w_in=1.4005 V  w_out-VCM=   +1.4 mV  |H|100k=2.14e+05  RTI100k=585 fA  minIDC(m2%)=22.5 nA
+bias_Mpw_-5mV        Ixc=  298nA Iw=  300nA  w_in=1.4007 V  w_out-VCM=   +0.8 mV  |H|100k=2.14e+05  RTI100k=585 fA  minIDC(m2%)=22.5 nA
+bias_Mpx_+5mV        Ixc=  297nA Iw=  298nA  w_in=1.4005 V  w_out-VCM=   +0.6 mV  |H|100k=2.14e+05  RTI100k=585 fA  minIDC(m2%)=22.5 nA
+bias_Mpx_-5mV        Ixc=  300nA Iw=  298nA  w_in=1.4005 V  w_out-VCM=   +1.4 mV  |H|100k=2.15e+05  RTI100k=584 fA  minIDC(m2%)=22.5 nA
+mirror_Mo1_+5mV      Ixc=  298nA Iw=  298nA  w_in=1.4005 V  w_out-VCM=   +4.3 mV  |H|100k=2.17e+05  RTI100k=580 fA  minIDC(m2%)=22.4 nA
+mirror_Mo1_-5mV      Ixc=  298nA Iw=  298nA  w_in=1.4005 V  w_out-VCM=   -2.3 mV  |H|100k=2.11e+05  RTI100k=589 fA  minIDC(m2%)=22.7 nA
+wideTIA_Vos_+10mV    Ixc=  298nA Iw=  298nA  w_in=1.3906 V  w_out-VCM=   -8.9 mV  |H|100k=2.14e+05  RTI100k=585 fA  minIDC(m2%)=22.5 nA
+wideTIA_Vos_-10mV    Ixc=  298nA Iw=  298nA  w_in=1.4107 V  w_out-VCM=  +11.2 mV  |H|100k=2.14e+05  RTI100k=585 fA  minIDC(m2%)=22.5 nA
+worst_combo          Ixc=  300nA Iw=  297nA  w_in=1.3905 V  w_out-VCM=   -4.9 mV  |H|100k=2.18e+05  RTI100k=580 fA  minIDC(m2%)=22.4 nA

@@ -1131,3 +1131,37 @@ attacker acceptance at the 1e-6…1e-8 level is not measurable by Monte Carlo
 (Gaussian-tail extrapolation would be needed); attackers were given perfect
 timing and, for the relay, perfect chip observation; no analog attacker
 bandwidth limits.
+
+## 26. Mismatch: worst-case sensitivity of the wideband stage (2026-10-17)
+
+Tool: `simulation/spice/tools/mismatch_sens.py`; data
+`simulation/spice/results/mismatch_sens.txt`.
+
+**Why not a Monte Carlo.** The sky130 5 V device models used here have no
+usable random-mismatch parameters (`vth0_slope = 0.000` for the thick-oxide
+NMOS/PMOS), so a model-driven Monte Carlo would silently show no mismatch. Instead
+gate-referred threshold offsets are injected by hand, one block at a time, at about
+±3σ for these areas (Pelgrom with an *assumed* A_VT of 5–10 mV·µm: σ ≈ 0.8 mV for
+the 160 µm² mirror devices, ≈ 1.1 mV for the bias mirror, ≈ 3 mV for the wideband
+op-amp input pair plus load): ±5 mV on the mirror and bias legs, ±10 mV on the op-amp.
+
+| injected offset | Ixc / Iw | w_in | w_out − VCM | \|H\|@100 kHz | min I_DC (m = 2 %) |
+|---|---|---|---|---|---|
+| none (reference) | 298 / 298 nA | 1.4005 V | +1.0 mV | 2.14e5 | 22.5 nA |
+| mirror Mo1 vs Mm, +5 / −5 mV | 298 / 298 | 1.4005 | +4.3 / −2.3 mV | 2.17e5 / 2.11e5 | 22.4 / 22.7 |
+| bias leg Mpw vs ref, +5 / −5 mV | 298 / 297, 300 | 1.4005 | +1.4 / +0.8 mV | 2.14e5 | 22.5 |
+| bias leg Mpx vs ref, +5 / −5 mV | 297, 300 / 298 | 1.4005 | +0.6 / +1.4 mV | 2.14e5 / 2.15e5 | 22.5 |
+| wide TIA op-amp Vos, +10 / −10 mV | 298 / 298 | 1.3906 / 1.4107 | −8.9 / +11.2 mV | 2.14e5 | 22.5 |
+| combined worst case | 300 / 297 | 1.3905 | −4.9 mV | 2.18e5 | 22.4 |
+
+**Result: benign.** Bias currents move ≤ 1 % (the 3 MΩ / 200 kΩ source
+degeneration turns a 5 mV offset into only 1.7 nA / 0.6 %), the wideband output
+DC shifts ≤ ±11 mV, gain ≤ ±1.5 % and the detection reach ≤ ±1 %. The cancel-current
+mismatch only changes the DC current into the 314 kΩ TIA (3 nA → 1 mV). The slow
+path is not injected: its offsets only move the bisected Msv gate voltage,
+which the digital servo removes.
+
+**Caveats.** Only systematic offsets of assumed magnitude; no random
+Monte Carlo, no resistor mismatch (poly R1/R2/R3 ratio errors move the slow
+gain ≈ 1 % per 1 % R3 mismatch, §20), no capacitor mismatch, no W/L (geometry)
+mismatch, and the A_VT values are assumptions not taken from the PDK.

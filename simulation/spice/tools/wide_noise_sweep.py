@@ -101,6 +101,18 @@ def netlist(o):
         s = s.replace("Ibx   vdpwr xc DC {IBX}", blk)
         s = s.replace(".nodeset ", ".nodeset v(pref)=1.0 v(s0)=3.2 v(sx)=3.2 v(sw)=3.2 ", 1)
         extra = " v(s0) v(sx) v(sw) v(pref)"
+    # worst-case gate-referred threshold-offset hooks for the mismatch sensitivity study [V]
+    hooks = ""
+    if "vmm" in o:    # mirror output device Mo1 vs diode Mm
+        s = s.replace("XMo1  w_in dmir", "XMo1  w_in gmo", 1); hooks += "Vmm gmo dmir DC " + o["vmm"] + "\n"
+    if "vbw" in o:    # bias mirror: wide-input cancel leg vs reference
+        s = s.replace("XMpw  w_in pref", "XMpw  w_in gpw", 1); hooks += "Vbw gpw pref DC " + o["vbw"] + "\n"
+    if "vbx" in o:    # bias mirror: xc bias leg vs reference
+        s = s.replace("XMpx  xc   pref", "XMpx  xc   gpx", 1); hooks += "Vbx gpx pref DC " + o["vbx"] + "\n"
+    if "vosw" in o:   # wideband TIA op-amp input offset (series with the M1 gate)
+        s = s.replace("XM1_w n1out_w w_in", "XM1_w n1out_w gin_w", 1); hooks += "Vosw gin_w w_in DC " + o["vosw"] + "\n"
+    if hooks:
+        s = s.replace(".param IDC", hooks + ".param IDC", 1)
     ctl = f""".control
   op
   print v(x) v(xc) v(dmir) v(gc) v(w_in) v(w_out){extra}
