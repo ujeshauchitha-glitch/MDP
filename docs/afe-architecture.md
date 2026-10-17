@@ -67,6 +67,11 @@ photodiode --> [buffer] -+
 
 ## 1a. Security model: two independent numbers, not one **[DERIVED]**
 
+> **Corrected in §25.** The claim below that a blind attacker succeeds with probability 2^-N "even with
+> unlimited SNR" is false for a correlation-threshold detector (blind injection at the legitimate
+> amplitude is accepted ≈ 16 % of the time); it holds only with an added residual/energy test, and
+> not against a real-time relay or an attacker who has observed the chips.
+
 The SNR formula used throughout (§4) is `(I_pert/i_n)*sqrt(2*T_int)` — T_int
 appears, N (chip count) does not. This is a real, general property of
 coherent/matched-filter detection: rejecting Gaussian noise depends on
