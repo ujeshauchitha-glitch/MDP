@@ -1497,3 +1497,31 @@ tt/27, ss/125, ff/−40, tt/125, tt/−40 only.
   5 / 30 / 100 / 300 nA / 1 µA), 0 re-acquisitions, i.e. identical to §24 within
   rounding. Select the plants with `SERVO_DATA_PREFIX=data_lp_` (data dumped by
   `corner_run.py` with `DUMP=`).
+
+**§32 addendum 2: loop gain and phase margin (measured, replacing the peaking proxy).**
+Tool `simulation/spice/tools/loopgain_final.py`, data
+`simulation/spice/results/loopgain_final.txt`: AC voltage injected in series with each TIA's
+feedback path in the final netlist (single-injection; the feedback network is
+high-impedance against a low-impedance output, so the Middlebrook correction is small;
+the same method as `loopgain_pm.py` for the first-pass TIA gave 81° / 67°).
+
+| configuration | slow loop: DC gain, unity-gain f, PM | wide loop: DC gain, unity-gain f, PM, GM |
+|---|---|---|
+| baseline bias 2 / 4 µA, Cf 50 fF, 1 GΩ, tt/27 °C | 47.6 dB, 2.2 kHz, **47.6°** | 85.3 dB, 5.3 MHz, 90.2°, 42.2 dB |
+| **low power** 0.5 / 1 µA, Cf 150 fF, 1 GΩ, tt/27 °C | 47.4 dB, 1.4 kHz, **66.6°** | 88.2 dB, 1.64 MHz, 66.4°, 15.9 dB |
+| low power, ss/125 °C, 2.97 V | 43.5 dB, 1.18 kHz, 64.5° | 82.8 dB, 1.33 MHz, 61.7°, 12.9 dB |
+| low power, ff/−40 °C, 3.63 V | 49.2 dB, 1.57 kHz, 68.4° | 90.5 dB, 1.93 MHz, 71.2°, 20.9 dB |
+| low power, 100 MΩ range (Cf 500 fF) | 66.6 dB, 4.5 kHz, 66.7° | 88.2 dB, 1.63 MHz, 66.5°, 15.9 dB |
+| low power, 10 MΩ range (Cf 1.5 pF) | 81.4 dB, 15 kHz, 79.7°, GM 43.5 dB | 88.2 dB, 1.63 MHz, 66.5°, 15.9 dB |
+
+**Result.** The low-power configuration is stable with margin everywhere checked: slow-loop
+PM 64.5 – 79.7°, wideband-loop PM 61.7 – 71.2° with 12.9 – 20.9 dB gain margin. The
+**baseline slow loop was the weakest case** (PM 47.6°, consistent with its 2.3 dB peaking),
+so the larger feedback capacitors adopted for the low-power bias also improve damping. The
+slow loop's DC gain is only 43 – 49 dB at the 1 GΩ range (the T-network divides the
+feedback), so its closed-loop transimpedance error is ≈ 0.3 – 0.7 %, consistent
+with the measured 0.986 – 0.998 GΩ.
+
+**Caveats.** tt/27, ss/125, ff/−40 corners only; I_DC = 100 nA; Cj = 10 pF assumed (a larger
+photodiode capacitance lowers the margin); the injection method is approximate for the
+slow loop at its crossover (1 – 4 kHz), where the T-network impedance is highest.

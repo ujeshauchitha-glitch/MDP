@@ -1,0 +1,19 @@
+# loop gain / phase margin of the FINAL netlist (tools/loopgain_final.py), I_DC=100n, single-injection method
+  slow : T_slow: DC loop gain 43.5 dB, unity-gain 1177 Hz, PM 64.5 deg
+  slow : T_slow: DC loop gain 47.4 dB, unity-gain 1379 Hz, PM 66.6 deg
+  slow : T_slow: DC loop gain 47.6 dB, unity-gain 2244 Hz, PM 47.6 deg
+  slow : T_slow: DC loop gain 49.2 dB, unity-gain 1568 Hz, PM 68.4 deg
+  slow : T_slow: DC loop gain 66.6 dB, unity-gain 4548 Hz, PM 66.7 deg
+  slow : T_slow: DC loop gain 81.4 dB, unity-gain 1.503e+04 Hz, PM 79.7 deg, GM 43.5 dB
+  wide : T_wide: DC loop gain 82.8 dB, unity-gain 1.328e+06 Hz, PM 61.7 deg, GM 12.9 dB
+  wide : T_wide: DC loop gain 85.3 dB, unity-gain 5.342e+06 Hz, PM 90.2 deg, GM 42.2 dB
+  wide : T_wide: DC loop gain 88.2 dB, unity-gain 1.633e+06 Hz, PM 66.5 deg, GM 15.9 dB
+  wide : T_wide: DC loop gain 88.2 dB, unity-gain 1.633e+06 Hz, PM 66.5 deg, GM 15.9 dB
+  wide : T_wide: DC loop gain 88.2 dB, unity-gain 1.638e+06 Hz, PM 66.4 deg, GM 15.9 dB
+  wide : T_wide: DC loop gain 90.5 dB, unity-gain 1.932e+06 Hz, PM 71.2 deg, GM 20.9 dB
+ff/-40C 3.63V ibias=0.5u,1u Cf=150f
+ss/125C 2.97V ibias=0.5u,1u Cf=150f
+tt/27C 3.3V ibias=0.5u,1u Cf=1.5p rpar=10.1Meg
+tt/27C 3.3V ibias=0.5u,1u Cf=150f
+tt/27C 3.3V ibias=0.5u,1u Cf=500f rpar=111Meg
+tt/27C 3.3V ibias=2u,4u Cf=50f
