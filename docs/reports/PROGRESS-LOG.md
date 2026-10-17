@@ -68,3 +68,4 @@ numbers (§) refer to [`../afe-architecture.md`](../afe-architecture.md). Full h
 | [`2026-10-17-03-dac-bandwidth-receiver.md`](2026-10-17-03-dac-bandwidth-receiver.md) | 10-17 | DAC sizing, bandwidth correction, receiver bound |
 | [`2026-10-17-04-segmented-canceller.md`](2026-10-17-04-segmented-canceller.md) | 10-17 | splitting the canceller into cells (§39): same noise as one device |
 | [`2026-10-17-05-digital-twin-and-closure.md`](2026-10-17-05-digital-twin-and-closure.md) | 10-17 | digital twin (`simulation/twin/`), Trivium, relay conclusion, gate-voltage DAC, ADC requirement, area/power (§40–§41) |
+| [`2026-10-17-06-closing-the-open-items.md`](2026-10-17-06-closing-the-open-items.md) | 10-17 | area reduction, RTL (Trivium/verifier/servo), hardware residual test, DAC ripple, key protocol, interference, flicker check (§42–§48) |
