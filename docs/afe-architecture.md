@@ -1860,3 +1860,22 @@ costs 11 % in reach and saves 6 250 µm².
 
 Revised estimate (`twin/budget.py`): **76 000 µm² (4.3 tiles; 5.5 with routing margin) at Cc = 50 pF, 70 000 µm² (3.9 tiles) at Cc = 25 pF.** Still more
 than one tile; the biggest remaining items are the digital estimates, which were replaced by a synthesis result (§43).
+
+## 43. Hardware-friendly residual test (2026-10-17)
+
+The D1 residual test of §25 subtracts the LS-fitted channel response to the true code. In hardware it needs a *template* filter.
+Studies on the twin (100 nA, m = 2 %, 4 samples/chip, 100 µV LSB; `simple_residual.txt`, `fir_residual.txt`, `iir_residual.txt`):
+
+| template | legit Pd | attacker 75 % of chips | 90 % of chips | relay 260 ns |
+|---|---|---|---|---|
+| full channel at 16/chip (twin D1) | 0.999 | 0.12 % | 7.8 % | 32 % |
+| the code itself (no channel) | 0.999 | 52 % | 94 % | 99.5 % |
+| 16-chip FIR, 8-bit coefficients | 0.999 | 22 % | 82 % | 99.9 % |
+| 96-chip FIR + offset fit | 0.999 | 0.2 % | 9 % | 70 % |
+| **4th-order IIR fit of the channel (b: 5 coefficients, a: 4), 4/chip** | **0.999** | **0.2 %** | **9.7 %** | **97.6 %** |
+
+The channel has a ~90 µs memory (1.8 kHz high-pass), so short FIR templates fail; a 4th-order IIR (impulse-response error 1.8 %) reproduces the
+full test for blind and partial-knowledge attackers. It loses the sub-sample relay discrimination (a 260 ns delay is half a sample at
+1.92 MS/s), which §40 showed is not a defensible security claim anyway. **Decision: hardware D1 = correlator + IIR template (order 4, fitted per
+I_DC bucket or fixed for the nominal channel) + residual accumulator.** The IIR coefficients depend on the channel (I_DC, corner), so they must be calibrated
+or stored for a few corner sets: not done.

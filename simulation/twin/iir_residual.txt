@@ -1,0 +1,6 @@
+order(b,a)  relative impulse-response error
+  (2,2)  0.313  stable=True
+  (3,3)  0.072  stable=True
+  (4,4)  0.018  stable=True
+using order 4 err 0.018
+legit 0.9990 | partial .75 0.0020  .9 0.0973 | relay130 0.9983 relay260 0.9762 | blind3x 0.0000

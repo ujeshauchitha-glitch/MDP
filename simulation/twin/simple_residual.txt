@@ -1,0 +1,9 @@
+legit: correlator-only Pd 1.0000; full D1 Pd 0.9990; cheap D1' Pd 0.9990
+attack           corr-only  full D1   cheap D1'
+blind 1x            0.1317    0.0000    0.0000
+blind 3x            0.3503    0.0000    0.0000
+blind 30x           0.4792    0.0000    0.0000
+partial f=0.75      1.0000    0.0012    0.5233
+partial f=0.9       1.0000    0.0783    0.9377
+relay 130ns         1.0000    0.9650    0.9987
+relay 260ns         1.0000    0.3220    0.9950
