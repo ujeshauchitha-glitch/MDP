@@ -78,6 +78,9 @@ def netlist(o):
     if "sdeg" in o:   # source-degenerated cancel (sink) device: lowers its flicker-noise current
         s = s.replace("XMsv  x vc_s vgnd vgnd", "XMsv  x vc_s sd_n vgnd", 1)
         s = s.replace(".param IDC", "Rsd   sd_n vgnd " + o["sdeg"] + "\n.param IDC", 1)
+    if "gdrv" in o:   # gate driven by a voltage DAC of output resistance gdrv (thermal noise), optional gate cap gcap
+        s = re.sub(r"^Vsv  vc_s vgnd DC (\S+)$", lambda m: "Vsv  vdac_o vgnd DC " + m.group(1) + "\nRdac vdac_o vc_s " + o["gdrv"]
+                   + "\nCgd  vc_s vgnd " + o.get("gcap", "1p"), s, flags=re.M)
     if "seg" in o:   # n identical unit cells (W=100 L=2), each with its own source resistor n*sdeg, shared gate
         n = int(o["seg"])
         cells = "".join(f"XMsv{i} x vc_s sd{i} vgnd sky130_fd_pr__nfet_g5v0d10v5 W=100 L=2\n"
