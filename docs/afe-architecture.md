@@ -1650,3 +1650,34 @@ tt/27 °C and the 1 GΩ range were run.
   servo plant/PSD dumps and the range tables use values that match the default-tolerance numbers
   (e.g. 1156 fA/√Hz at 10 Hz, 8.4 pA RMS, Z = 0.996 GΩ); no corrupted values (sub-floor noise)
   appear in them.
+
+## 35. How long must the code integrate to reach low photocurrents? (2026-10-17)
+
+The pattern check misses the original 10 nA goal (needs ≈ 24 nA at m = 2 % for a 100 µs
+decision). The one purely electronic mitigation is a longer integration window.
+`chip_rate_sweep.py` with `LONG=1` on the final channel (I_DC = 100 nA channel,
+`results_final/long_integration.txt`), 480 kchip/s, code length N growing with T_int,
+m = 2 %, Pd 99.9 % at Pfa 1e-8:
+
+| N (chips) | T_int | min I_DC (m = 2 %) |
+|---|---|---|
+| 48 | 100 µs | 24.3 nA |
+| 96 | 200 µs | 17.2 nA |
+| 144 | 300 µs | 14.0 nA |
+| 192 | 400 µs | 12.1 nA |
+| 288 | 600 µs | 9.9 nA |
+| 480 | 1.0 ms | 7.7 nA |
+| 720 | 1.5 ms | 6.2 nA |
+| 960 | 2.0 ms | 5.4 nA |
+| 1440 | 3.0 ms | 4.4 nA |
+
+It follows min I_DC ∝ 1/(m·√T_int). **T_int needed to reach I_DC = 10 nA: ≈ 0.6 ms at m = 2 %,
+≈ 2.4 ms at m = 1 %, ≈ 9.4 ms at m = 0.5 %; to reach 5 nA: ≈ 2.4 ms / 9.5 ms / 38 ms.** The
+longer code also raises the guess-resistance (2^-N), but it multiplies the decision latency
+and the verification can no longer be per 100 µs sample.
+
+**Caveats.** The noise below 1 kHz was set equal to its 1 kHz value (the channel files start at
+1 kHz), so long windows (> 1 ms) ignore any 1/f, mains or ambient-light interference that a real
+sensor will have; the channel and the legitimate amplitude must stay stationary over the window;
+slow ambient flicker (100/120 Hz lighting) is not modelled. Treat the table as the white-noise
+limit, i.e. optimistic for T_int ≳ 1 ms.
