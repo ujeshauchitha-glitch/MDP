@@ -21,7 +21,8 @@ import sys, pathlib, math
 import numpy as np
 import coherent_mc as cm
 
-RES = pathlib.Path(__file__).resolve().parent.parent / "spice" / "results_real"
+import os
+RES = pathlib.Path(os.environ.get("SPOOF_RES", pathlib.Path(__file__).resolve().parent.parent / "spice" / "results_real"))
 IDC = 100e-9
 M_LEG = 0.02
 TRIALS = int(sys.argv[1]) if len(sys.argv) > 1 else 6000

@@ -1622,3 +1622,26 @@ of noise at 100 nA (+13 dB). The headroom limit is I·R < ≈ 0.5 V at the 1.4 V
 DAC's noise and the resistor's own noise/mismatch (included in SPICE as thermal noise only) were
 not designed; the flicker magnitude depends on the sky130 HV model (no silicon data); only
 tt/27 °C and the 1 GΩ range were run.
+
+**§33 addendum (further audit results, same day).**
+* **ngspice noise normalisation verified.** A 1 kΩ resistor gives `onoise_spectrum` =
+  4.0714 nV/√Hz, exactly √(4kT·R) at 27 °C (4.0714): the spectrum is a one-sided density in
+  V/√Hz, as the Monte Carlo assumes. (Had it been two-sided every noise figure and minimum
+  photocurrent would have been 3 dB off.)
+* **Generated files match their generators.** Re-running `gen_afe.py` and `gen_afe_direct.py`
+  leaves the working tree unchanged.
+* **Servo plant fit quality** (2nd-order fit to the SPICE plants): worst-case |ln(fit/data)|
+  is 1.8 – 3.4 % over 1 – 100 Hz (the PPG and servo band), 3 – 7 % to 1 kHz, 13 – 34 % at
+  1 – 10 kHz and up to 79 % at 10 – 100 kHz. The servo and PPG results only depend on the
+  low-frequency region; the high-frequency fit error is irrelevant to them, and the
+  transistor-level cross-check of §23 (3.6 mV rms vs a 150 mV PPG) is the real validation.
+* **Spoofing study re-run on the final channel** (`SPOOF_RES=…/results_final`,
+  `spoof_results_final.txt`): blind injection at the legitimate amplitude 16.3 % (D0) / 0 %
+  (D1), amplitude 100x 49.6 % / 0 %, 90 %- / 95 %-known chips 8.3 % / 28.5 % (D1), relay
+  at 50 / 130 / 260 / 520 ns: 99.6 / 97.3 / 35.4 / 0 % (D1); legitimate Pd 0.9990 with D1.
+  Identical (within trial statistics) to §25, so the §25 conclusions do not depend on the
+  channel version.
+* **Results taken with tight solver tolerances that were checked**: the §20 slow-noise column, the
+  servo plant/PSD dumps and the range tables use values that match the default-tolerance numbers
+  (e.g. 1156 fA/√Hz at 10 Hz, 8.4 pA RMS, Z = 0.996 GΩ); no corrupted values (sub-floor noise)
+  appear in them.
