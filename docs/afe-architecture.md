@@ -1168,6 +1168,9 @@ mismatch, and the A_VT values are assumptions not taken from the PDK.
 
 ## 27. Supply rejection (PSRR): poor, and it sets a supply-noise budget (2026-10-17)
 
+> **Superseded by §28.** The diagnosis below ("inside the op-amps") was wrong: the coupling came
+> from Mc's body effect, now fixed; the supply-noise budget below is the *pre-fix* one.
+
 Tool: `simulation/spice/tools/psrr.py`; raw data `simulation/spice/results/psrr.txt`.
 Full chain (T-network, real bias mirror, VCM 1.4 V, tt/27 °C, VDD 3.3 V,
 I_DC = 100 nA): AC on VDD → each output, divided by the measured signal gain, gives
