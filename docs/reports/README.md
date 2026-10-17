@@ -5,6 +5,7 @@ Easy-to-read summaries of the work, newest first. Technical detail lives in
 
 | Report | Date | What it is |
 |---|---|---|
+| [`2026-10-17-05-digital-twin-and-closure.md`](2026-10-17-05-digital-twin-and-closure.md) | 2026-10-17 | The digital twin, validated; Trivium chosen; relay attack not defendable in Layer 1; converter and digitiser designs; area (~5 tiles) and power (~90 µW) estimates |
 | [`2026-10-17-04-segmented-canceller.md`](2026-10-17-04-segmented-canceller.md) | 2026-10-17 | Tested splitting the canceller into many small cells: same noise as one big device, so the split can be chosen for accuracy |
 | [`2026-10-17-03-dac-bandwidth-receiver.md`](2026-10-17-03-dac-bandwidth-receiver.md) | 2026-10-17 | A bandwidth correction (63 kHz, not 280 kHz), the best-possible receiver is only 0.5 dB better, how to build the steady-current canceller quietly, pulse SNR 58–63 dB |
 | [`2026-10-17-02-audit-and-noise.md`](2026-10-17-02-audit-and-noise.md) | 2026-10-17 | Audit results (what was checked and what was wrong), the main pulse-path noise source and a +13–17 dB fix, how long the code must run for dim signals |

@@ -67,3 +67,4 @@ numbers (§) refer to [`../afe-architecture.md`](../afe-architecture.md). Full h
 | [`2026-10-17-02-audit-and-noise.md`](2026-10-17-02-audit-and-noise.md) | 10-17 | audit, cancel-device noise and degeneration, integration time |
 | [`2026-10-17-03-dac-bandwidth-receiver.md`](2026-10-17-03-dac-bandwidth-receiver.md) | 10-17 | DAC sizing, bandwidth correction, receiver bound |
 | [`2026-10-17-04-segmented-canceller.md`](2026-10-17-04-segmented-canceller.md) | 10-17 | splitting the canceller into cells (§39): same noise as one device |
+| [`2026-10-17-05-digital-twin-and-closure.md`](2026-10-17-05-digital-twin-and-closure.md) | 10-17 | digital twin (`simulation/twin/`), Trivium, relay conclusion, gate-voltage DAC, ADC requirement, area/power (§40–§41) |
