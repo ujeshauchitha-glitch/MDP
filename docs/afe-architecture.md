@@ -1762,3 +1762,14 @@ security margin (§1a/§25). With N = 48 and a longer window: 240 kchip/s, 200 �
 400 µs → 10.6 nA. The conclusion of §21 stands (the bandwidth shortfall is a minor loss); the
 statement of the bandwidth itself was the error. Raising the bandwidth requires a larger IBX (more
 gm), which costs noise (§12, §17); no extra receiver filtering/equalisation was simulated.
+
+**§38 addendum: is the rectangular correlator leaving SNR on the table?** With the channel this
+band-limited the chips are smeared and a receiver matched to the true response might recover
+a lot. `simulation/detect/receiver_compare.py` computes the exact optimum (matched and whitened to
+the SPICE noise PSD, neighbouring symbols known and subtracted): d_opt² = 4∫₀^{fs/2}|X(f)|²/S(f) df
+(= 2E/N₀; verified against the closed form A·√(2T/S) on a flat channel with white noise). On the final
+channel (I_DC = 100 nA, N = 48, 480 kchip/s): **rectangular correlator d(m = 1) = 1769, optimum 1879, i.e.
++0.5 dB (min I_DC 24.6 → 23.2 nA at m = 2 %).** So the receiver is within 0.5 dB of the bound; there
+is no receiver-side fix, and the 63 kHz channel and its noise, not the correlator, set the 24 nA. (A first
+version of this comparison had a factor-of-2 error in the formula that made the optimum look 2.5 dB
+*worse*; it was caught because an optimum cannot be worse than a practical receiver.)
