@@ -1,0 +1,7 @@
+DAC LSB   R_dac   C_gate | mean s_out   ripple pk-pk at s_out   ripple pk-pk at gate
+ 2.350 mV  100k    5p | 1.4003 V      0.925 mV      2349.7 uV
+ 2.350 mV  1Meg    5p | 1.4002 V      0.357 mV      1044.5 uV
+ 0.147 mV  100k    5p | 1.4003 V      0.058 mV       147.0 uV
+ 0.147 mV  1Meg    5p | 1.4003 V      0.022 mV        65.3 uV
+ 0.147 mV  1Meg    1p | 1.4003 V      0.048 mV       142.0 uV
+ 0.037 mV  1Meg    1p | 1.4001 V      0.012 mV        34.8 uV
