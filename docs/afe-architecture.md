@@ -1931,3 +1931,17 @@ driver and the verifier**, so there is no inter-chip frame synchronisation; the 
 So the counter part of the IV must never repeat (power loss must not roll it back: store it before use), and the residual test, not the correlation alone, is what rejects replays/wrong keys.
 **Receive-delay tolerance** (genuine accept): ±0.5 chip (±1 µs): 99.8 %; +1 chip 83.5 %, −1 chip 48.5 %; ±2 chips 16–17 %. The delay is a fixed property of the chip (LED driver latency +
 channel), calibrated once, so ±0.5 chip is easy. Not done: the TRNG and OTP circuits themselves, power-loss-safe counter update, side channels (power analysis of Trivium), physical-attack resistance.
+
+## 47. Ambient-light interference on the fast path (2026-10-17)
+
+A gap found while extending the twin (`twin/interference.py`, `interference_adaptive.py`; I_DC = 100 nA, m = 2 %, a sinusoidal ambient flicker of the given peak amplitude on the photocurrent):
+
+* **Fixed thresholds (calibrated without interference)**: legitimate D1 acceptance collapses: 100 Hz: 99.7 % at 1 % of I_DC (1 nA), 16.5 % at 10 %; 1 kHz: 14 % already at 1 %; ≥ 10 kHz: 0 % at 1 %.
+  The correlation-only test survives (88 % at 100 % interference, 100 Hz), but that is the test that accepts blind injection (§25). Mains flicker of 10 % of the DC photocurrent is common indoors, so
+  **fixed residual thresholds are not usable.**
+* **Adaptive thresholds from dark (LED-off) frames** (correlation threshold 5.61 σ of the dark-frame correlator output, residual threshold at the 99.9 % quantile of the dark-frame residual):
+  legit accepted ≥ 99.8 % with interference up to 10 % at 100 Hz, 1 % at 1 kHz, 1 % at 10 kHz; blind injection (1x and 3x) stays at 0 %; the 90 %-knowledge attacker's acceptance rises with the interference
+  (8 % → 76 % at 100 Hz/10 %, 67 % at 1 kHz/1 %). Beyond those levels the interference exceeds the pulse of the code (≈ 1.5 mV at the output) and legit frames are rejected (availability, not security, fails).
+* **Design consequence:** the frame schedule needs periodic dark frames (e.g. 1 in 10) to adapt both thresholds; the verifier RTL (§44) takes `eta` and `thr` as inputs, so only the adaptation logic is missing
+  (a second accumulator mode and a quantile/peak tracker). **Interference tolerance is a limitation to state: ≲ 10 % at mains frequencies, ≲ 1 % for kHz-range lamp PWM** (relative to the DC photocurrent). A front-end notch or an
+  interference canceller would extend it; not designed.
