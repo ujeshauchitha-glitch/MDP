@@ -44,6 +44,7 @@ ngspice 47 with the sky130 models, not built or measured**.
 | **Supply ±10 % × PVT (VCM 1.4 V)** | slow Z within 1.5 % of 1 GΩ; wide min I_DC 20.8–29.2 nA | §22 |
 | Stability (§32) | slow-loop PM 65–80°, wideband-loop PM 62–71° (GM 13–21 dB) at the low-power bias, corners checked; baseline slow loop 48° was weakest | §32 |
 | **Analog power** | 241–299 µW at baseline bias; **61–74 µW with a 4x lower op-amp bias (Cf 150 fF/500 fF/1.5 pF), detection reach 2–4 % worse**; digital excluded | §32 |
+| **Slow-path noise vs cancel device** | the cancel device is 85–95 % of the slow-path noise; degenerating it to ≈ 0.3 V drop cuts it 4.7x at 100 nA (8.4 → 1.8 pA) and 8x at 1 µA (78 → 9.5 pA) | §33, §34 |
 | Chip-rate trade | 240→480 kchip/s costs only 12 %; T_int 200 µs cuts need by 37 % | §21 |
 
 The detection numbers were re-verified on the final front end (§30, identical within 0.5 %).

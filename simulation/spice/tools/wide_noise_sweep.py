@@ -72,6 +72,9 @@ def netlist(o):
         s = re.sub(r"^Rbias_w [^\n]*$", "Ibw vdpwr nbias_w DC " + o["ibias"].split(",")[1], s, flags=re.M)
     if o.get("inbulk") == "src":   # op-amp input pairs in their own n-well tied to the tail node: no VDD body effect on Vt
         s = re.sub(r"^(XM[12]_[sw]\s+\S+\s+\S+\s+(tail1_[sw]))\s+vdpwr", r"\1 \2", s, flags=re.M)
+    if "sdeg" in o:   # source-degenerated cancel (sink) device: lowers its flicker-noise current
+        s = s.replace("XMsv  x vc_s vgnd vgnd", "XMsv  x vc_s sd_n vgnd", 1)
+        s = s.replace(".param IDC", "Rsd   sd_n vgnd " + o["sdeg"] + "\n.param IDC", 1)
     if "cpb" in o:   # AC-tie the PMOS gate-bias nodes to VDD so tail / load current sources see no Vgs ripple
         s = s.replace(".param IDC", "Cpb_s pbias_s vdpwr " + o["cpb"] + "\nCpb_w pbias_w vdpwr " + o["cpb"] + "\n.param IDC", 1)
     if o.get("mcbulk") == "vcm":   # Mc well on the quiet VCM node: no VDD body path, well capacitance not on the signal node

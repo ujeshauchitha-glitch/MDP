@@ -101,8 +101,8 @@ VDD = float(BASE.get("vdd", 3.3))
 ix = (VDD - parse(out, "sx")) / R * 1e9
 iw = (VDD - parse(out, "sw")) / R * 1e9
 
-# --- slow path: tight tolerances ---
-h1, _, ns = analyze(vsg, "1", "s")
+# --- slow path (default tolerances; tight ones are used only for the lock bisection) ---
+h1, _, ns = analyze(vsg, "0", "s")      # default tolerances: tight ones returned physically impossible (sub-floor) noise for some circuits (docs s33)
 f = h1[:, 0]
 Hs = (h1[:, 4] + 1j * h1[:, 5]) / 1e-9      # wrdata repeats the frequency column per vector
 gs10 = abs(Hs[int(np.argmin(np.abs(np.log(f / 10))))])

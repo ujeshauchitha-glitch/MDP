@@ -1559,18 +1559,23 @@ numbers from the raw files, and hunting for stale statements. Tools:
   100 kHz ≲ 69 µV/√Hz, 300 kHz ≲ 12 µV/√Hz, **1 MHz ≲ 3.3 µV/√Hz**, tones ≲ 110 mV / 10 mV /
   **0.6 mV** at 100 kHz / 300 kHz / 1 MHz; slow ≲ 210 mV/√Hz at 10 Hz, 42 mV/√Hz at 100 Hz,
   2.5 mV/√Hz at 1 kHz. (The §27 budget is the superseded pre-fix one.)
-* **The "tight tolerances corrupt `.noise`" explanation (§9, §14, §20, §30) is not
-  established.** In the audit the wideband input-referred noise was *identical* under
-  default, abstol 1e-13 … 1e-16, reltol 1e-5/1e-6, vntol and gmin variations (574.6 / 587.9 /
-  5523 fA/√Hz at 10 kHz / 100 kHz / 1 MHz with the slow path removed; 627.5 fA at 100 kHz with
-  it, for tight 0 and 1, at gate-voltage offsets of ±2e-5 V). The 391 fA/√Hz outliers could not
-  be reproduced by any variation tried (tolerances, AC start frequency, a second noise
-  analysis, R3 = 101 vs 102 kΩ). They were nevertheless wrong: 391 fA is **below the 588 fA/√Hz
-  floor of the same wideband chain with the slow path removed**, and adding the slow path can
-  only add noise. The cause is unidentified (possibly a transient file/parse problem in the
-  first version of the driver); all headline numbers use default tolerances and agree with the
-  independent validations above. §19's wideband columns (obtained in that flow) remain
-  superseded by §20.
+* **Tight solver tolerances DO corrupt `.noise` for some circuits (§9, §14, §20, §30): now
+  demonstrated, with the cause still unknown.** For the nominal circuit the result is identical
+  under every tolerance setting (wideband 574.6 / 587.9 / 5523 fA/√Hz at 10 kHz / 100 kHz /
+  1 MHz with the slow path removed; slow-path 3199 / 1156 / 436 / 222 fA/√Hz at 1 / 10 / 100 /
+  1000 Hz for tight 0 and 1), so the earlier 391 fA/√Hz wideband outliers could not be
+  reproduced. But for the source-degenerated cancel device (§34) the tight-tolerance analysis
+  returned **5.8 / 2.1 / 0.7 / 0.2 fA/√Hz** (below the 4 fA/√Hz 1 GΩ thermal floor, i.e. impossible)
+  for every Rsd ≥ 1 MΩ at 100 nA and ≥ 100 kΩ at 1 µA, where default tolerances gave smooth,
+  monotonic values (e.g. 380, 231 fA/√Hz at 10 Hz for 1 MΩ, 3 MΩ). The same symptom (0.0 pA)
+  had appeared once in the §20 ff/−40 °C slow-noise column. The earlier wideband outliers were
+  also below that chain's own floor (391 vs 588 fA/√Hz with the slow path removed). **Rule:
+  noise is always analysed with default tolerances; tight tolerances are used only to bisect the
+  DC lock.** `corner_run.py` now follows it, and the 11-point PVT × supply matrix was re-run
+  with the corrected slow-noise analysis: every number reproduced to the digit (slow Z
+  0.989 – 0.998 GΩ, slow noise 7.4 – 9.5 pA, wideband min I_DC 21.1 – 28.8 nA), so the
+  matrix of §29 stands. §19's wideband columns (obtained in the first, tight-tolerance flow)
+  remain superseded by §20.
 * **`STATUS.md` stale entries** (still listing already-finished work as open, an outdated bias
   spread, and an out-of-date reproduce block): fixed in the same commit.
 
@@ -1581,3 +1586,39 @@ numbers from the raw files, and hunting for stale statements. Tools:
 * all bias references, the poly resistors and the supply are ideal elements;
 * the relay-attack and cryptography items (§25) are unresolved design questions;
 * digital power, layout, and area (Cc ≈ 50 pF ≈ 25 000 µm²) have not been addressed.
+
+## 34. Source degeneration of the cancel device cuts the slow-path noise 3–8x (2026-10-17)
+
+Found as a follow-up to §33's result that the cancel (sink) device supplies 85–95 % of the
+slow-path noise. A resistor between its source and ground (`sdeg=` option of
+`wide_noise_sweep.py`; the gate voltage is re-bisected for each value) reduces its
+gate-referred flicker current by ≈ 1/(1 + gm·R). Default solver tolerances (see §33);
+raw data `simulation/spice/results/sdeg_and_matrix_audit.txt`. T-network 1 GΩ range, tt/27 °C.
+
+| I_DC | Rsd | DC drop | slow noise RMS 0.5–100 Hz | @10 Hz | wideband min I_DC (m = 2 %) |
+|---|---|---|---|---|---|
+| 10 nA | none | 0 | 1.6 pA | 212 fA/√Hz | 23.1 nA |
+| 10 nA | 3 MΩ / 10 MΩ | 30 / 100 mV | 1.4 / 1.4 pA | 190 / 179 | 23.0 / 23.0 |
+| 100 nA | none | 0 | 8.4 pA | 1156 | 24.3 nA |
+| 100 nA | 300 kΩ | 30 mV | 5.0 pA | 679 | 24.2 |
+| 100 nA | 1 MΩ | 100 mV | 2.8 pA | 380 | 24.0 |
+| 100 nA | **3 MΩ** | 300 mV | **1.8 pA** | 231 | 23.9 |
+| 1 µA | none | 0 | 78 pA | 10844 | 36.1 nA |
+| 1 µA | 100 kΩ | 100 mV | 22 pA | 3047 | 32.4 |
+| 1 µA | **300 kΩ** | 300 mV | **9.5 pA** | 1301 | 31.2 |
+
+**Result.** At a ≈ 0.3 V drop the slow-path noise falls **4.7x at 100 nA and 8.2x at 1 µA**
+(floor at 10 nA: 1.4 pA, the op-amp/Rf level; the ideal-noiseless-sink floor at 10 Hz is
+0.17 pA/√Hz ≈ 1.3 pA RMS). The 1 MΩ and 3 MΩ cases at 1 µA cannot lock (the drop approaches the
+1.4 V node voltage). The wideband path also benefits at high photocurrent (1 µA: 36.1 → 31.2 nA)
+and is unchanged below 100 nA.
+
+**Design rule.** Degenerate the DAC output devices so that I·R ≈ 0.3 V *at the I_DC being
+cancelled*, i.e. R ∝ 1/I_DC (≈ 3 MΩ at 100 nA, 300 kΩ at 1 µA): a switched or trimmed
+resistor per DAC range. In PPG terms the SNR for a 2 % modulation improves from 8.4 pA to 1.8 pA
+of noise at 100 nA (+13 dB). The headroom limit is I·R < ≈ 0.5 V at the 1.4 V `x` node.
+
+**Caveats.** Applies to the single behavioral NMOS sink used throughout; a real segmented
+DAC's noise and the resistor's own noise/mismatch (included in SPICE as thermal noise only) were
+not designed; the flicker magnitude depends on the sky130 HV model (no silicon data); only
+tt/27 °C and the 1 GΩ range were run.
