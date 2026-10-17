@@ -1,0 +1,4 @@
+alt100M_ff             ff/-40C IDC=100n: Vsg=0.663170 s_out=1.400 | slow Z10Hz=1e+08 BW=1e+04Hz noise@10Hz=1353fA RMS0.5-100Hz=9.8pA | Ixc/Iw=300/300nA xc=1.08 w_in=1.400 | wide |H|100k=2.08e+05 RTI10
+alt10M_ff              ff/-40C IDC=1u: Vsg=0.762414 s_out=1.400 | slow Z10Hz=9.97e+06 BW=2.52e+04Hz noise@10Hz=12028fA RMS0.5-100Hz=86.9pA | Ixc/Iw=300/300nA xc=1.08 w_in=1.400 | wide |H|100k=1.66e+05
+alt100M_ss             ss/125C IDC=100n: Vsg=0.373778 s_out=1.400 | slow Z10Hz=9.99e+07 BW=8.43e+03Hz noise@10Hz=1177fA RMS0.5-100Hz=8.6pA | Ixc/Iw=300/300nA xc=0.89 w_in=1.401 | wide |H|100k=1.79e+05
+alt10M_ss              ss/125C IDC=1u: Vsg=0.547799 s_out=1.400 | slow Z10Hz=9.97e+06 BW=2.24e+04Hz noise@10Hz=9873fA RMS0.5-100Hz=71.3pA | Ixc/Iw=300/300nA xc=0.89 w_in=1.401 | wide |H|100k=1.44e+05 

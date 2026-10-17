@@ -1844,3 +1844,19 @@ total ≈ 90 000 µm² ≈ 5 Tiny-Tapeout 1x1 tiles (≈ 6.6 with routing margin
 allocation is needed, or the design must change (e.g. smaller Cc and Cj-limited bandwidth, 100 MΩ range from a switched T-network instead of a 111 MΩ parallel
 resistor, which removes ≈ 14 000 µm²). Digital + ADC power ≈ 22 µW (fast ADC 15, Trivium 6); with the 61–74 µW analog
 (low-power bias) the chip is ≈ 83–96 µW against the 87 µW goal. Both are estimates until a synthesis and layout flow runs.
+
+## 42. Area reduction: one T-network per range, smaller coupling cap (2026-10-17)
+
+The 100 MΩ and 10 MΩ ranges used a switched resistor in parallel with the 1 GΩ T-network (111 MΩ ≈ 55 000 squares
+≈ 13 900 µm²). Replacing that with a **separate small T-network per range** (R3 = 102 kΩ kept; R1 = R2 = 3.095 MΩ for 100 MΩ,
+0.912 MΩ for 10 MΩ; the unused networks are switched out) gives the same behaviour (`results/range_tnet_alt.txt`, tt/27 °C):
+100 MΩ range at 100 nA: Z = 100 MΩ, BW 8.9 kHz, noise 9.2 pA (parallel-R version: 99.9 MΩ, 9.5 kHz, 8.4 pA); 10 MΩ range at 1 µA: Z = 9.97 MΩ,
+BW 23.8 kHz, 79.3 pA (parallel-R: 78.4 pA). Hot/cold: 100 MΩ 8.6 / 9.8 pA, BW 8.4 / 10 kHz; 10 MΩ 71 / 87 pA, 22 / 25 kHz. Resistor area drops
+from ≈ 15 100 µm² to ≈ 1 000 µm². **Not simulated:** the switches that disconnect the unused networks (their leakage into the 1 GΩ node
+and charge injection; §31 covers the older arrangement), and the series-switch Ron of the selected network.
+
+**Coupling capacitor** (`results/cc_sweep.txt`, 100 nA, tt/27 °C): Cc = 50 / 25 / 12 pF → min I_DC 24.2 / 26.8 / 32.4 nA. Halving Cc to 25 pF
+costs 11 % in reach and saves 6 250 µm².
+
+Revised estimate (`twin/budget.py`): **76 000 µm² (4.3 tiles; 5.5 with routing margin) at Cc = 50 pF, 70 000 µm² (3.9 tiles) at Cc = 25 pF.** Still more
+than one tile; the biggest remaining items are the digital estimates, which were replaced by a synthesis result (§43).

@@ -5,13 +5,15 @@ Technology assumptions (sky130): xhigh-rho poly 2 kOhm/sq, width 0.35 um, ~0.25 
 MIM cap 2 fF/um^2 (1 layer pair) or 4 fF/um^2 (double MIM); D flip-flop 20 um^2, NAND2-equivalent 3.75 um^2,
 std-cell utilisation 50 %; energy per flop clock edge ~20 fJ incl. local clock, per gate toggle ~5 fJ at 1.8 V.
 Tiny Tapeout 1x1 tile = ~160 x 111 um = 17.9 k um^2 (a design may use up to 8x2 tiles)."""
+import os
+CC = float(os.environ.get("CC", 50e-12))
 SQ_A = 0.25            # um^2 per square of xhrpoly
 ohm = lambda r: r / 2000 * SQ_A
 area = {
-    "Cc 50 pF coupling cap (double MIM, 4 fF/um2)": 50e-12 / 4e-15,
+    "Cc coupling cap (double MIM, 4 fF/um2); 50 pF baseline": CC / 4e-15,
     "T-network R1+R2 (2 x 10 Mohm)": 2 * ohm(10e6),
-    "Rpar 111 Mohm (100M range)": ohm(111e6),
-    "Rpar 10.1 Mohm (10M range)": ohm(10.1e6),
+    "100M-range T-network (2 x 3.095 Mohm, replaces 111 Mohm parallel R, sec. 42)": 2 * ohm(3.095e6),
+    "10M-range T-network (2 x 0.912 Mohm, replaces 10.1 Mohm parallel R)": 2 * ohm(0.912e6),
     "cancel-device degeneration Rs 30M + 3M + 0.3M (per range)": ohm(30e6) + ohm(3e6) + ohm(0.3e6),
     "bias degeneration 3 Mohm + 2x mirror 200 kohm + TIA 314 kohm": ohm(3e6) + ohm(0.8e6) + ohm(0.314e6),
     "feedback / compensation caps (<= 1.5 pF x3 + misc 5 pF)": 10e-12 / 2e-15,
