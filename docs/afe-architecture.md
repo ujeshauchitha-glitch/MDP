@@ -1481,3 +1481,19 @@ rejection (§28–§29) and the servo/ranging results (§23–§24) were not re-
 low bias (the slow plant bandwidth is ~1.2 kHz instead of 2.8 kHz, well above the
 servo's 0.05 Hz corner, but this was not simulated); PVT checked at
 tt/27, ss/125, ff/−40, tt/125, tt/−40 only.
+
+**§32 addendum: caveats closed (low-power configuration re-checks, 2026-10-17).**
+* **Supply rejection (§28–§29) at the 0.5 / 1 µA bias** (`results_lowpower.txt` in
+  `simulation/servo/`): supply-equivalent input current per V/√Hz, 1 GΩ range: slow
+  0.24 pA (0.5–1 Hz), 0.31 pA (10 Hz), 1.96 pA (100 Hz), 20 pA (1 kHz); wideband
+  0.13 nA (10 kHz), 1.2 nA (100 kHz), 14 nA (300 kHz), **619 nA (1 MHz)**. The slow path
+  and the wideband path up to 300 kHz are as good as or better than at the higher
+  bias (the 1 MHz wideband figure is 1.9x worse than 330 nA); the 100 MΩ range gives
+  the same values (0.30 / 1.95 / 20.2 pA at 10 / 100 / 1000 Hz).
+* **Servo and auto-ranging on the low-power plants** (plant fits: 1 GΩ
+  f0 = 1.26 kHz, Q = 0.57; 100 MΩ 4.1 kHz, Q = 0.54; 10 MΩ 14 kHz, Q = 0.51: overdamped,
+  no peaking): power-up lock 24 ms, range switch at 125 ms, PPG gain 0.9986 –
+  0.9988, added noise equal to the analog values (0.8 / 2.9 / 8.4 / 24.5 / 78.7 pA at
+  5 / 30 / 100 / 300 nA / 1 µA), 0 re-acquisitions, i.e. identical to §24 within
+  rounding. Select the plants with `SERVO_DATA_PREFIX=data_lp_` (data dumped by
+  `corner_run.py` with `DUMP=`).

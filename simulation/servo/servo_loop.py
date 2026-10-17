@@ -34,7 +34,9 @@ ADC_NOISE = 0.5             # LSB rms
 N_DAC = 12
 LSB_C = 0.5e-9              # coarse DAC LSB [A]; full scale ~2.05 uA
 # transimpedance ranges: (plant data dir, plant file tag, I_DC above which the NEXT lower-gain range is chosen)
-RANGES = {"1G": ("data_1G", "10n", 12.5e-9), "100M": ("data_100M", "100n", 125e-9), "10M": ("data_10M", "1u", 1.25e-6)}
+import os
+_PFX = os.environ.get("SERVO_DATA_PREFIX", "data_")      # "data_lp_" = low-power op-amp bias plants (docs s32)
+RANGES = {"1G": (_PFX + "1G", "10n", 12.5e-9), "100M": (_PFX + "100M", "100n", 125e-9), "10M": (_PFX + "10M", "1u", 1.25e-6)}
 ORDER = ["1G", "100M", "10M"]
 BOOST_THR = 0.03           # |2 s mean error| above this speeds up the integrator [V]
 BOOST_GAIN = 20.0

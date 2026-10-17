@@ -1,1 +1,1 @@
-auto I_DC=300n PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.38399000000000005; PPG (last 3 s) gain 0.9987 phase +2.3 noise 24.5 pA, re-acq 0
+auto I_DC=300n PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9986 phase +2.3 noise 24.5 pA, re-acq 0

@@ -1,0 +1,33 @@
+# low-power config (ibias 0.5u/1u, Cf 150f/500f/1.5p): supply rejection and servo re-checks
+## PSRR 1G
+range 1G; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.96e+08 V/A  PSRR   72.5 dB  i_eq = 0.238 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.96e+08 V/A  PSRR   72.5 dB  i_eq = 0.239 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.96e+08 V/A  PSRR   70.3 dB  i_eq = 0.307 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.97e+08 V/A  PSRR   54.2 dB  i_eq = 1.96 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=8.2e+08 V/A  PSRR   35.6 dB  i_eq = 20.2 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=2.5e+05 V/A  PSRR   90.0 dB  i_eq = 1.27e+05 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=2.04e+05 V/A  PSRR   72.4 dB  i_eq = 1.18e+06 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=8.09e+04 V/A  PSRR   58.7 dB  i_eq = 1.44e+07 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=9.13e+03 V/A  PSRR   45.0 dB  i_eq = 6.19e+08 fA per V/rtHz of supply noise
+## PSRR 100M range
+range 100M; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.99e+07 V/A  PSRR   92.7 dB  i_eq = 0.231 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.99e+07 V/A  PSRR   92.7 dB  i_eq = 0.231 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.99e+07 V/A  PSRR   90.4 dB  i_eq = 0.301 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.99e+07 V/A  PSRR   74.2 dB  i_eq = 1.95 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1.02e+08 V/A  PSRR   53.7 dB  i_eq = 20.2 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=2.36e+05 V/A  PSRR   83.9 dB  i_eq = 2.68e+05 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=1.92e+05 V/A  PSRR   67.6 dB  i_eq = 2.18e+06 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=7.84e+04 V/A  PSRR   59.6 dB  i_eq = 1.34e+07 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=8.94e+03 V/A  PSRR   45.0 dB  i_eq = 6.31e+08 fA per V/rtHz of supply noise
+## plant fits (servo_loop, SERVO_DATA_PREFIX=data_lp_)
+1G Z0=1.02e9 f0=1256 Hz Q=0.57; 100M Z0=1.02e8 f0=4141 Hz Q=0.54; 10M Z0=1.02e7 f0=13973 Hz Q=0.51
+## auto-range from power-up, PPG 2%, 7 s
+auto I_DC=5n   PPG 2.0%: final range 1G, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9987 phase +2.1 noise 0.8 pA, re-acq 0
+auto I_DC=30n  PPG 2.0%: final range 100M, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9988 phase +2.2 noise 2.9 pA, re-acq 0
+auto I_DC=100n PPG 2.0%: final range 100M, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9988 phase +2.3 noise 8.4 pA, re-acq 0
+auto I_DC=300n PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9986 phase +2.3 noise 24.5 pA, re-acq 0
+auto I_DC=1u   PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9986 phase +2.3 noise 78.7 pA, re-acq 0
