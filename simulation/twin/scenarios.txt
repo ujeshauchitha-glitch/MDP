@@ -1,0 +1,7 @@
+twin at I_DC = 100 nA, m = 2 %: eta = 49.9 uV (sigma0 8.90 uV), residual threshold 1.55e-08
+genuine                              frames accepted  60/60  mean z/sigma   36.3  -> PPG TRUSTED   (slow: range 100M, lock 24 ms, PPG gain 0.999)
+blind spoof, 1x amplitude            frames accepted   0/60  mean z/sigma   -0.2  -> PPG REJECTED   (slow: range 100M, lock 24 ms, PPG gain 0.999)
+blind spoof, 30x amplitude (loud)    frames accepted   0/60  mean z/sigma  -31.3  -> PPG REJECTED   (slow: range 100M, lock 24 ms, PPG gain 0.999)
+attacker knows 90 % of chips         frames accepted   5/60  mean z/sigma   32.9  -> PPG REJECTED   (slow: range 100M, lock 24 ms, PPG gain 0.999)
+relay, 130 ns                        frames accepted  56/60  mean z/sigma   35.8  -> PPG TRUSTED   (slow: range 100M, lock 24 ms, PPG gain 0.999)
+relay, 520 ns                        frames accepted   0/60  mean z/sigma   32.2  -> PPG REJECTED   (slow: range 100M, lock 24 ms, PPG gain 0.999)

@@ -1,0 +1,13 @@
+== fast path: twin vs detect_results.txt (m = 2 %, 48 chips, 480 kchip/s) ==
+I_DC=10n  twin d=   3.77  SPICE-MC d=   3.79  diff  -0.7 %   min I_DC (Pd 99.9 %)   23.1 nA
+I_DC=30n  twin d=  11.18  SPICE-MC d=  11.31  diff  -1.2 %   min I_DC (Pd 99.9 %)   23.4 nA
+I_DC=100n twin d=  35.82  SPICE-MC d=  35.92  diff  -0.3 %   min I_DC (Pd 99.9 %)   24.3 nA
+I_DC=300n twin d=  96.75  SPICE-MC d=  96.42  diff  +0.3 %   min I_DC (Pd 99.9 %)   27.0 nA
+I_DC=1u   twin d= 239.99  SPICE-MC d= 240.98  diff  -0.4 %   min I_DC (Pd 99.9 %)   36.3 nA
+
+== slow path: twin vs servo results (results_sdeg.txt, 2 % PPG, degenerated sink) ==
+I_DC=5n   range 1G   (ref 1G  ) lock  24.5 ms (ref 24.5) PPG gain 0.9968 (ref ~0.999) resid   0.6 pA (ref 0.7 pA RMS 0.5-100 Hz) reacq 0  [4s]
+I_DC=30n  range 100M (ref 100M) lock  24.5 ms (ref 24.5) PPG gain 0.9985 (ref ~0.999) resid   1.3 pA (ref 1.4 pA RMS 0.5-100 Hz) reacq 0  [4s]
+I_DC=100n range 100M (ref 100M) lock  24.5 ms (ref 24.5) PPG gain 0.9988 (ref ~0.999) resid   1.6 pA (ref 1.8 pA RMS 0.5-100 Hz) reacq 0  [3s]
+I_DC=300n range 10M  (ref 10M ) lock 383.5 ms (ref 24.5) PPG gain 0.9990 (ref ~0.999) resid   3.1 pA (ref 4.2 pA RMS 0.5-100 Hz) reacq 0  [3s]
+I_DC=1u   range 10M  (ref 10M ) lock  24.5 ms (ref 24.5) PPG gain 0.9990 (ref ~0.999) resid   8.8 pA (ref 10.5 pA RMS 0.5-100 Hz) reacq 0  [4s]
