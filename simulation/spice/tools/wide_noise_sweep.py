@@ -37,6 +37,22 @@ def netlist(o):
     s = s.replace(".param IBX=1u", f".param IBX={o.get('ibx','1u')}").replace(".param CC=50p", f".param CC={o.get('cc','50p')}")
     s = s.replace(".option gmin=1e-17", ".option gmin=1e-14")
     s = re.sub(r"\* coarse acquisition[^\n]*\nBint[^\n]*\n", "", s)
+    if o.get("opamp2") == "1":
+        # Op-amp v2: no NMOS source-follower buffer (the CS stage drives the output, so amp_out sits at VCM
+        # instead of VCM + Vgs, freeing ~1.3 V) and a cascoded PMOS load whose gate bias is AC-tied to VDD.
+        dev_p, dev_n = "sky130_fd_pr__pfet_g5v0d10v5", "sky130_fd_pr__nfet_g5v0d10v5"
+        rx = o.get("rcasc", "150k")
+        for t in ("s", "w"):
+            out = f"{t}_out"
+            s = re.sub(rf"^(XM9_{t}|XM10_{t}) [^\n]*\n", "", s, flags=re.M)
+            s = re.sub(rf"\bamp_out_{t}\b", out, s)
+            s = s.replace(f"XM7_{t} {out} pbias_{t} vdpwr vdpwr {dev_p} W=20 L=2",
+                          f"XM7_{t} mid7_{t} pbias_{t} vdpwr vdpwr {dev_p} W=20 L=2\n"
+                          f"XM7c_{t} {out} pcasc_{t} mid7_{t} vdpwr {dev_p} W=20 L=2\n"
+                          f"XMxa_{t} pxa_{t} pxa_{t} vdpwr vdpwr {dev_p} W=4 L=2\n"
+                          f"Rxc_{t} pxa_{t} pcasc_{t} {rx}\n"
+                          f"XMxc_{t} pcasc_{t} nbias_{t} vgnd vgnd {dev_n} W=4 L=2\n"
+                          f"Ccasc_{t} pcasc_{t} vdpwr 10p")
     if o.get("slow", "1") == "0":
         a = s.index("* ---- slow path DC servo"); b = s.index("* ===== wideband TIA =====")
         s = s[:a] + "Lx x vcm 1e6\n\n" + s[b:]
@@ -51,6 +67,10 @@ def netlist(o):
     s = re.sub(r"(XMo1 [^\n]*W=20 L=2)", r"\1" + mir_m, s)
     s = s.replace("XMc   dmir gc xc vdpwr sky130_fd_pr__pfet_g5v0d10v5 W=20 L=1",
                   f"XMc   dmir gc xc vdpwr sky130_fd_pr__pfet_g5v0d10v5 W={o.get('mcw','20')} L={o.get('mcl','1')}")
+    if o.get("mcbulk") == "vcm":   # Mc well on the quiet VCM node: no VDD body path, well capacitance not on the signal node
+        s = s.replace("XMc   dmir gc xc vdpwr", "XMc   dmir gc xc vcm", 1)
+    if o.get("mcbulk") == "src":   # Mc in its own n-well tied to its source: no body-effect path from VDD ripple
+        s = s.replace("XMc   dmir gc xc vdpwr", "XMc   dmir gc xc xc", 1)
     if o.get("mct") == "thin":   # thin-oxide Mc, own n-well (bulk = source) so Vgb stays < 1.8 V
         s = re.sub(r"XMc   dmir gc xc vdpwr sky130_fd_pr__pfet_g5v0d10v5", "XMc   dmir gc xc xc sky130_fd_pr__pfet_01v8", s)
     s = s.replace("XMb   gc   xc vgnd vgnd sky130_fd_pr__nfet_g5v0d10v5 W=1  L=8",
@@ -96,6 +116,8 @@ def netlist(o):
                f"Rref  pref vgnd {rref}\nCref  pref vdpwr {cref}\n"
                f"Rsx   vdpwr sx {rs}\nXMpx  xc   pref sx vdpwr {dev} W={pw} L={pl}\n"
                f"Rsw   vdpwr sw {rs}\nXMpw  w_in pref sw vdpwr {dev} W={pw} L={pl}\n")
+        if "iref" in o:   # supply-independent reference current (bandgap-derived in silicon; ideal here) instead of Rref to ground
+            blk = blk.replace(f"Rref  pref vgnd {rref}\n", f"Iref  pref vgnd DC {o['iref']}\n")
         assert "Icompw vdpwr w_in DC {IBX}" in s and "Ibx   vdpwr xc DC {IBX}" in s
         s = s.replace("Icompw vdpwr w_in DC {IBX}", "* Icompw replaced by XMpw")
         s = s.replace("Ibx   vdpwr xc DC {IBX}", blk)

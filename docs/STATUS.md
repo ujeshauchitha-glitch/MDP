@@ -89,10 +89,12 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    LFSR chip generator is fully predictable after 64 observed chips (133 µs).
    Needs a keyed nonlinear stream cipher + TRNG (cryptographer) and a decision
    on whether relay attacks are in scope.
-4. **Supply rejection is poor (§27).** PSRR 11–30 dB (wideband) and falling to −36 dB at
-   1 kHz (slow); the supply must be quiet: ≲ 15 nV/√Hz at 100 Hz for the slow path,
-   ≲ 36–110 nV/√Hz at 100–300 kHz and < 60 µV ripple near 300 kHz for the wideband path.
-   Needs an op-amp PSRR fix (cascode/replica) or an isolated, heavily filtered supply.
+4. **Supply rejection: fixed except above ≈ 500 kHz (§27, §28).** The cause was
+   body effect in the wideband input PMOS (Mc's well tied to VDD), converted to a current
+   by Cc, not the op-amps. Mc's well on the quiet VCM node plus a supply-independent
+   bias reference cut the supply-equivalent input current 68–223x (slow path) and
+   39–210x (wide, 10–100 kHz); ripple above ≈ 500 kHz (switchers) still needs care
+   (≲ 20 nV/√Hz at 1 MHz). The reference is ideal in the simulation.
 5. **Not simulated:** random mismatch Monte Carlo (worst-case offsets only, §26: ≤ 1 %
    effect), supply noise/PSRR, ambient light
    (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,

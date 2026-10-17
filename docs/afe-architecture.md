@@ -1236,3 +1236,72 @@ input pair, Mc and mirror headroom), (b) replace the NMOS source-follower output
 by a lower-Vgs buffer, or (c) take the supply requirement to the board: an
 ultra-low-noise LDO (single-digit nV/√Hz class, > 80 dB PSRR) with heavy
 decoupling meets the budget above without touching the op-amp.
+
+## 28. Supply-rejection fix: the cause was Mc's body, not the op-amps (2026-10-17)
+
+**This corrects §27's "inside the op-amps" diagnosis.** Tracing the VDD → node
+transfer at 100 Hz (tool: node-by-node AC dump in `simulation/spice/build`, summarised
+here; code: `tools/psrr.py`, `wide_noise_sweep.py` options `mcbulk`, `iref`):
+
+* the slow output current was `5.7 nA per V` of ripple through the T-network
+  midpoint `tn`, but the real source is **node `xc` (Mc's source) moving 0.18 V per
+  V of VDD ripple**; the 50 pF coupling capacitor Cc converts that to a current
+  `ω·Cc·0.18 ≈ ω·9.1 pF` into node `x` (matching the measured i_eq ∝ f at an
+  equivalent 9.15 pF);
+* the cause is the **body effect**: Mc is a PMOS in an n-well tied to VDD, so VDD
+  ripple modulates its threshold and therefore `xc`.
+
+Replacing the op-amp output stage with a follower-free stage and a cascoded PMOS
+load (`opamp2=1`, 0.62 V → ~1.9 V headroom) changed nothing at all
+(bit-identical to 3 digits for any cascode bias), confirming the op-amps were not
+the path; it improved the slow path only ≈ 1.5x at low frequency once the real
+cause was fixed and is **not adopted**.
+
+**Fix (two parts):**
+1. **Mc's n-well on the quiet VCM node** (`mcbulk=vcm`) instead of VDD. Tying it to
+   its own source also removes the VDD path but costs 13 % of wideband reach (the
+   isolated well's capacitance sits on the signal node): min I_DC 27.1 nA versus
+   24.2 nA with the bulk on VCM. Needs a separate n-well for Mc and a low-impedance
+   1.4 V node (already present as the TIA common-mode reference).
+2. **Supply-independent bias reference** (`iref=300n`): the mirror reference was a
+   resistor to ground (reference current ∝ VDD, gate ripple 0.48 V/V). It is now a
+   constant current to ground (ideal here; bandgap-derived in silicon), so the
+   mirror gate tracks VDD and the bias legs stay at 300 nA at every corner and supply.
+
+**Supply-induced input-equivalent current (per 1 V/√Hz of supply noise), 1 GΩ range,
+I_DC = 100 nA, tt/27 °C** (raw `results/psrr_fix.txt`):
+
+| frequency | before (§27) | after (bulk = VCM + Iref) | gain |
+|---|---|---|---|
+| slow 0.5 Hz | 30 pA | 8.0 pA | 3.7x |
+| slow 10 Hz | 575 pA | 8.4 pA | 68x |
+| slow 100 Hz | 5.75 nA | 26.9 pA | 214x |
+| slow 1 kHz | 57 nA | 257 pA | 223x |
+| wide 10 kHz | 131 nA | 0.63 nA | 210x |
+| wide 100 kHz | 1.06 µA | 27 nA | 39x |
+| wide 300 kHz | 3.3 µA | 275 nA | 12x |
+| wide 1 MHz | 8.0 µA | 3.7 µA | 2.2x |
+
+**New supply-noise budget** (≤ 20 % of the analog floor): slow 10 Hz ≲ 26 mV/√Hz,
+100 Hz ≲ 3 mV/√Hz, 1 kHz ≲ 0.17 mV/√Hz (any practical supply meets these); wide
+100 kHz ≲ 3.4 µV/√Hz, 300 kHz ≲ 0.33 µV/√Hz, **1 MHz ≲ 20 nV/√Hz**. Tolerable
+tone amplitude for ≤ 10 % of I_pert (200 pA at I_DC = 100 nA, m = 2 %): ≈ 7 mV at
+100 kHz, ≈ 0.7 mV at 300 kHz, **≈ 55 µV at 1 MHz**. So only switching-regulator
+ripple above ≈ 500 kHz still needs attention (a ferrite/RC pre-filter or a
+post-regulator, which §27's 15 nV/√Hz low-frequency requirement no longer needs).
+The residual coupling at 300 kHz – 1 MHz was not traced.
+
+**PVT × supply with the fix** (corner_run, I_DC = 100 nA, VCM 1.4 V, T-network,
+Mc bulk = VCM, Iref; `psrr_fix.txt`): slow Z 0.990 – 0.997 GΩ, −3 dB 2.4 – 3.2 kHz,
+slow noise 7.4 – 9.5 pA, **bias current exactly 300 / 300 nA at all 11 points**
+(it varied 241 – 363 nA with a resistor reference), wideband min I_DC
+**21.0 – 29.0 nA** (m = 2 %; ss/125 °C 28.7 – 29.0 nA, ff/−40 °C 21.0 – 21.2 nA),
+i.e. unchanged from §22.
+
+**Caveats.** PSRR measured only at tt/27 °C, I_DC = 100 nA, 1 GΩ range (§27 showed
+the equivalent input current is range-independent); the adopted Mc well must be
+isolated in layout and its bulk node must be quiet over the whole band; the
+reference current is an ideal source (its noise, supply rejection and
+temperature behaviour in silicon are not modelled); the remaining
+300 kHz – 1 MHz coupling is untraced; the correlator Monte Carlo (§16–§21) was
+not re-run (it assumes a noiseless supply and the min-I_DC figure is unchanged).
