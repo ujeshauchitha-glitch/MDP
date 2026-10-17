@@ -12,28 +12,41 @@ FRAC = 12                                  # coefficient fractional bits
 TB = 12                                    # template word: t = round(t_float * 2**TB_SC)
 Y_LSB = 100e-6; Y_BITS = 8                 # sample quantisation (signed 8 bit, +/-12.7 mV range)
 sos = tf2sos(fit.b, fit.a)
-FRAC = 16                                  # coefficient fractional bits (poles at 0.9973 need >= 14)
-EXTRA = 10                                 # fractional bits kept in the section outputs / state
-# scale the template so that |t| peaks near 100 (integer units) for +/-1 chips
+LPF = sos[0].copy()                        # low-pass biquad of the channel fit (section 1); the high-pass part is two shift-based stages
+FRAC = 12                                  # coefficient fractional bits of the (well-damped) low-pass biquad
+EXTRA = 8                                  # fractional bits kept in the state
+HPK = 8                                    # high-pass corner = 2^-HPK per sample
+def _float_template(c4, b):
+    x = sosfilt(np.r_[b, LPF[3:]][None, :], c4, axis=1)
+    for _ in range(2):
+        x = lfilter([1.0, -1.0], [1.0, -(1 - 2.0 ** -HPK)], x, axis=1)
+    return x
+from scipy.signal import lfilter
 _rng = np.random.default_rng(5)
-_c = _rng.choice([-1.0, 1.0], size=(50, 400))
-_peak = np.abs(sosfilt(sos, _c, axis=1))[:, 100:].max()
-sos[0, :3] *= 100.0 / _peak
-qi = lambda x: np.round(np.asarray(x) * 2 ** FRAC).astype(np.int64)
-SB = qi(sos[:, :3]); SA = qi(sos[:, 4:])        # integer coefficients (Q16)
-print("integer SOS  b:", SB.tolist(), " a1,a2:", SA.tolist(), " template scale", 100.0 / _peak)
+_c = _rng.choice([-1.0, 1.0], size=(50, 1000))
+_peak = np.abs(_float_template(_c, LPF[:3]))[:, 300:].max()
+BSC = LPF[:3] * (100.0 / _peak)             # scaled numerator so that |t| peaks near 100
+SB = np.round(BSC * 2 ** FRAC).astype(np.int64)
+SA = np.round(LPF[4:] * 2 ** FRAC).astype(np.int64)
+print("LP biquad integer b:", SB.tolist(), " a1,a2:", SA.tolist())
 def template(c4):
-    """Fixed-point cascade of two direct-form-I biquads (all integer arithmetic, Q16 coefficients, EXTRA fractional state bits)."""
-    x = c4.astype(np.int64) << EXTRA                   # chip +/-1 in Q(EXTRA)
-    for k in range(2):
-        b0, b1, b2 = SB[k]; a1, a2 = SA[k]
-        y = np.zeros_like(x)
+    """Integer template: LP biquad (Q12 coefficients, 8 fractional state bits, rounded) then two first-order shift high-pass stages."""
+    x = c4.astype(np.int64) << EXTRA
+    b0, b1, b2 = SB; a1, a2 = SA
+    y = np.zeros_like(x)
+    for n in range(x.shape[1]):
+        acc = b0 * x[:, n]
+        if n >= 1: acc = acc + b1 * x[:, n - 1] - a1 * y[:, n - 1]
+        if n >= 2: acc = acc + b2 * x[:, n - 2] - a2 * y[:, n - 2]
+        y[:, n] = (acc + (1 << (FRAC - 1))) >> FRAC
+    x = y
+    for _ in range(2):
+        h = np.zeros_like(x)
         for n in range(x.shape[1]):
-            acc = b0 * x[:, n]
-            if n >= 1: acc = acc + b1 * x[:, n - 1] - a1 * y[:, n - 1]
-            if n >= 2: acc = acc + b2 * x[:, n - 2] - a2 * y[:, n - 2]
-            y[:, n] = (acc + (1 << (FRAC - 1))) >> FRAC       # round to nearest, arithmetic shift
-        x = y
+            xp = x[:, n - 1] if n >= 1 else 0
+            hp = h[:, n - 1] if n >= 1 else 0
+            h[:, n] = x[:, n] - xp + hp - ((hp + (1 << (HPK - 1))) >> HPK)
+        x = h
     return x / 2.0 ** EXTRA
 def hw_stats(light, trials=6000):
     Z, R = [], []
@@ -60,5 +73,5 @@ if __name__ == "__main__":
     for lt in (f.partial(1, .75), f.partial(1, .9), f.blind(3)):
         z, r = hw_stats(lt); out.append(np.mean((z > eta) & (r < thr)))
     print("legit corr-only %.4f, legit D1 %.4f | partial .75 %.4f  .9 %.4f | blind 3x %.4f" % tuple(out))
-    json.dump(dict(sosb=SB.tolist(), sosa=SA.tolist(), frac=FRAC, extra=EXTRA, eta=float(eta), thr=float(thr), ybits=Y_BITS, ylsb=Y_LSB),
+    json.dump(dict(lpb=SB.tolist(), lpa=SA.tolist(), frac=FRAC, extra=EXTRA, hpk=HPK, eta=float(eta), thr=float(thr), ybits=Y_BITS, ylsb=Y_LSB),
               open(pathlib.Path(__file__).resolve().parent.parent / "rtl" / "coeffs.json", "w"), indent=1)
