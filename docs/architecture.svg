@@ -33,16 +33,16 @@
   <text x="460" y="92" text-anchor="middle" class="h t">SLOW PATH (PPG)  — direct off the photodiode</text>
   <rect class="box" x="275" y="106" width="150" height="62" rx="5"/>
   <text x="350" y="124" text-anchor="middle" class="h t">T-network feedback</text>
-  <text x="350" y="140" text-anchor="middle" class="s">R1=R2=10 MΩ, R3=102 kΩ → VCM</text>
-  <text x="350" y="155" text-anchor="middle" class="s">+ switched range resistor ∥</text>
+  <text x="350" y="140" text-anchor="middle" class="s">R1=R2=10M, R3=102k→VCM</text>
+  <text x="350" y="155" text-anchor="middle" class="s">+ switched range R ∥</text>
   <rect class="box" x="445" y="106" width="200" height="62" rx="5"/>
   <text x="545" y="124" text-anchor="middle" class="h t">2-stage TIA op-amp</text>
   <text x="545" y="140" text-anchor="middle" class="s">PMOS pair, Miller Cc 4.2 pF</text>
   <text x="545" y="155" text-anchor="middle" class="s">source-follower out → s_out</text>
   <rect class="box" x="275" y="180" width="370" height="48" rx="5"/>
-  <text x="460" y="199" text-anchor="middle" class="s" style="font-size:11.5px">ranges: 1 GΩ (Cf 50 fF, 2.8 kHz)  |  100 MΩ (100 fF, 9.5 kHz)  |  10 MΩ (500 fF, 25 kHz)</text>
-  <text x="460" y="216" text-anchor="middle" class="s" style="font-size:11.5px">Z within 1.5 % over PVT and ±10 % supply; headroom ±0.3 nA / ±3 nA / ±30 nA</text>
-  <path class="ln" d="M215 300 C 235 300 245 137 275 137" marker-end="url(#a)"/>
+  <text x="460" y="199" text-anchor="middle" class="s" style="font-size:10.5px">1 GΩ 50 fF 2.8 kHz | 100 MΩ 100 fF 9.5 kHz | 10 MΩ 500 fF 25 kHz</text>
+  <text x="460" y="216" text-anchor="middle" class="s" style="font-size:10.5px">Z within 1.5 % over PVT/supply; PPG headroom ±0.3 / ±3 / ±30 nA</text>
+  <path class="ln" d="M215 300 C 238 300 250 120 275 120" marker-end="url(#a)"/>
 
   <!-- wide path -->
   <rect class="wide" x="260" y="380" width="400" height="215" rx="8"/>
@@ -52,7 +52,7 @@
   <text x="310" y="448" text-anchor="middle" class="s">50 pF</text>
   <rect class="box" x="360" y="416" width="115" height="40" rx="5"/>
   <text x="417" y="434" text-anchor="middle" class="h t">Mc  (PMOS CG)</text>
-  <text x="417" y="448" text-anchor="middle" class="s">W=80, gate = 0 V, node xc</text>
+  <text x="417" y="448" text-anchor="middle" class="s">W=80, gate 0 V</text>
   <rect class="box" x="490" y="416" width="155" height="40" rx="5"/>
   <text x="567" y="434" text-anchor="middle" class="h t">NMOS mirror ×4</text>
   <text x="567" y="448" text-anchor="middle" class="s">200 kΩ source degeneration</text>
@@ -61,7 +61,7 @@
   <text x="460" y="506" text-anchor="middle" class="s">≈ 280 kHz, 0.6 pA/√Hz at 100 kHz, ~85 µW</text>
   <rect class="box" x="275" y="530" width="370" height="50" rx="5"/>
   <text x="460" y="548" text-anchor="middle" class="h t">Bias: degenerated PMOS mirror</text>
-  <text x="460" y="564" text-anchor="middle" class="s">IBX 300 nA into xc and an equal cancel current into the TIA input (Rs 3 MΩ, Rref 3.6 MΩ)</text>
+  <text x="460" y="564" text-anchor="middle" class="s">IBX 300 nA → xc; equal cancel into TIA input (Rs 3 MΩ)</text>
   <path class="ln" d="M215 310 C 230 310 240 436 275 436" marker-end="url(#a)"/>
   <path class="ln" d="M345 436H360" marker-end="url(#a)"/>
   <path class="ln" d="M475 436H490" marker-end="url(#a)"/>
@@ -95,7 +95,7 @@
   <text x="830" y="486" text-anchor="middle" class="h t" font-size="12">Pd ≥ 99.9 % needs I_DC ≳</text>
   <text x="830" y="504" text-anchor="middle" class="s" style="font-size:11.5px">24 nA (m 2 %) · 49 nA (1 %) · 97 nA (0.5 %)</text>
   <text x="830" y="520" text-anchor="middle" class="s" style="font-size:11.5px">PVT × supply: 21–29 nA at m 2 %</text>
-  <text x="830" y="546" text-anchor="middle" class="s" style="font-size:11.5px">open: real-time optical relay (≤130 ns) passes;</text>
-  <text x="830" y="562" text-anchor="middle" class="s" style="font-size:11.5px">LFSR chips predictable after 64 chips → keyed cipher</text>
+  <text x="830" y="546" text-anchor="middle" class="s" style="font-size:11.5px">open: optical relay ≤130 ns still passes;</text>
+  <text x="830" y="562" text-anchor="middle" class="s" style="font-size:11.5px">LFSR chips predictable → keyed cipher needed</text>
   <path class="ln" d="M645 494 H700" marker-end="url(#a)"/>
 </svg>
