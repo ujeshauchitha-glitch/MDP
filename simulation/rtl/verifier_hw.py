@@ -15,7 +15,8 @@ SB, SA = COEF["lpb"], COEF["lpa"]
 FRAC, EXTRA, HPK = COEF["frac"], COEF["extra"], COEF["hpk"]
 NSAMP = 192
 D4 = 2
-YW, TW = 8, 9          # sample width, template width (t = round(y2 / 2^EXTRA))
+ZW, RW, TTW, YTW, YYW, PW = 15, 18, 22, 22, 18, 44
+YW, TW = 6, 9          # sample width, template width (t = round(y2 / 2^EXTRA))
 SW = 17                # section output word (Q8)
 AW = 29                # biquad accumulator
 
@@ -89,11 +90,11 @@ class Verifier(Elaboratable):
         self.c = Signal()                       # chip bit
         self.en = Signal()                      # sample strobe (clock enable)
         self.frame_start = Signal()             # first sample of a frame window (aligned with y)
-        self.eta = Signal(signed(20))           # correlation threshold (same units as z)
-        self.thr = Signal(24)                   # residual threshold
+        self.eta = Signal(signed(ZW))           # correlation threshold (same units as z)
+        self.thr = Signal(RW)                   # residual threshold
         self.done = Signal()                    # pulses when a frame decision is ready
         self.accept = Signal()
-        self.z_out = Signal(signed(20))
+        self.z_out = Signal(signed(ZW))
         self.t_dbg = Signal(signed(TW))         # template sample (for verification)
 
     def elaborate(self, platform):
@@ -113,14 +114,14 @@ class Verifier(Elaboratable):
         # ---- frame accumulators ---------------------------------------------------------------------
         cnt = Signal(8, reset_less=True)
         run = Signal(reset_less=True)
-        z = Signal(signed(20), reset_less=True)
-        yt = Signal(signed(24), reset_less=True)
-        tt = Signal(unsigned(24), reset_less=True)
-        yy = Signal(unsigned(24), reset_less=True)
-        zs = Signal(signed(20), reset_less=True)
-        yts = Signal(signed(24), reset_less=True)
-        tts = Signal(unsigned(24), reset_less=True)
-        yys = Signal(unsigned(24), reset_less=True)
+        z = Signal(signed(ZW), reset_less=True)
+        yt = Signal(signed(YTW), reset_less=True)
+        tt = Signal(unsigned(TTW), reset_less=True)
+        yy = Signal(unsigned(YYW), reset_less=True)
+        zs = Signal(signed(ZW), reset_less=True)
+        yts = Signal(signed(YTW), reset_less=True)
+        tts = Signal(unsigned(TTW), reset_less=True)
+        yys = Signal(unsigned(YYW), reset_less=True)
         last = Signal()
         m.d.comb += last.eq(run & (cnt == NSAMP - 1) & self.en)
         sample_in = self.en & (run | self.frame_start)
@@ -143,11 +144,11 @@ class Verifier(Elaboratable):
         # ---- end of frame: snapshot and sequential compare ----------------------------------------
         st = Signal(3, reset_less=True)         # 0 idle, 1 yy*tt, 2 yt*yt, 3 thr*tt, 4 compare
         mcnt = Signal(5, reset_less=True)
-        mplier = Signal(24, reset_less=True)
-        mcand = Signal(48, reset_less=True)
-        prod = Signal(48, reset_less=True)
-        p1 = Signal(48, reset_less=True)
-        p2 = Signal(48, reset_less=True)
+        mplier = Signal(TTW, reset_less=True)
+        mcand = Signal(PW, reset_less=True)
+        prod = Signal(PW, reset_less=True)
+        p1 = Signal(PW, reset_less=True)
+        p2 = Signal(PW, reset_less=True)
         zok = Signal(reset_less=True)
         self.state = st
         m.d.comb += self.done.eq(0)
@@ -159,19 +160,19 @@ class Verifier(Elaboratable):
                          mplier.eq(yy), mcand.eq(tt), zok.eq(z > self.eta)]
         with m.Elif(st == 1):                       # shift-add: prod = yy * tt
             m.d.sync += [prod.eq(prod + Mux_bit(mplier[0], mcand)), mcand.eq(mcand << 1), mplier.eq(mplier >> 1), mcnt.eq(mcnt + 1)]
-            with m.If(mcnt == 23):
+            with m.If(mcnt == (TTW - 1)):
                 m.d.sync += [st.eq(2), mcnt.eq(0)]
         with m.Elif(st == 2):
             m.d.sync += [p1.eq(prod), prod.eq(0), mplier.eq(Abs24(yts)), mcand.eq(Abs24(yts)), st.eq(3), mcnt.eq(0)]
         with m.Elif(st == 3):                       # prod = yt*yt
             m.d.sync += [prod.eq(prod + Mux_bit(mplier[0], mcand)), mcand.eq(mcand << 1), mplier.eq(mplier >> 1), mcnt.eq(mcnt + 1)]
-            with m.If(mcnt == 23):
+            with m.If(mcnt == (TTW - 1)):
                 m.d.sync += [st.eq(4), mcnt.eq(0), p2.eq(0)]
         with m.Elif(st == 4):
             m.d.sync += [p2.eq(prod), prod.eq(0), mplier.eq(self.thr), mcand.eq(tts), st.eq(5), mcnt.eq(0)]
         with m.Elif(st == 5):                       # prod = thr*tt
             m.d.sync += [prod.eq(prod + Mux_bit(mplier[0], mcand)), mcand.eq(mcand << 1), mplier.eq(mplier >> 1), mcnt.eq(mcnt + 1)]
-            with m.If(mcnt == 23):
+            with m.If(mcnt == (TTW - 1)):
                 m.d.sync += [st.eq(6), mcnt.eq(0)]
         with m.Elif(st == 6):
             m.d.comb += self.done.eq(1)
@@ -204,4 +205,4 @@ def Mux_bit(b, v):
 
 def Abs24(v):
     from amaranth.hdl import Mux
-    return Mux(v < 0, -v, v)[:24]
+    return Mux(v < 0, -v, v)[:YTW]

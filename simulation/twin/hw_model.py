@@ -10,7 +10,8 @@ f = fit.f
 STEP = 4
 FRAC = 12                                  # coefficient fractional bits
 TB = 12                                    # template word: t = round(t_float * 2**TB_SC)
-Y_LSB = 100e-6; Y_BITS = 8                 # sample quantisation (signed 8 bit, +/-12.7 mV range)
+import os
+Y_LSB = float(os.environ.get("YLSB", 100e-6)); Y_BITS = int(os.environ.get("YBITS", 8))   # sample LSB and signed width
 sos = tf2sos(fit.b, fit.a)
 LPF = sos[0].copy()                        # low-pass biquad of the channel fit (section 1); the high-pass part is two shift-based stages
 FRAC = 12                                  # coefficient fractional bits of the (well-damped) low-pass biquad

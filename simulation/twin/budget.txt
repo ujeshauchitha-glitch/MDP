@@ -1,24 +1,25 @@
 AREA estimate [um^2]
-      12500  Cc 50 pF coupling cap (double MIM, 4 fF/um2)
+      12500  Cc coupling cap (double MIM, 4 fF/um2); 50 pF baseline
        2500  T-network R1+R2 (2 x 10 Mohm)
-      13875  Rpar 111 Mohm (100M range)
-       1262  Rpar 10.1 Mohm (10M range)
+        774  100M-range T-network (2 x 3.095 Mohm, replaces 111 Mohm parallel R, sec. 42)
+        228  10M-range T-network (2 x 0.912 Mohm, replaces 10.1 Mohm parallel R)
        4162  cancel-device degeneration Rs 30M + 3M + 0.3M (per range)
         514  bias degeneration 3 Mohm + 2x mirror 200 kohm + TIA 314 kohm
        5000  feedback / compensation caps (<= 1.5 pF x3 + misc 5 pF)
        4800  cancel device cells (16 x 200 um2 gate, plus routing x1.5)
        3500  two op-amps + mirrors + switches
        4000  slow ADC 10 bit / 2 kS/s + gate-voltage DAC 12 bit (string)
-       3500  fast preamp + 8 bit ADC ~2 MS/s
-      12270  Trivium (288 FF + ~100 gates) @50 % util
-      22500  correlator (48x accumulate, 14 bit) + servo FSM + control (~3000 gate-eq)
-      90384  TOTAL = 5.0 Tiny-Tapeout 1x1 tiles (x1.3 routing margin: 6.6)
+       3000  fast PGA preamp + 6 bit ADC ~2 MS/s
+      17708  Trivium RTL (synthesised cell area 8.9k) @50 % util
+      75544  fast-path verifier RTL (corr + IIR template + residual; 6-bit samples, 38k cells) @50 % util
+      26728  servo + auto-range RTL (13k cells) @50 % util
+     160958  TOTAL = 9.0 Tiny-Tapeout 1x1 tiles (x1.3 routing margin: 11.7)
 
-DIGITAL / MIXED-SIGNAL POWER estimate [uW]
-     6.01  Trivium 288 FF + 100 gates @ 480 kHz (x2 clock tree)
-     0.81  correlator add/sub 14 bit @ 1.92 MS/s (4 samples/chip)
-     0.15  servo logic @ 2 kHz + SD DAC @ 100 kHz
-    14.75  fast ADC 8 bit @ 1.92 MS/s (Walden FoM 30 fJ/step)
+DIGITAL / MIXED-SIGNAL POWER estimate [uW] (gate counts from yosys, energies assumed)
+     2.36  Trivium @ 480 kHz
+    19.00  verifier @ 1.92 MHz (1 sample/clock)
+     0.33  servo @ 100 kHz
+     8.69  fast ADC 6 bit @ 1.92 MS/s (Walden FoM 30 fJ/step) + programmable-gain preamp (assumed 5 uW)
      0.06  slow ADC 10 bit @ 2 kS/s
-     0.06  leakage ~6000 gates x 10 pW
-    21.83  TOTAL digital+ADC;  + analog 61-74 uW (low-power bias) = 83-96 uW  (original goal 87 uW)
+     0.09  leakage ~8000 gates + 900 FF x 10 pW
+    30.53  TOTAL digital+ADC;  + analog 61-74 uW (low-power bias) = 92-105 uW  (original goal 87 uW)

@@ -1879,3 +1879,26 @@ full test for blind and partial-knowledge attackers. It loses the sub-sample rel
 1.92 MS/s), which §40 showed is not a defensible security claim anyway. **Decision: hardware D1 = correlator + IIR template (order 4, fitted per
 I_DC bucket or fixed for the nominal channel) + residual accumulator.** The IIR coefficients depend on the channel (I_DC, corner), so they must be calibrated
 or stored for a few corner sets: not done.
+
+## 44. Digital blocks as RTL, synthesised (2026-10-17)
+
+`simulation/rtl/` (Amaranth HDL; `run_all.py` runs every self-test and the yosys synthesis, `synth_results.txt`). Synthesis is yosys
+(generic gates, then sky130_fd_sc_hd datasheet areas): a gate-count estimate, **not** place-and-route; no timing closure.
+
+| block | what | FF | gates | cell area |
+|---|---|---|---|---|
+| `trivium_hw.py` | Trivium, 288-bit shift chain loaded serially from static key/IV (288 cycles) + 1152 warm-up; matches the Python reference over 500 chips | 301 | 522 | 8 850 µm² |
+| `verifier_hw.py` | 6-bit samples (LSB 300 µV), 4 samples/chip; correlator, template = low-pass biquad (Q12) + two shift high-pass stages, residual accumulators, sequential compare `yy·tt − yt² < thr·tt`; **bit-exact** against `twin/hw_model.py` over 6-frame random tests (frame 0 excluded: filter start-up history) | 422 | 4 754 | 37 800 µm² |
+| `servo_hw.py` | SAR acquisition, integrator with gain scheduling and 2 s mean, re-acquire, auto-range, ΣΔ; closed-loop with the SPICE-fitted plants: locks at 25.0 ms, switches ranges at ≈ 126 ms (float model 125 ms), DAC code within 1 LSB of ideal (5 nA … 1 µA) | 126 | 1 934 | 13 400 µm² |
+
+Design decisions that came out of writing the RTL: (i) a full-channel template would cost > 50 000 µm²; the cheap template (LP biquad + shift high-pass, 8×2)
+gives legit Pd 0.999, partial-knowledge attackers 0.65 % (75 % of chips) / 17.5 % (90 %) accepted (full D1: 0.12 % / 7.8 %), blind 0 %
+(`hw_model.py`, `hp_variant.py`); (ii) samples can be 6 bits / 300 µV with no change in these numbers (needs a programmable-gain preamp so the
+sample range follows I_DC); (iii) the cancel code in the servo is in 0.5 nA units; with the gate-voltage DAC of §41 the code→current map is nonlinear
+and range dependent, which a closed loop tolerates but the range thresholds (25 / 250 codes) must then be calibrated; (iv) the shift-high-pass corner and
+the biquad coefficients are fitted to one channel (I_DC = 100 nA, tt/27 °C): other corners need either a few stored coefficient sets or a measured fit.
+
+**Revised budget** (`twin/budget.py`, digital at 50 % utilisation): **≈ 161 000 µm² ≈ 9 Tiny-Tapeout 1×1 tiles (≈ 11.7 with routing margin)**, i.e. a 4×3 or larger
+allocation; the verifier alone is ≈ 75 000 µm² placed. **Power ≈ 92–105 µW** (digital + ADC ≈ 31 µW: verifier 19, fast ADC + preamp 8.7, Trivium 2.4) against the
+87 µW goal, which is therefore *not* met with the residual test; a correlator-only verifier would be far smaller and cheaper but accepts the blind attack (§25).
+Energies per flop (15 fJ) and per gate (3 fJ × 0.25 activity) are assumptions.

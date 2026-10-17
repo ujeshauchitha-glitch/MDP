@@ -1,4 +1,4 @@
 self-tests (Trivium vs reference, verifier bit-exact vs fixed-point model): PASS
 trivium    301 FF    522 gates      8854 um^2 (cell area, sky130_fd_sc_hd estimate)
-verifier   464 FF   5553 gates     43176 um^2 (cell area, sky130_fd_sc_hd estimate)
+verifier   422 FF   4754 gates     37772 um^2 (cell area, sky130_fd_sc_hd estimate)
 servo      126 FF   1934 gates     13364 um^2 (cell area, sky130_fd_sc_hd estimate)
