@@ -1731,7 +1731,7 @@ L = 2 µm (area 200 µm²) in all earlier results. Slow-path noise (0.5–100 Hz
    cell gives the same noise** (each cell's current noise scales with its own gm, and both the
    current and the area are shared out in proportion), so the segmentation of the DAC should
    be chosen for linearity and glitch, not noise; **total gate area of the cells that are ON
-   is the noise lever.** (Reasoning, not simulated with a real segmented DAC.)
+   is the noise lever.** (Confirmed in §39 with explicit multi-cell netlists.)
 4. Sizing example: for ≤ 2x the floor (≈ 2.6 pA) at 1 µA the cancel path needs about
    ≳ 3000 µm² of gate area plus a 300 kΩ-class degeneration per active leg; at 100 nA the existing
    200 µm² with 3 MΩ is already at the floor.
@@ -1773,3 +1773,22 @@ channel (I_DC = 100 nA, N = 48, 480 kchip/s): **rectangular correlator d(m = 1) 
 is no receiver-side fix, and the 63 kHz channel and its noise, not the correlator, set the 24 nA. (A first
 version of this comparison had a factor-of-2 error in the formula that made the optimum look 2.5 dB
 *worse*; it was caught because an optimum cannot be worse than a practical receiver.)
+
+## 39. Segmented cancel device: splitting into unit cells does not change noise (2026-10-17)
+
+Check of rule 3 of §37. New `seg=n` option of `wide_noise_sweep.py`: n separate unit cells (W = 100, L = 2),
+each with its own source resistor n × `sdeg`, common gate, replacing the single device. Slow-path noise
+(0.5–100 Hz RMS, 1 GΩ range, tt/27 °C, default tolerances; `results/seg_cells.txt`):
+
+| case | segmented | single device of equal total area and equal drop |
+|---|---|---|
+| 16 cells, 4.8 MΩ each, 1 µA | 3.5 pA, Vsg 0.955705 | m = 16, 300 kΩ: 3.5 pA, Vsg 0.955705 |
+| 4 cells, 1.2 MΩ each, 1 µA | 5.5 pA | m = 4, 300 kΩ: 5.5 pA |
+| 4 cells, 12 MΩ each, 100 nA | 1.5 pA | m = 4, 3 MΩ: 1.5 pA |
+
+Identical to the digit, as expected: with independent per-instance noise sources the parallel combination
+is the same circuit. **What this does not show:** random mismatch between cells (affects DAC linearity, not
+the noise computed here), the switching of cells on and off, glitch, and the sigma-delta fine path; the
+sky130 flicker model scaling with area is itself unverified against silicon. Design consequence: choose the
+segmentation (e.g. 16 unit cells plus a binary fine part) for linearity and glitch; the noise is set by
+the total gate area switched ON and by the ≈ 0.3 V source drop.

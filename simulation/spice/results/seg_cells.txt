@@ -1,0 +1,4 @@
+# segmented cancel device: n unit cells (W100 L2), each with its own n*sdeg source resistor, shared gate; tt/27C, default tolerances
+seg16_1u   n=16 sdeg=300k IDC=1u : Vsg=0.955705 RMS0.5-100Hz=3.5pA  (single m=16 device: 3.5pA, Vsg 0.955705)
+seg4_1u    n=4  sdeg=300k IDC=1u : Vsg=1.030926 RMS0.5-100Hz=5.5pA  (single m=4 device: 5.5pA, Vsg 1.030926)
+seg4_100n  n=4  sdeg=3Meg IDC=100n: Vsg=0.905515 RMS0.5-100Hz=1.5pA (single m=4 device: 1.5pA)

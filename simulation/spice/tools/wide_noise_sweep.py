@@ -78,6 +78,13 @@ def netlist(o):
     if "sdeg" in o:   # source-degenerated cancel (sink) device: lowers its flicker-noise current
         s = s.replace("XMsv  x vc_s vgnd vgnd", "XMsv  x vc_s sd_n vgnd", 1)
         s = s.replace(".param IDC", "Rsd   sd_n vgnd " + o["sdeg"] + "\n.param IDC", 1)
+    if "seg" in o:   # n identical unit cells (W=100 L=2), each with its own source resistor n*sdeg, shared gate
+        n = int(o["seg"])
+        cells = "".join(f"XMsv{i} x vc_s sd{i} vgnd sky130_fd_pr__nfet_g5v0d10v5 W=100 L=2\n"
+                        f"Rsd{i} sd{i} vgnd {{{n}*{o["sdeg"]}}}\n" for i in range(n))
+        s = re.sub(r"^XMsv [^\n]*\n", "", s, flags=re.M)
+        s = re.sub(r"^Rsd [^\n]*\n", "", s, flags=re.M)
+        s = s.replace(".param IDC", cells + ".param IDC", 1)
     if "cpb" in o:   # AC-tie the PMOS gate-bias nodes to VDD so tail / load current sources see no Vgs ripple
         s = s.replace(".param IDC", "Cpb_s pbias_s vdpwr " + o["cpb"] + "\nCpb_w pbias_w vdpwr " + o["cpb"] + "\n.param IDC", 1)
     if o.get("mcbulk") == "vcm":   # Mc well on the quiet VCM node: no VDD body path, well capacitance not on the signal node

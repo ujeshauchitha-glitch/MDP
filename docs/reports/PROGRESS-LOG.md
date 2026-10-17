@@ -66,3 +66,4 @@ numbers (§) refer to [`../afe-architecture.md`](../afe-architecture.md). Full h
 | [`2026-10-17-overview.md`](2026-10-17-overview.md) | 10-17 | whole project so far, in plain language |
 | [`2026-10-17-02-audit-and-noise.md`](2026-10-17-02-audit-and-noise.md) | 10-17 | audit, cancel-device noise and degeneration, integration time |
 | [`2026-10-17-03-dac-bandwidth-receiver.md`](2026-10-17-03-dac-bandwidth-receiver.md) | 10-17 | DAC sizing, bandwidth correction, receiver bound |
+| [`2026-10-17-04-segmented-canceller.md`](2026-10-17-04-segmented-canceller.md) | 10-17 | splitting the canceller into cells (§39): same noise as one device |
