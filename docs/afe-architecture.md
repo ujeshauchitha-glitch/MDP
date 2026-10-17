@@ -1911,3 +1911,23 @@ Thévenin resistance and gate capacitance by a 100 kHz two-level (ΣΔ, 50 % dut
 mean s_out stays 1.4003 V. The ripple is at ≥ 100 kHz, outside the PPG band, and below the 0.98 mV servo-ADC LSB. **A 12-bit string DAC (or even 8-bit) with ΣΔ
 is adequate; ≥ 5 pF on the gate node and ≥ 100 kΩ output resistance are enough to filter it.** Not done: the string/switch tree at transistor level (its DC load is only
 the gate, so switch on-resistance does not matter; its noise is the output-resistance figure of §41), and range-switch glitches of the extra resistors.
+
+## 46. Key, IV and synchronisation protocol (2026-10-17)
+
+**Specification.** 80-bit device key in OTP/fuses (per-device, provisioned at manufacture; never read back). Per-session 80-bit IV = 48-bit non-volatile monotonic
+session counter ‖ 32 bits from a ring-oscillator TRNG. A session starts with Trivium initialisation (288 load + 1152 warm-up clocks = 3.0 ms at 480 kHz) and lasts at most
+about 1 s (10 000 frames) before re-initialisation with a new IV (Trivium is secure for ≤ 2^64 bits per IV; the limit here is policy, not cipher). **One on-chip generator feeds both the LED
+driver and the verifier**, so there is no inter-chip frame synchronisation; the verifier needs only the fixed LED-to-sample delay.
+
+**Twin checks** (`twin/protocol.py`, `protocol_results.txt`, I_DC = 100 nA, m = 2 %, full D1 detector, 400 frames per case):
+
+| case | D1 accepts | correlation-only accepts |
+|---|---|---|
+| genuine | 100 % | 100 % |
+| replay of a recorded earlier session (new IV) | **0 %** | 19 % |
+| replay when the IV is wrongly reused (identical keystream) | **100 %** | 100 % |
+| device with another key | 0 % | 16.5 % |
+
+So the counter part of the IV must never repeat (power loss must not roll it back: store it before use), and the residual test, not the correlation alone, is what rejects replays/wrong keys.
+**Receive-delay tolerance** (genuine accept): ±0.5 chip (±1 µs): 99.8 %; +1 chip 83.5 %, −1 chip 48.5 %; ±2 chips 16–17 %. The delay is a fixed property of the chip (LED driver latency +
+channel), calibrated once, so ±0.5 chip is easy. Not done: the TRNG and OTP circuits themselves, power-loss-safe counter update, side channels (power analysis of Trivium), physical-attack resistance.

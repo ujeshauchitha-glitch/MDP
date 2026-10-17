@@ -1,0 +1,15 @@
+test                                            D1 accept   corr-only accept
+genuine (verifier and LED use session B)             1.000       1.000
+replay of recorded session A against session B       0.000       0.190
+replay with REUSED IV (same keystream)               1.000       1.000
+attacker device with another key                     0.000       0.165
+
+receive-delay error (samples at 16/chip = 1/8 chip steps; 4 samples/chip hardware step = 4 of these)
+delay error -32 (=-2.00 chip)               genuine D1 accept  0.158  corr-only  0.158
+delay error -16 (=-1.00 chip)               genuine D1 accept  0.485  corr-only  0.485
+delay error  -8 (=-0.50 chip)               genuine D1 accept  0.998  corr-only  1.000
+delay error  +0 (=+0.00 chip)               genuine D1 accept  0.998  corr-only  1.000
+delay error  +8 (=+0.50 chip)               genuine D1 accept  0.998  corr-only  1.000
+delay error +16 (=+1.00 chip)               genuine D1 accept  0.835  corr-only  0.838
+delay error +32 (=+2.00 chip)               genuine D1 accept  0.172  corr-only  0.172
+delay error +64 (=+4.00 chip)               genuine D1 accept  0.115  corr-only  0.115
