@@ -55,6 +55,9 @@ numbers (§) refer to [`../afe-architecture.md`](../afe-architecture.md). Full h
 |---|---|---|
 | integration-time study (§35) | min I_DC vs code length | ∝ 1/√T_int: 10 nA needs ~0.6 ms at 2 % |
 | degenerated cancel device in the servo study (§36) | auto-range with the 0.3 V-drop sink noise | PPG SNR +13 dB at 100 nA, +17.5 dB at 1 µA |
+| DAC cell sizing (§37) | noise vs area and degeneration | resistor matters most; noise ~ area^-0.4 |
+| bandwidth correction (§38) | wideband band is 1.8–63 kHz, not ~280 kHz | status page was stale; detection unaffected |
+| optimal-receiver bound (§38 addendum) | matched+whitened receiver vs rect correlator | only +0.5 dB; a formula error was caught |
 
 ## Phase 4: reports (from 17 Oct)
 
@@ -62,3 +65,4 @@ numbers (§) refer to [`../afe-architecture.md`](../afe-architecture.md). Full h
 |---|---|---|
 | [`2026-10-17-overview.md`](2026-10-17-overview.md) | 10-17 | whole project so far, in plain language |
 | [`2026-10-17-02-audit-and-noise.md`](2026-10-17-02-audit-and-noise.md) | 10-17 | audit, cancel-device noise and degeneration, integration time |
+| [`2026-10-17-03-dac-bandwidth-receiver.md`](2026-10-17-03-dac-bandwidth-receiver.md) | 10-17 | DAC sizing, bandwidth correction, receiver bound |
