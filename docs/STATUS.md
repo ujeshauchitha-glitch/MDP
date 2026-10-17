@@ -1,6 +1,6 @@
 # TrustSense Layer 1 AFE: status (2026-10-17, audited §33)
 
-One-page summary of where the design stands. Details, derivations and every
+One-page summary of where the design stands. **For a plain-language version see [`reports/`](reports/README.md).** Details, derivations and every
 failed attempt are in [`afe-architecture.md`](afe-architecture.md) (§ numbers
 below) and [`TIA-DESIGN.md`](TIA-DESIGN.md). Everything here is **simulated in
 ngspice 47 with the sky130 models, not built or measured**.
