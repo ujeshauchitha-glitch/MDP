@@ -73,13 +73,18 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
 * §3–§6 of afe-architecture.md (Rf_wide/N tables, SNR tables) are the
   *pre-simulation* hand analysis; keep for the derivations, not the numbers.
 
-## Added after the status above (2026-10-17, see afe-architecture.md §39–§41 and `simulation/twin/`)
+## Added after the status above (2026-10-17; afe-architecture.md §39–§48, `simulation/twin/`, `simulation/rtl/`)
 
-* **Digital twin** (`simulation/twin/`): end-to-end model (slow servo path + fast verifier + Trivium chips + attacks), validated against the SPICE studies (detection SNR within 1.2 %, range choice, lock 24.5 ms, PPG gain and noise).
-* **Chip generator: Trivium** (replaces the predictable LFSR). **Relay attack is not defendable inside Layer 1**: needs module-level measures; state it in the threat model (§40).
-* **Cancel converter:** gate-voltage DAC with switched source resistor; a 100 kΩ output adds < 0.1 pA (§41). Splitting into unit cells does not change noise (§39).
-* **Fast-path ADC:** ≥ 1.9 MS/s (4 samples/chip), LSB ≤ 300 µV input-referred (§41).
-* **Area/power estimates:** ≈ 90 000 µm² (~5 tiles, **does not fit one**), digital+ADC ≈ 22 µW, total ≈ 83–96 µW (§41).
+* **Digital twin** (`simulation/twin/`): end-to-end model (servo path + fast verifier + Trivium chips + attacks), validated against the SPICE studies (detection SNR within 1.2 %, range choice, lock 24.5 ms, PPG gain and noise).
+* **Digital blocks as RTL** (`simulation/rtl/`, Amaranth + yosys): Trivium (301 FF / 522 gates), fast-path verifier (422 FF / 4 754 gates, bit-exact vs the fixed-point model), servo with auto-range (126 FF / 1 934 gates; closed-loop lock 25 ms). §44.
+* **Chip generator = Trivium; key/IV protocol specified** (§40, §46): replay and wrong-key frames are rejected by the residual test; an IV must never repeat.
+* **Relay attack is not defendable inside Layer 1** (§40): needs module-level measures; state it in the threat model.
+* **Area reduction** (§42): one T-network per range instead of the 111 MΩ parallel resistor; Cc 25 pF would cost 11 % in reach.
+* **Cancel converter:** gate-voltage DAC + ΣΔ with switched source resistor (§41, §45): a 100 kΩ output adds < 0.1 pA, ripple < 0.06 mV at the slow output; splitting into unit cells changes nothing (§39).
+* **Fast-path ADC:** 4 samples/chip, 6 bits at 300 µV LSB with a programmable-gain preamp (§41, §44).
+* **Ambient interference (new limitation, §47):** fixed residual thresholds fail at 1 % flicker; adaptive thresholds from dark frames work up to ≈ 10 % (mains) / 1 % (kHz lamp PWM) of I_DC; adaptation logic not built.
+* **Budget from synthesis:** ≈ 161 000 µm² (≈ 9 Tiny-Tapeout 1×1 tiles, ≈ 12 with routing margin); power ≈ 92–105 µW vs the 87 µW goal (not met with the residual test) (§44).
+* **Flicker model** (§48): extracted 3.7×10⁻¹⁰ V²·µm² (NMOS), still unverified against silicon.
 
 ## Open items and risks (most important first)
 

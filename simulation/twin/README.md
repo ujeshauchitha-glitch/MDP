@@ -11,5 +11,12 @@ All numbers come from the SPICE runs (`simulation/spice/results_final`, `simulat
 | `validate.py`, `validation.txt` | twin vs the stand-alone SPICE-based studies (fast path within 1.2 % on d; slow path range, lock, PPG gain, noise match) |
 | `scenarios.py`, `scenarios.txt` | genuine contact and attacks end to end |
 
+| `relay_study.py`, `adc_study.py`, `simple_residual.py`, `fir_residual.py`, `iir_residual.py`, `hw_model.py` | relay attack, digitisation, hardware residual-test studies; `hw_model.py` = bit-accurate fixed-point model of the verifier RTL |
+| `protocol.py` | key/IV/replay/delay-tolerance checks (§46) |
+| `interference.py`, `interference_adaptive.py` | ambient-light interference with fixed and adaptive thresholds (§47) |
+| `budget.py` | area/power budget using the synthesised RTL (§44) |
+
+The RTL (Amaranth HDL, simulated and synthesised with yosys) is in `../rtl/`.
+
 Run: `python validate.py`, `python scenarios.py` (no ngspice needed; uses stored SPICE data).
 Known artefact: the slow-path "lock time" (5 mV criterion) can read ~380 ms at 300 nA in some noise seeds; the DAC itself locks in ~25 ms.
