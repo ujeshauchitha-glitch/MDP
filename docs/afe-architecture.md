@@ -1818,3 +1818,29 @@ the amplitude (A = 1: 99 %). **Conclusion: relay is not defendable inside Layer 
 stated as "resists blind and key-guessing injection, not a real-time optical relay"**, and a relay defence must come from the
 module (sealed LED–photodiode path, LED current sensing) or from a higher layer. Recommended residual-risk wording in the
 threat model.
+
+## 41. Cancel-current converter, fast-path digitisation, area and digital power (2026-10-17)
+
+**Cancel-current converter: a gate-voltage DAC, not a current DAC.** The servo is a closed loop, so the converter
+needs resolution, monotonicity and low noise, not linearity. The cancel current is set by a 12-bit voltage DAC
+(resistor string, ΣΔ optional) driving the gate of the degenerated sink Msv (n unit cells, §39) whose source resistor
+is switched with the TIA range (≈ 30 MΩ / 3 MΩ / 300 kΩ for the 1 G / 100 M / 10 M ranges, giving the ≈ 0.3 V drop of
+§34 at the top of each range). Check with the new `gdrv=`/`gcap=` options (DAC Thévenin resistance and gate cap;
+`results` of 0.5–100 Hz slow noise): 100 nA/3 MΩ: 1.8 pA with a 0 Ω, 100 kΩ and 1 MΩ DAC output; 1 µA/300 kΩ: 9.5 pA (ideal) /
+9.6 pA (100 kΩ) / 9.9 pA (1 MΩ). **A voltage DAC with ≤ 100 kΩ output resistance adds < 0.1 pA.** The current step per
+DAC LSB is ΔV_LSB/(R_s + 1/g_m) (about 0.6 V span / 4096 = 0.15 mV → ≈ 0.05 nA at 3 MΩ, ≈ 0.45 nA at 300 kΩ; analytic
+estimate, not simulated), finer than the 0.5 nA assumed in §23, so the ΣΔ fine path can be dropped. Not done: transistor-level
+resistor string / switch design, INL (irrelevant in closed loop), range-switch glitch of the extra resistors (§31 covers the
+TIA switches only).
+
+**Fast-path digitisation (a block that was undefined until now)** (`twin/adc_study.py`). Output noise is 110 µV rms per sample at
+7.68 MS/s, the signal peak 0.8 mV at 100 nA. Detection SNR relative to ideal 16 samples/chip: 8 samples/chip −0.01 dB, **4 samples/chip
+(1.92 MS/s) −0.16 dB**, 2 samples/chip −0.8 dB, 1 sample/chip −5.8 dB; quantiser LSB 100 µV −0.05…−0.2 dB, 300 µV −0.6 dB (4/chip),
+1 mV −10 dB. So the fast ADC needs ≥ 1.9 MS/s and an input-referred LSB ≤ 300 µV: a programmable gain stage then an 8-bit ADC.
+
+**Area and digital power budget** (`twin/budget.py`, first-order estimates from stated sky130 densities; no synthesis or layout):
+total ≈ 90 000 µm² ≈ 5 Tiny-Tapeout 1x1 tiles (≈ 6.6 with routing margin). The largest items: correlator/control logic (guess,
+22 000), Rpar 111 MΩ (13 900), Cc 50 pF double-MIM (12 500), Trivium (12 300). **It does not fit one tile**; a 4x2 or larger
+allocation is needed, or the design must change (e.g. smaller Cc and Cj-limited bandwidth, 100 MΩ range from a switched T-network instead of a 111 MΩ parallel
+resistor, which removes ≈ 14 000 µm²). Digital + ADC power ≈ 22 µW (fast ADC 15, Trivium 6); with the 61–74 µW analog
+(low-power bias) the chip is ≈ 83–96 µW against the 87 µW goal. Both are estimates until a synthesis and layout flow runs.

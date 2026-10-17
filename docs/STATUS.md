@@ -73,6 +73,14 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
 * §3–§6 of afe-architecture.md (Rf_wide/N tables, SNR tables) are the
   *pre-simulation* hand analysis; keep for the derivations, not the numbers.
 
+## Added after the status above (2026-10-17, see afe-architecture.md §39–§41 and `simulation/twin/`)
+
+* **Digital twin** (`simulation/twin/`): end-to-end model (slow servo path + fast verifier + Trivium chips + attacks), validated against the SPICE studies (detection SNR within 1.2 %, range choice, lock 24.5 ms, PPG gain and noise).
+* **Chip generator: Trivium** (replaces the predictable LFSR). **Relay attack is not defendable inside Layer 1**: needs module-level measures; state it in the threat model (§40).
+* **Cancel converter:** gate-voltage DAC with switched source resistor; a 100 kΩ output adds < 0.1 pA (§41). Splitting into unit cells does not change noise (§39).
+* **Fast-path ADC:** ≥ 1.9 MS/s (4 samples/chip), LSB ≤ 300 µV input-referred (§41).
+* **Area/power estimates:** ≈ 90 000 µm² (~5 tiles, **does not fit one**), digital+ADC ≈ 22 µW, total ≈ 83–96 µW (§41).
+
 ## Open items and risks (most important first)
 
 1. **Spec miss at low photocurrent.** Below ≈ 24 nA (2 % modulation) the

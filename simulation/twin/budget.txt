@@ -1,0 +1,24 @@
+AREA estimate [um^2]
+      12500  Cc 50 pF coupling cap (double MIM, 4 fF/um2)
+       2500  T-network R1+R2 (2 x 10 Mohm)
+      13875  Rpar 111 Mohm (100M range)
+       1262  Rpar 10.1 Mohm (10M range)
+       4162  cancel-device degeneration Rs 30M + 3M + 0.3M (per range)
+        514  bias degeneration 3 Mohm + 2x mirror 200 kohm + TIA 314 kohm
+       5000  feedback / compensation caps (<= 1.5 pF x3 + misc 5 pF)
+       4800  cancel device cells (16 x 200 um2 gate, plus routing x1.5)
+       3500  two op-amps + mirrors + switches
+       4000  slow ADC 10 bit / 2 kS/s + gate-voltage DAC 12 bit (string)
+       3500  fast preamp + 8 bit ADC ~2 MS/s
+      12270  Trivium (288 FF + ~100 gates) @50 % util
+      22500  correlator (48x accumulate, 14 bit) + servo FSM + control (~3000 gate-eq)
+      90384  TOTAL = 5.0 Tiny-Tapeout 1x1 tiles (x1.3 routing margin: 6.6)
+
+DIGITAL / MIXED-SIGNAL POWER estimate [uW]
+     6.01  Trivium 288 FF + 100 gates @ 480 kHz (x2 clock tree)
+     0.81  correlator add/sub 14 bit @ 1.92 MS/s (4 samples/chip)
+     0.15  servo logic @ 2 kHz + SD DAC @ 100 kHz
+    14.75  fast ADC 8 bit @ 1.92 MS/s (Walden FoM 30 fJ/step)
+     0.06  slow ADC 10 bit @ 2 kS/s
+     0.06  leakage ~6000 gates x 10 pW
+    21.83  TOTAL digital+ADC;  + analog 61-74 uW (low-power bias) = 83-96 uW  (original goal 87 uW)
