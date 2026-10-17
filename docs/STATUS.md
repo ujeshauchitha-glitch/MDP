@@ -36,7 +36,7 @@ ngspice 47 with the sky130 models, not built or measured**.
 |---|---|---|
 | Slow-path gain | 0.986–0.997 GΩ at all PVT and ±10 % supply points; **3 ranges 1 GΩ / 100 MΩ / 10 MΩ**, auto-selected, PPG gain 0.9986–0.9989 from 5 nA to 1 µA | §20, §22, §24 |
 | Slow-path noise (0.5–100 Hz, I_DC = 100 nA) | 7.4–9.5 pA RMS | §14, §20 |
-| Wideband bandwidth / gain | ≈ 250–300 kHz (target 480), 314 kΩ | §15 |
+| Wideband bandwidth / gain | **−3 dB band 1.8–63 kHz** at the final IBX = 300 nA (gain at 480 kHz = 13 % of peak; target 480 kHz not met; ≈ 280 kHz only at IBX = 1 µA), 314 kΩ; costs ≈ 1.2 dB vs a matched chip rate | §21, §38 |
 | Wideband input noise | ≈ 0.6 pA/√Hz at 100 kHz (hand budget was 0.24) | §17 |
 | **Min I_DC for Pd ≥ 99.9 % at Pfa = 1e-8** | **24 nA (m = 2 %), 49 nA (1 %), 97 nA (0.5 %)** | §18 |
 | Same across PVT (m = 2 %) | 21–29 nA | §20, §29 |

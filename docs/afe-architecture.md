@@ -1584,6 +1584,9 @@ numbers from the raw files, and hunting for stale statements. Tools:
 * **`STATUS.md` stale entries** (still listing already-finished work as open, an outdated bias
   spread, and an out-of-date reproduce block): fixed in the same commit.
 
+* **Wideband bandwidth was misstated** (≈ 280 kHz instead of 1.8–63 kHz for the final design): found in
+  a later check, corrected in §38.
+
 **Known weak points that the audit could not remove (unchanged, restated):**
 * the noise *magnitudes* depend on the sky130 HV device flicker model (no silicon data);
 * the DAC is behavioral and its noise is *assumed* to equal one NMOS sink (the dominant
@@ -1736,3 +1739,26 @@ L = 2 µm (area 200 µm²) in all earlier results. Slow-path noise (0.5–100 Hz
 **Caveats.** One behavioral sink, one corner; the resistor is ideal (thermal noise only);
 flicker model unverified; area numbers are gate areas, not layout (the 3 MΩ and 300 kΩ degeneration
 resistors also take area); the sigma-delta fine path and the switching of legs were not simulated.
+
+## 38. Correction: the wideband bandwidth of the final design (2026-10-17)
+
+`STATUS.md` and the diagram quoted "≈ 250–300 kHz (target 480)". That figure comes from §15, where the
+cascode bias IBX was 1 µA. The final design (§17, §18, §29) runs IBX = 300 nA, which lowers the
+input-node bandwidth (≈ gm/(2π·Cj) with Cj = 10 pF). The measured response of the final channel
+(`results_final/chan_100n.txt`, I_DC = 100 nA):
+
+| quantity | final channel (IBX 300 nA) | §15 variant (IBX 1 µA) / earlier real-bias channel |
+|---|---|---|
+| peak gain | 3.25e5 V/A at 3 kHz | 2.81e5 V/A at 3 kHz (`results_real`) |
+| −3 dB band | **1.8 kHz – 63 kHz** | 1.8 kHz – 112 kHz (`results_real`); ≈ 280 kHz at IBX = 1 µA |
+| gain at 100 / 300 / 480 kHz (÷ peak) | 0.63 / 0.27 / 0.13 | 0.73 / 0.32 / 0.16 |
+
+The 480 kHz chip rate therefore runs far beyond the channel bandwidth: the chip waveform is heavily
+smeared (inter-symbol interference), which the Monte Carlo (§16–§21, §30) includes because it
+uses this exact channel. Trade-off on the final channel at a fixed 100 µs window (chip-rate sweep, N
+scaled with the rate): 480 kchip/s N = 48 → 24.3 nA; 240 kchip/s N = 24 → 21.6 nA; 160 kchip/s N = 16 →
+21.3 nA; 120 kchip/s N = 12 → 21.3 nA: only 12 % better at 4x lower rate, and the shorter code weakens the
+security margin (§1a/§25). With N = 48 and a longer window: 240 kchip/s, 200 µs → 15.2 nA; 120 kchip/s,
+400 µs → 10.6 nA. The conclusion of §21 stands (the bandwidth shortfall is a minor loss); the
+statement of the bandwidth itself was the error. Raising the bandwidth requires a larger IBX (more
+gm), which costs noise (§12, §17); no extra receiver filtering/equalisation was simulated.

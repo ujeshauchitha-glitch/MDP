@@ -24,7 +24,7 @@ sigma, dn, need, dly = w.metric(f, H, Sn, 100e-9)
 print("%%.1f %%d %%.1f %%.4f %%.1f %%.2f" %% (cm.RCHIP / 1e3, cm.N, cm.N / cm.RCHIP * 1e6, dn, need, dly / cm.OS))
 ''' % (str(HERE.parent / "spice" / "tools"), CHAN)
 
-configs = [(240e3, 24), (240e3, 48), (320e3, 32), (320e3, 48), (400e3, 40), (400e3, 48), (480e3, 48),
+configs = [(120e3, 12), (120e3, 48), (160e3, 16), (160e3, 48), (240e3, 24), (240e3, 48), (320e3, 32), (320e3, 48), (400e3, 40), (400e3, 48), (480e3, 48),
            (600e3, 60), (720e3, 72), (960e3, 96), (480e3, 96), (480e3, 144)]
 if os.environ.get("LONG") == "1":     # long integration windows at fixed 480 kchip/s (code length grows with T_int)
     configs = [(480e3, n) for n in (48, 96, 144, 192, 288, 480, 720, 960, 1440)]
