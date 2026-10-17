@@ -1,0 +1,22 @@
+* gate-referred flicker noise of the sky130 5 V devices used in the design
+.include "sky130_min.lib"
+.option scale=1u
+Vs vs 0 DC 3.3
+Vg g 0 DC 0.9 AC 1
+Rd vs d 20k
+XN d g 0 0 sky130_fd_pr__nfet_g5v0d10v5 W=100 L=2
+Vg2 g2 0 DC 2.0 AC 1
+Rs2 s2 0 20k
+XP s2 g2 vs vs sky130_fd_pr__pfet_g5v0d10v5 W=100 L=2
+.control
+ op
+ print v(d) v(s2)
+ noise v(d) Vg dec 10 0.1 100k
+ setplot noise1
+ wrdata flk_n.txt inoise_spectrum
+ noise v(s2) Vg2 dec 10 0.1 100k
+ setplot noise3
+ wrdata flk_p.txt inoise_spectrum
+ quit
+.endc
+.end

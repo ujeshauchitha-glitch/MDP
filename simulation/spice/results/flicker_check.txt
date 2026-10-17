@@ -1,0 +1,3 @@
+# gate-referred flicker noise of the PDK model (simulation/spice/tools/flicker_check.spice), tt/27C, W=100 L=2 5V devices at ~40 uA / ~80 uA, 0.1-1 Hz fit
+NMOS sky130_fd_pr__nfet_g5v0d10v5: S_vg(1 Hz) = 1.86e-12 V^2/Hz (1.37 uV/rtHz); S_vg*W*L*f = 3.7e-10 V^2 um^2; white 13.9 nV/rtHz
+PMOS sky130_fd_pr__pfet_g5v0d10v5: S_vg(1 Hz) = 3.6e-13 V^2/Hz (0.60 uV/rtHz); S_vg*W*L*f = 7.2e-11 V^2 um^2; white 7.3 nV/rtHz

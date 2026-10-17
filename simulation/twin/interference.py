@@ -1,5 +1,5 @@
 """Ambient-light interference on the fast path (twin, I_DC = 100 nA total photocurrent of which the interferer is a sine of
-amplitude A_int, m = 2 %, 6-bit/300 uV clipping included). Legitimate acceptance of the D1 detector and the correlator-only detector,
+amplitude A_int, m = 2 %; floating-point samples, no ADC quantisation or clipping). Legitimate acceptance of the D1 detector and the correlator-only detector,
 with the residual threshold calibrated WITHOUT interference (as it would be in the field)."""
 import numpy as np
 import trustsense_twin as t

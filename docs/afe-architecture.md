@@ -1945,3 +1945,12 @@ A gap found while extending the twin (`twin/interference.py`, `interference_adap
 * **Design consequence:** the frame schedule needs periodic dark frames (e.g. 1 in 10) to adapt both thresholds; the verifier RTL (§44) takes `eta` and `thr` as inputs, so only the adaptation logic is missing
   (a second accumulator mode and a quantile/peak tracker). **Interference tolerance is a limitation to state: ≲ 10 % at mains frequencies, ≲ 1 % for kHz-range lamp PWM** (relative to the DC photocurrent). A front-end notch or an
   interference canceller would extend it; not designed.
+
+## 48. Check of the flicker-noise model (2026-10-17)
+
+The slow-path noise is 85–95 % flicker noise of the cancel device (§33), so the PDK's flicker model decides the PPG noise. `tools/flicker_check.spice` extracts the gate-referred 1/f noise of the two 5 V
+devices used (`results/flicker_check.txt`): NMOS `nfet_g5v0d10v5` S_vg·W·L·f = **3.7×10⁻¹⁰ V²·µm²** (1.4 µV/√Hz at 1 Hz for W·L = 200 µm²), PMOS 7.2×10⁻¹¹ V²·µm².
+For comparison, gate-referred 1/f coefficients of thin-oxide NMOS in 130–180 nm CMOS are commonly in the 10⁻¹¹–10⁻¹⁰ V²·µm² range (my recollection of typical values, **not** a measurement of this PDK and no
+citation checked), so the model's NMOS number looks at the high end, i.e. if anything pessimistic; thick-oxide devices can be several times noisier than thin-oxide ones, so the model may well be right. **There is no
+silicon data in this project, so the model remains unverified.** Sensitivity: while the cancel device dominates, slow-path noise scales with √(K_f) (a 4× lower K_f halves it) until the 1.3 pA op-amp/R_f floor;
+the wideband path is white-noise dominated and is unaffected. A measurement on a test chip (an array of W·L = 200 µm² NMOS at 1 µA with and without source degeneration) is the way to settle it.
