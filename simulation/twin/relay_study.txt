@@ -1,0 +1,15 @@
+legit z/sigma0: mean 35.8, window [26.6, 44.9] sigma0
+relay (attacker re-emits every chip with delay tau, LED blocked so only the relay light arrives):
+   tau      A     D1 accepts   D1+amplitude window accepts
+   20 ns  1.0      1.000         0.999
+   20 ns  1.5      1.000         0.017
+   20 ns  2.0      1.000         0.000
+  130 ns  1.0      0.995         0.994
+  130 ns  1.5      0.913         0.018
+  130 ns  2.0      0.557         0.000
+  260 ns  1.0      0.570         0.569
+  260 ns  1.5      0.006         0.000
+  260 ns  2.0      0.000         0.000
+  520 ns  1.0      0.000         0.000
+  520 ns  1.5      0.000         0.000
+  520 ns  2.0      0.000         0.000

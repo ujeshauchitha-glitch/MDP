@@ -1792,3 +1792,29 @@ the noise computed here), the switching of cells on and off, glitch, and the sig
 sky130 flicker model scaling with area is itself unverified against silicon. Design consequence: choose the
 segmentation (e.g. 16 unit cells plus a binary fine part) for linearity and glitch; the noise is set by
 the total gate area switched ON and by the ≈ 0.3 V source drop.
+
+## 40. Digital twin, chip generator and the relay attack (2026-10-17)
+
+**Twin** (`simulation/twin/`, see its README): one model of light → photodiode → slow servo path (auto-range,
+SPICE-fitted plants and noise) and fast path (SPICE channel and noise, correlator + residual test), driven by a
+keyed chip stream. Validation (`validation.txt`): fast-path detection SNR d within 1.2 % of the stand-alone Monte
+Carlo at all five I_DC (min I_DC 23–36 nA, 24.3 nA at 100 nA), slow-path range choice, 24.5 ms lock, PPG gain
+0.997–0.999 and 0.5–100 Hz noise (0.6 / 1.3 / 1.6 / 3.1 / 8.8 pA at 5 n / 30 n / 100 n / 300 n / 1 µA) match the servo
+study (0.7 / 1.4 / 1.8 / 4.2 / 10.5 pA; the twin is 10–25 % lower, a different noise seed and an 8 s window). A 1 µA run
+shorter than ~8 s reads 120 pA because of the post-range-switch settling transient, not noise.
+
+**Chip generator decision: Trivium** (80-bit key, 80-bit IV, 288 flip-flops, one chip per clock). `codegen.py` matches
+the eSTREAM keystream vector (key = IV = 0: FBE0BF265859051B…). Replaces the LFSR-32, which §25 showed is
+predictable after 64 chips; a keyed hash stream (the §25 stand-in) is unpredictable and Trivium is the small
+hardware realisation of that role. Not done: key storage / provisioning and frame synchronisation between LED driver and
+verifier (both sides run the same keystream), side channels.
+
+**Relay attack (`relay_study.py`).** An attacker who observes each chip optically and re-emits it within the 130 ns
+that passes D1 (97–100 % accepted; 0 at ≥ 520 ns) cannot be stopped by any receiver-side processing, because the code
+is known to the attacker one chip-time after the LED shows it and the chip is 2.08 µs: only an attacker latency above
+about half a chip is detectable, and a fast photodetector + comparator + LED driver has tens of ns. Adding a window on the
+correlation amplitude rejects mis-scaled relays (A = 1.5x: 91 % → 1.8 % accepted at 130 ns) but not an attacker who matches
+the amplitude (A = 1: 99 %). **Conclusion: relay is not defendable inside Layer 1; the security claim must be
+stated as "resists blind and key-guessing injection, not a real-time optical relay"**, and a relay defence must come from the
+module (sealed LED–photodiode path, LED current sensing) or from a higher layer. Recommended residual-risk wording in the
+threat model.
