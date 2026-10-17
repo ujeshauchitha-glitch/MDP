@@ -72,6 +72,9 @@ def netlist(o):
         s = re.sub(r"^Rbias_w [^\n]*$", "Ibw vdpwr nbias_w DC " + o["ibias"].split(",")[1], s, flags=re.M)
     if o.get("inbulk") == "src":   # op-amp input pairs in their own n-well tied to the tail node: no VDD body effect on Vt
         s = re.sub(r"^(XM[12]_[sw]\s+\S+\s+\S+\s+(tail1_[sw]))\s+vdpwr", r"\1 \2", s, flags=re.M)
+    if "msvm" in o or "msvl" in o:   # cancel-device geometry: multiplier m and channel length L (area study)
+        s = s.replace("XMsv  x vc_s vgnd vgnd sky130_fd_pr__nfet_g5v0d10v5 W=100 L=2",
+                      "XMsv  x vc_s vgnd vgnd sky130_fd_pr__nfet_g5v0d10v5 W=100 L=" + o.get("msvl", "2") + " m=" + o.get("msvm", "1"), 1)
     if "sdeg" in o:   # source-degenerated cancel (sink) device: lowers its flicker-noise current
         s = s.replace("XMsv  x vc_s vgnd vgnd", "XMsv  x vc_s sd_n vgnd", 1)
         s = s.replace(".param IDC", "Rsd   sd_n vgnd " + o["sdeg"] + "\n.param IDC", 1)

@@ -1702,3 +1702,37 @@ re-acquisitions (0) are unchanged; only the noise changes:
 Before degeneration the PPG SNR was ≈ 44 – 45 dB at every I_DC from 30 nA up (the cancel
 device's noise scales with I_DC like the signal); degeneration makes it grow with I_DC.
 Same caveats as §34 (behavioral sink, ideal resistor, flicker model unverified, tt/27 °C).
+
+## 37. DAC unit-cell sizing: noise versus area and degeneration (2026-10-17)
+
+Follow-up to §34 (`msvm=`, `msvl=` options of `wide_noise_sweep.py`; data
+`simulation/spice/results/sink_area.txt`). The cancel device is `g5v0d10v5`, W = 100 µm,
+L = 2 µm (area 200 µm²) in all earlier results. Slow-path noise (0.5–100 Hz RMS, 1 GΩ range, tt/27 °C):
+
+| geometry | gate area | I_DC | degeneration | noise | vs reference |
+|---|---|---|---|---|---|
+| W 100, L 2, m 1 (reference) | 200 µm² | 1 µA | 300 kΩ (0.3 V) | 9.5 pA | 1.0x |
+| L 4, m 1 | 400 µm² | 1 µA | 300 kΩ | 6.5 pA | 1.5x lower |
+| m 4 | 800 µm² | 1 µA | 300 kΩ | 5.5 pA | 1.7x |
+| L 4, m 4 | 1600 µm² | 1 µA | 300 kΩ | 4.1 pA | 2.3x |
+| m 16 | 3200 µm² | 1 µA | 300 kΩ | **3.5 pA** | 2.7x |
+| m 4 | 800 µm² | 1 µA | 150 kΩ (0.15 V) | 9.1 pA | ≈ no gain |
+| W 100, L 2, m 1 / m 4 | 200 / 800 µm² | 100 nA | 3 MΩ (0.3 V) | 1.8 / 1.5 pA | op-amp floor (1.3 pA) |
+
+**Rules for the DAC cells:**
+1. **Degeneration matters more than area**: the ≈ 0.3 V drop is what gives the 4.7 – 8x
+   (§34); area at a 0.15 V drop does little.
+2. **Noise falls roughly as area^−0.4 to −0.5** once degenerated (flicker): 4x area → 1.7x,
+   16x → 2.7x at 1 µA. The noise above the ≈ 1.3 pA op-amp/Rf floor is what area removes.
+3. **Splitting into many small cells at the same total gate area and the same drop per
+   cell gives the same noise** (each cell's current noise scales with its own gm, and both the
+   current and the area are shared out in proportion), so the segmentation of the DAC should
+   be chosen for linearity and glitch, not noise; **total gate area of the cells that are ON
+   is the noise lever.** (Reasoning, not simulated with a real segmented DAC.)
+4. Sizing example: for ≤ 2x the floor (≈ 2.6 pA) at 1 µA the cancel path needs about
+   ≳ 3000 µm² of gate area plus a 300 kΩ-class degeneration per active leg; at 100 nA the existing
+   200 µm² with 3 MΩ is already at the floor.
+
+**Caveats.** One behavioral sink, one corner; the resistor is ideal (thermal noise only);
+flicker model unverified; area numbers are gate areas, not layout (the 3 MΩ and 300 kΩ degeneration
+resistors also take area); the sigma-delta fine path and the switching of legs were not simulated.

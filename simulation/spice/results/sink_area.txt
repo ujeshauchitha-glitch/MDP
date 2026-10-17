@@ -1,0 +1,9 @@
+# cancel-device geometry study, I_DC=1u unless noted, sdeg=300k (0.3 V drop), default tolerances
+area_100n_m1           tt/27C IDC=100n: Vsg=0.981148 s_out=1.400 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=231fA RMS0.5-100Hz=1.8pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.03e+05 RTI100k=616fA minIDC(m2%)=23.9nA
+area_100n_m4           tt/27C IDC=100n: Vsg=0.905515 s_out=1.400 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=199fA RMS0.5-100Hz=1.5pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.02e+05 RTI100k=620fA minIDC(m2%)=24.0nA
+area_1u_L4_m1          tt/27C IDC=1u: Vsg=1.142502 s_out=1.401 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=874fA RMS0.5-100Hz=6.5pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.03e+05 RTI100k=650fA minIDC(m2%)=31.2nA
+area_1u_L4_m4          tt/27C IDC=1u: Vsg=1.068867 s_out=1.399 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=534fA RMS0.5-100Hz=4.1pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.02e+05 RTI100k=653fA minIDC(m2%)=31.3nA
+area_1u_W100L2_m1      tt/27C IDC=1u: Vsg=1.104607 s_out=1.399 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=1301fA RMS0.5-100Hz=9.5pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.03e+05 RTI100k=650fA minIDC(m2%)=31.2nA
+area_1u_m16            tt/27C IDC=1u: Vsg=0.955705 s_out=1.401 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=441fA RMS0.5-100Hz=3.5pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2e+05 RTI100k=663fA minIDC(m2%)=31.6nA
+area_1u_m4             tt/27C IDC=1u: Vsg=1.030926 s_out=1.401 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=729fA RMS0.5-100Hz=5.5pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.02e+05 RTI100k=652fA minIDC(m2%)=31.2nA
+area_1u_m4_R150k       tt/27C IDC=1u: Vsg=0.820752 s_out=1.400 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=1229fA RMS0.5-100Hz=9.1pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.02e+05 RTI100k=676fA minIDC(m2%)=31.9nA
