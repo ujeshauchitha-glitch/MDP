@@ -1396,3 +1396,37 @@ op-amp and supply-rejection changes did not move the detection reach.
 in §9/§14; with default tolerances (the gate voltage is fixed, so no lock is needed)
 the numbers above are monotonic in I_DC. Slow-path gate voltages must be given with
 six digits (a 5e-5 V rounding error at 1 µA is ≈ 1.5 V of output).
+
+## 31. Range switches as real MOS devices: glitch, leakage, settling (2026-10-17)
+
+Tool: `simulation/spice/tools/range_switch_tran.py`; data
+`simulation/spice/results/range_switch.txt`. §24 used ideal switches. Here the
+lower-gain resistor (111 MΩ or 10.1 MΩ) is in series with a thick-oxide NMOS
+(`g5v0d10v5`, W = 2 µm, L = 0.5 µm; gate 0 ↔ 3.3 V in 10 ns) between the photodiode
+node `x` and `s_out`; I_DC = 100 nA with the cancel device held at its locked gate
+voltage (6-digit value per corner), Cf = 100 fF, final front end.
+
+| case | switch | corner | peak glitch on s_out | DC shift after | settles to ±20 mV |
+|---|---|---|---|---|---|
+| 100 MΩ range ON | W 2 µm | tt/27 °C | +3 mV | −0.8 mV | immediately |
+| 100 MΩ range OFF | W 2 µm | tt/27 °C | +7 mV (at +90 µs) | +0.8 mV | immediately |
+| 10 MΩ range ON / OFF | W 2 µm | tt/27 °C | +2 / +7 mV | −0.9 / +0.9 mV | immediately |
+| 100 MΩ range ON | W 10 µm | tt/27 °C | +13 mV | −0.8 mV | immediately |
+| 100 MΩ range ON / OFF | W 2 µm | tt/125 °C | +3 / +5 mV | +0.1 / −0.1 mV | immediately |
+| 100 MΩ range ON / OFF | W 2 µm | ss/125 °C | +3 / +6 mV | +0.5 / −0.5 mV | immediately |
+| 10 MΩ range OFF | W 2 µm | tt/125 °C | +5 mV | −0.1 mV | immediately |
+
+**Result: benign.** The switch's Ron (a few tens of kΩ) is negligible against 10–111 MΩ;
+charge injection produces a 2–13 mV output glitch (smaller with the narrow switch:
+width trades Ron against injection) and the output returns inside ±20 mV with no
+measurable settling time, because with the DAC cancel locked the node has no
+imbalance to redistribute. **Off-state leakage is negligible even at 125 °C: the
+DC shift between the switch-on and switch-off states is ≤ 1 mV on the 1 GΩ
+range (≈ 1 pA).** (A first 125 °C run with the 27 °C gate voltage showed `s_out`
+railed at 2.02 V: that was an unlocked cancel device, not the switch.)
+
+**Caveats.** One I_DC (100 nA) and PPG-free input; a range change while a large
+residual DC error or a PPG peak is present was not simulated (the digital policy in §24
+re-centres the output after the switch); the 1 GΩ range at very low I_DC (≤ 10 nA)
+where 1 pA is 1 mV of a 10 pA signal was not simulated; the switch's gate drive
+(0/3.3 V) and its driver are ideal.

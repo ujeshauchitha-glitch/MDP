@@ -1,0 +1,13 @@
+# range-switch transients with a real NMOS (g5v0d10v5) series switch, tools/range_switch_tran.py, I_DC=100n, Msv fixed at the lock voltage
+## 27C (Vsg 0.552389)
+R100M_off_W2           Rpar=111Meg switch W/L=2/0.5 dir=off 27C: pre-switch s_out=1.4005 V, peak glitch +7 mV at +90 us, final shift +0.8 mV, settles to within 20 mV of final after 0 us; x excursion 0.1 mV
+R100M_on_W10           Rpar=111Meg switch W/L=10/0.5 dir=on 27C: pre-switch s_out=1.4013 V, peak glitch +13 mV at +0 us, final shift -0.8 mV, settles to within 20 mV of final after 0 us; x excursion 0.2 mV
+R100M_on_W2            Rpar=111Meg switch W/L=2/0.5 dir=on 27C: pre-switch s_out=1.4013 V, peak glitch +3 mV at +0 us, final shift -0.8 mV, settles to within 20 mV of final after 0 us; x excursion 0.0 mV
+R10M_off_W2            Rpar=10.1Meg switch W/L=2/0.5 dir=off 27C: pre-switch s_out=1.4004 V, peak glitch +7 mV at +90 us, final shift +0.9 mV, settles to within 20 mV of final after 0 us; x excursion 0.1 mV
+R10M_on_W2             Rpar=10.1Meg switch W/L=2/0.5 dir=on 27C: pre-switch s_out=1.4013 V, peak glitch +2 mV at +0 us, final shift -0.9 mV, settles to within 20 mV of final after 0 us; x excursion 0.1 mV
+## 125C with the correct hot lock voltage
+R100M_off_ss125        Rpar=111Meg switch W/L=2/0.5 dir=off 125C: pre-switch s_out=1.4005 V, peak glitch +6 mV at +90 us, final shift -0.5 mV, settles to within 20 mV of final after 0 us; x excursion 0.1 mV
+R100M_off_tt125        Rpar=111Meg switch W/L=2/0.5 dir=off 125C: pre-switch s_out=1.4005 V, peak glitch +5 mV at +91 us, final shift -0.1 mV, settles to within 20 mV of final after 0 us; x excursion 0.1 mV
+R100M_on_ss125         Rpar=111Meg switch W/L=2/0.5 dir=on 125C: pre-switch s_out=1.3999 V, peak glitch +3 mV at +0 us, final shift +0.5 mV, settles to within 20 mV of final after 0 us; x excursion 0.0 mV
+R100M_on_tt125         Rpar=111Meg switch W/L=2/0.5 dir=on 125C: pre-switch s_out=1.4004 V, peak glitch +3 mV at +0 us, final shift +0.1 mV, settles to within 20 mV of final after 0 us; x excursion 0.0 mV
+R10M_off_tt125         Rpar=10.1Meg switch W/L=2/0.5 dir=off 125C: pre-switch s_out=1.4005 V, peak glitch +5 mV at +91 us, final shift -0.1 mV, settles to within 20 mV of final after 0 us; x excursion 0.1 mV
