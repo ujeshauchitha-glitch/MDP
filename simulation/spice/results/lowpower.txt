@@ -1,0 +1,43 @@
+# power and op-amp bias study (final analog design, digital ADC/DAC logic excluded)
+## baseline bias (2u,4u): power by block (power.py)
+case           total   wide-only  slow-only(+servo sink)
+tt27 3.3V 81.2uA 268uW | wide 54.8uA 181uW | slow 26.4uA 87uW
+tt27 3.63V 299uW | ss125 2.97V 241uW | ff-40 3.63V 291uW | tt125 3.3V 271uW
+## bias sweep, PVT peaking check (lowpower.py): P total / slow peaking dB / slow -3dB
+(see docs s32 table)
+## low-power config (0.5u,1u) with Cf per range: power by block (power_lp.py)
+case           total   wide-only  slow-only
+tt27 3.3V 20.1uA 66uW | wide 13.8uA 46uW | slow 6.3uA 21uW
+tt27 3.63V 74uW | ss125 2.97V 61uW | ff-40 3.63V 72uW | tt125 3.3V 67uW
+## detection reach, low-power config (Cf 150f), I_DC=100n (corner_run.py)
+LP_ff-40_3.63          ff/-40C IDC=100n: Vsg=0.663197 s_out=1.399 | slow Z10Hz=9.97e+08 BW=1.26e+03Hz noise@10Hz=1266fA RMS0.5-100Hz=9.2pA | Ixc/Iw=300/300nA xc=1.08 w_in=1.400 | wide |H|100k=2.16e+05 RTI100k=557fA minIDC(m2%)=21.5nA
+LP_ss125_2.97          ss/125C IDC=100n: Vsg=0.373869 s_out=1.401 | slow Z10Hz=9.94e+08 BW=1.12e+03Hz noise@10Hz=1042fA RMS0.5-100Hz=7.6pA | Ixc/Iw=300/300nA xc=0.89 w_in=1.400 | wide |H|100k=1.86e+05 RTI100k=788fA minIDC(m2%)=30.1nA
+LP_tt-40               tt/-40C IDC=100n: Vsg=0.693694 s_out=1.401 | slow Z10Hz=9.97e+08 BW=1.26e+03Hz noise@10Hz=1306fA RMS0.5-100Hz=9.5pA | Ixc/Iw=300/300nA xc=1.13 w_in=1.400 | wide |H|100k=2.16e+05 RTI100k=560fA minIDC(m2%)=21.6nA
+LP_tt125               tt/125C IDC=100n: Vsg=0.343944 s_out=1.400 | slow Z10Hz=9.95e+08 BW=1.12e+03Hz noise@10Hz=1011fA RMS0.5-100Hz=7.4pA | Ixc/Iw=300/300nA xc=0.83 w_in=1.400 | wide |H|100k=1.87e+05 RTI100k=782fA minIDC(m2%)=29.8nA
+LP_tt27                tt/27C IDC=100n: Vsg=0.552392 s_out=1.402 | slow Z10Hz=9.96e+08 BW=1.19e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.04e+05 RTI100k=646fA minIDC(m2%)=24.8nA
+## 1G ibias sweep
+ibias_0.5u_1u          tt/27C IDC=100n: Vsg=0.552392 s_out=1.402 | slow Z10Hz=9.96e+08 BW=1.59e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.08e+05 RTI100k=635fA minIDC(m2%)=24.2nA
+ibias_1u_1u            tt/27C IDC=100n: Vsg=0.552390 s_out=1.399 | slow Z10Hz=9.97e+08 BW=2.12e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.06e+05 RTI100k=639fA minIDC(m2%)=24.4nA
+ibias_1u_2u            tt/27C IDC=100n: Vsg=0.552390 s_out=1.399 | slow Z10Hz=9.97e+08 BW=2.12e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.06e+05 RTI100k=627fA minIDC(m2%)=23.9nA
+ibias_1u_4u            tt/27C IDC=100n: Vsg=0.552390 s_out=1.399 | slow Z10Hz=9.97e+08 BW=2.12e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.06e+05 RTI100k=620fA minIDC(m2%)=23.7nA
+ibias_2u_2u            tt/27C IDC=100n: Vsg=0.552389 s_out=1.401 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.03e+05 RTI100k=634fA minIDC(m2%)=24.5nA
+ibias_2u_4u_ref        tt/27C IDC=100n: Vsg=0.552389 s_out=1.401 | slow Z10Hz=9.96e+08 BW=2.82e+03Hz noise@10Hz=1156fA RMS0.5-100Hz=8.4pA | Ixc/Iw=300/300nA xc=1.01 w_in=1.400 | wide |H|100k=2.03e+05 RTI100k=628fA minIDC(m2%)=24.3nA
+## range Cf at low bias, peaking
+111Meg   Cf=100f  tt27     tt/27C 3.3V ibias=0.5u,1u   P=    66 uW ( 20.1 uA) | slow peaking +8.02 dB, slow -3dB~5315 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+111Meg   Cf=100f  ss125    ss/125C 2.97V ibias=0.5u,1u   P=    61 uW ( 20.4 uA) | slow peaking +7.94 dB, slow -3dB~4737 Hz | wide peak at 3 kHz, resonance indicator 0.00 dB
+111Meg   Cf=100f  ff-40    ff/-40C 3.63V ibias=0.5u,1u   P=    72 uW ( 19.9 uA) | slow peaking +8.11 dB, slow -3dB~5630 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+111Meg   Cf=200f  tt27     tt/27C 3.3V ibias=0.5u,1u   P=    66 uW ( 20.1 uA) | slow peaking +4.74 dB, slow -3dB~5018 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+111Meg   Cf=200f  ss125    ss/125C 2.97V ibias=0.5u,1u   P=    61 uW ( 20.4 uA) | slow peaking +4.95 dB, slow -3dB~4472 Hz | wide peak at 3 kHz, resonance indicator 0.00 dB
+111Meg   Cf=200f  ff-40    ff/-40C 3.63V ibias=0.5u,1u   P=    72 uW ( 19.9 uA) | slow peaking +4.50 dB, slow -3dB~5315 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+111Meg   Cf=300f  tt27     tt/27C 3.3V ibias=0.5u,1u   P=    66 uW ( 20.1 uA) | slow peaking +2.62 dB, slow -3dB~4737 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+111Meg   Cf=300f  ss125    ss/125C 2.97V ibias=0.5u,1u   P=    61 uW ( 20.4 uA) | slow peaking +2.97 dB, slow -3dB~4222 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+111Meg   Cf=300f  ff-40    ff/-40C 3.63V ibias=0.5u,1u   P=    72 uW ( 19.9 uA) | slow peaking +2.30 dB, slow -3dB~5018 Hz | wide peak at 4 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=500f  tt27     tt/27C 3.3V ibias=0.5u,1u   P=    66 uW ( 20.1 uA) | slow peaking +4.23 dB, slow -3dB~15871 Hz | wide peak at 12 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=500f  ss125    ss/125C 2.97V ibias=0.5u,1u   P=    61 uW ( 20.4 uA) | slow peaking +4.12 dB, slow -3dB~14144 Hz | wide peak at 11 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=500f  ff-40    ff/-40C 3.63V ibias=0.5u,1u   P=    72 uW ( 19.9 uA) | slow peaking +4.32 dB, slow -3dB~16811 Hz | wide peak at 13 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=1p    tt27     tt/27C 3.3V ibias=0.5u,1u   P=    66 uW ( 20.1 uA) | slow peaking +1.77 dB, slow -3dB~14144 Hz | wide peak at 13 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=1p    ss125    ss/125C 2.97V ibias=0.5u,1u   P=    61 uW ( 20.4 uA) | slow peaking +1.95 dB, slow -3dB~12606 Hz | wide peak at 12 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=1p    ff-40    ff/-40C 3.63V ibias=0.5u,1u   P=    72 uW ( 19.9 uA) | slow peaking +1.61 dB, slow -3dB~14983 Hz | wide peak at 15 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=1.5p  tt27     tt/27C 3.3V ibias=0.5u,1u   P=    66 uW ( 20.1 uA) | slow peaking +0.46 dB, slow -3dB~11235 Hz | wide peak at 18 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=1.5p  ss125    ss/125C 2.97V ibias=0.5u,1u   P=    61 uW ( 20.4 uA) | slow peaking +0.68 dB, slow -3dB~10606 Hz | wide peak at 14 kHz, resonance indicator 0.00 dB
+10.1Meg  Cf=1.5p  ff-40    ff/-40C 3.63V ibias=0.5u,1u   P=    72 uW ( 19.9 uA) | slow peaking +0.29 dB, slow -3dB~11901 Hz | wide peak at 21 kHz, resonance indicator 0.00 dB

@@ -42,6 +42,7 @@ ngspice 47 with the sky130 models, not built or measured**.
 | Same across PVT (m = 2 %) | 21–28 nA | §20 |
 | Bias current spread over PVT / supply | 241–363 nA (nominal 300) | §19, §22 |
 | **Supply ±10 % × PVT (VCM 1.4 V)** | slow Z within 1.5 % of 1 GΩ; wide min I_DC 20.8–29.2 nA | §22 |
+| **Analog power** | 241–299 µW at baseline bias; **61–74 µW with a 4x lower op-amp bias (Cf 150 fF/500 fF/1.5 pF), detection reach 2–4 % worse**; digital excluded | §32 |
 | Chip-rate trade | 240→480 kchip/s costs only 12 %; T_int 200 µs cuts need by 37 % | §21 |
 
 The detection numbers were re-verified on the final front end (§30, identical within 0.5 %).

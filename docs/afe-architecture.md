@@ -1430,3 +1430,54 @@ residual DC error or a PPG peak is present was not simulated (the digital policy
 re-centres the output after the switch); the 1 GΩ range at very low I_DC (≤ 10 nA)
 where 1 pA is 1 mV of a 10 pA signal was not simulated; the switch's gate drive
 (0/3.3 V) and its driver are ideal.
+
+## 32. Power budget and a 4x lower-power op-amp bias (2026-10-17)
+
+Tools: `simulation/spice/build/power.py`-style supply-current measurement of the final
+analog design (digital ADC/DAC/controller logic not included); bias and Cf sweeps with an
+AC peaking check (`lowpower.py` family); data `simulation/spice/results/lowpower.txt`.
+
+**Baseline power (op-amp bias 2 µA slow / 4 µA wide):** 81 µA total, **268 µW at tt/27 °C,
+3.3 V; 241 – 299 µW over corners, ±10 % supply** (wideband path 181 µW, slow path
+87 µW). About 3x the original 87 µW target.
+
+**Bias can be reduced 4x without changing detection reach.** Sweeping the op-amp
+reference currents with the rest fixed (tt/27 °C, I_DC = 100 nA, m = 2 %):
+
+| bias slow / wide | wideband min I_DC | slow Z | slow noise | analog power |
+|---|---|---|---|---|
+| 2 / 4 µA (baseline) | 24.3 nA | 0.996 GΩ | 8.4 pA | 268 µW |
+| 1 / 4 µA | 23.7 nA | 0.997 GΩ | 8.4 pA | |
+| 2 / 2 µA | 24.5 nA | 0.996 GΩ | 8.4 pA | |
+| 1 / 2 µA | 23.9 nA | 0.997 GΩ | 8.4 pA | 133 µW |
+| **0.5 / 1 µA** | **24.2 nA** | 0.996 GΩ | 8.4 pA | **66 µW** |
+| 0.25 / 0.5 µA (AC check only) | | | | 34 µW |
+
+(Power scales linearly with the bias.) The wideband response has no secondary
+resonance at any bias or corner. The cost is lower slow-op-amp GBW, which raised
+slow-path response peaking from 2.3 dB (2 µA) to 4.4 dB (0.5 µA) at 50 fF; it is
+removed by a larger feedback capacitor, scaling as Cf ∝ 1/√Rf:
+
+| range | Cf at 2 µA bias (§24) | Cf for 0.5 µA bias | peaking, 3 corners | −3 dB |
+|---|---|---|---|---|
+| 1 GΩ | 50 fF | **150 fF** | 0.03 – 0.28 dB | 1.1 – 1.3 kHz |
+| 100 MΩ | 100 fF | **500 fF** | 0.16 – 0.67 dB | 3.6 – 4.0 kHz |
+| 10 MΩ | 500 fF | **1.5 pF** | 0.29 – 0.68 dB | 10.6 – 11.9 kHz |
+
+**Low-power configuration (adopted as the option, not yet the default in every earlier
+table): op-amp bias 0.5 µA (slow) / 1 µA (wide), Cf 150 fF / 500 fF / 1.5 pF.**
+Analog power **61 – 74 µW over corners and ±10 % supply** (tt/27 3.3 V 66 µW: wideband
+path 46 µW, slow path 21 µW; ss/125 °C 2.97 V 61 µW; ff/−40 °C 3.63 V 72 µW), i.e.
+under the 87 µW target, analog only. Detection reach at I_DC = 100 nA, m = 2 %
+(5 corner/temperature points): 21.5 – 30.1 nA against 21.1 – 28.8 nA at the baseline
+bias, **2 – 4 % worse** (wideband input noise 646 fA/√Hz vs 628 at tt/27 °C); slow Z
+0.994 – 0.997 GΩ, slow noise unchanged, slow −3 dB 1.1 – 1.3 kHz (still ≫ the PPG band).
+
+**Caveats.** Digital power (ADC 10 bit / 2 kS/s, 12-bit DAC with a 100 kHz
+sigma-delta, controller) and the references' own current are not included: Iref
+and the bias references are ideal sources here; the lower GBW was checked by AC
+peaking, not by a loop-gain/phase-margin measurement or transient; the supply
+rejection (§28–§29) and the servo/ranging results (§23–§24) were not re-run at the
+low bias (the slow plant bandwidth is ~1.2 kHz instead of 2.8 kHz, well above the
+servo's 0.05 Hz corner, but this was not simulated); PVT checked at
+tt/27, ss/125, ff/−40, tt/125, tt/−40 only.

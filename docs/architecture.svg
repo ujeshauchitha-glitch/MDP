@@ -58,7 +58,7 @@
   <text x="567" y="448" text-anchor="middle" class="s">200 kΩ source degeneration</text>
   <rect class="box" x="275" y="470" width="370" height="48" rx="5"/>
   <text x="460" y="489" text-anchor="middle" class="h t">Wideband TIA   Rf 314 kΩ, Cf 1.4 pF</text>
-  <text x="460" y="506" text-anchor="middle" class="s">≈ 280 kHz, 0.6 pA/√Hz at 100 kHz, ~85 µW</text>
+  <text x="460" y="506" text-anchor="middle" class="s">≈ 280 kHz, 0.6 pA/√Hz at 100 kHz, 46–181 µW (§32)</text>
   <rect class="box" x="275" y="530" width="370" height="50" rx="5"/>
   <text x="460" y="548" text-anchor="middle" class="h t">Bias: degenerated PMOS mirror</text>
   <text x="460" y="564" text-anchor="middle" class="s">IBX 300 nA (ref. from const. Iref) → xc; cancel into TIA</text>
