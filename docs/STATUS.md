@@ -89,16 +89,20 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    LFSR chip generator is fully predictable after 64 observed chips (133 µs).
    Needs a keyed nonlinear stream cipher + TRNG (cryptographer) and a decision
    on whether relay attacks are in scope.
-4. **Not simulated:** random mismatch Monte Carlo (worst-case offsets only, §26: ≤ 1 %
+4. **Supply rejection is poor (§27).** PSRR 11–30 dB (wideband) and falling to −36 dB at
+   1 kHz (slow); the supply must be quiet: ≲ 15 nV/√Hz at 100 Hz for the slow path,
+   ≲ 36–110 nV/√Hz at 100–300 kHz and < 60 µV ripple near 300 kHz for the wideband path.
+   Needs an op-amp PSRR fix (cascode/replica) or an isolated, heavily filtered supply.
+5. **Not simulated:** random mismatch Monte Carlo (worst-case offsets only, §26: ≤ 1 %
    effect), supply noise/PSRR, ambient light
    (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,
    the 50 pF coupling cap area (~25 000 µm², about a third of a 334×225 µm
    tile) and ~20 MΩ of series poly.
-5. Poly resistors are ideal in SPICE; absolute tolerance (±20 %) moves the slow
+6. Poly resistors are ideal in SPICE; absolute tolerance (±20 %) moves the slow
    gain proportionally (a calibratable constant).
-6. Ideal elements still in the netlist: the digital servo, Rref/Rs/R1–R3, the
+7. Ideal elements still in the netlist: the digital servo, Rref/Rs/R1–R3, the
    wide TIA's ideal Rf (314 kΩ).
-7. `hardware/afe/tia.sch` is the old single-TIA drawing, marked superseded;
+8. `hardware/afe/tia.sch` is the old single-TIA drawing, marked superseded;
    there is no xschem schematic of the final design. A block diagram with the
    simulated values is in [`architecture.svg`](architecture.svg).
 

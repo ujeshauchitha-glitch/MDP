@@ -1,0 +1,73 @@
+# supply rejection (tools/psrr.py), I_DC=100n, tt/27C, VCM 1.4, T-network
+## range 1G
+range 1G; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.96e+08 V/A  PSRR   30.5 dB  i_eq = 29.9 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.96e+08 V/A  PSRR   24.8 dB  i_eq = 58.1 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.96e+08 V/A  PSRR    4.8 dB  i_eq = 575 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.98e+08 V/A  PSRR  -15.2 dB  i_eq = 5.75e+03 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1.16e+09 V/A  PSRR  -36.4 dB  i_eq = 5.73e+04 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=2.55e+05 V/A  PSRR   29.5 dB  i_eq = 1.31e+08 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=2.06e+05 V/A  PSRR   13.2 dB  i_eq = 1.06e+09 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=8.32e+04 V/A  PSRR   11.3 dB  i_eq = 3.28e+09 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=9.07e+03 V/A  PSRR   22.8 dB  i_eq = 7.96e+09 fA per V/rtHz of supply noise
+## range 100M
+range 100M; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.99e+07 V/A  PSRR   50.4 dB  i_eq = 30.1 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.99e+07 V/A  PSRR   44.7 dB  i_eq = 58.1 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.99e+07 V/A  PSRR   24.8 dB  i_eq = 575 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.99e+07 V/A  PSRR    4.8 dB  i_eq = 5.75e+03 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1.02e+08 V/A  PSRR  -15.3 dB  i_eq = 5.73e+04 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=3.3e+05 V/A  PSRR   21.8 dB  i_eq = 2.45e+08 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=2.01e+05 V/A  PSRR   13.4 dB  i_eq = 1.06e+09 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=8.23e+04 V/A  PSRR   11.3 dB  i_eq = 3.29e+09 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=9.02e+03 V/A  PSRR   22.9 dB  i_eq = 7.98e+09 fA per V/rtHz of supply noise
+## range 10M
+range 10M; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=1e+07 V/A  PSRR   69.7 dB  i_eq = 32.9 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=1e+07 V/A  PSRR   64.5 dB  i_eq = 59.6 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=1e+07 V/A  PSRR   44.8 dB  i_eq = 575 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=1e+07 V/A  PSRR   24.8 dB  i_eq = 5.75e+03 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1e+07 V/A  PSRR    4.8 dB  i_eq = 5.73e+04 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=6.8e+04 V/A  PSRR   14.7 dB  i_eq = 2.7e+09 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=1.67e+05 V/A  PSRR   14.0 dB  i_eq = 1.19e+09 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=7.53e+04 V/A  PSRR   11.8 dB  i_eq = 3.41e+09 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=8.65e+03 V/A  PSRR   23.0 dB  i_eq = 8.2e+09 fA per V/rtHz of supply noise
+## variant ideal (1G range)
+range 1G; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.96e+08 V/A  PSRR   31.2 dB  i_eq = 27.6 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.96e+08 V/A  PSRR   25.5 dB  i_eq = 53.4 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.96e+08 V/A  PSRR    5.6 dB  i_eq = 528 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.98e+08 V/A  PSRR  -14.4 dB  i_eq = 5.28e+03 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1.16e+09 V/A  PSRR  -35.7 dB  i_eq = 5.28e+04 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=2.55e+05 V/A  PSRR   29.7 dB  i_eq = 1.28e+08 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=2.06e+05 V/A  PSRR   13.2 dB  i_eq = 1.06e+09 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=8.35e+04 V/A  PSRR   11.2 dB  i_eq = 3.29e+09 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=9.13e+03 V/A  PSRR   22.6 dB  i_eq = 8.16e+09 fA per V/rtHz of supply noise
+## variant cref200 (1G range)
+range 1G; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.96e+08 V/A  PSRR   30.5 dB  i_eq = 29.9 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.96e+08 V/A  PSRR   24.8 dB  i_eq = 58.1 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.96e+08 V/A  PSRR    4.8 dB  i_eq = 575 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.98e+08 V/A  PSRR  -15.1 dB  i_eq = 5.73e+03 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1.16e+09 V/A  PSRR  -35.8 dB  i_eq = 5.35e+04 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=2.55e+05 V/A  PSRR   29.7 dB  i_eq = 1.28e+08 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=2.06e+05 V/A  PSRR   13.2 dB  i_eq = 1.06e+09 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=8.32e+04 V/A  PSRR   11.3 dB  i_eq = 3.28e+09 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=9.07e+03 V/A  PSRR   22.8 dB  i_eq = 7.95e+09 fA per V/rtHz of supply noise
+## variant rbw (1G range)
+range 1G; slow path (s_out), at 100 nA:
+  f=    0.5 Hz  Z=9.96e+08 V/A  PSRR   30.5 dB  i_eq = 29.9 pA per V/rtHz of supply noise
+  f=      1 Hz  Z=9.96e+08 V/A  PSRR   24.8 dB  i_eq = 58.1 pA per V/rtHz of supply noise
+  f=     10 Hz  Z=9.96e+08 V/A  PSRR    4.8 dB  i_eq = 575 pA per V/rtHz of supply noise
+  f=    100 Hz  Z=9.98e+08 V/A  PSRR  -15.2 dB  i_eq = 5.75e+03 pA per V/rtHz of supply noise
+  f=   1000 Hz  Z=1.16e+09 V/A  PSRR  -36.4 dB  i_eq = 5.73e+04 pA per V/rtHz of supply noise
+wideband path (w_out):
+  f=  10000 Hz  |H|=2.55e+05 V/A  PSRR   29.5 dB  i_eq = 1.31e+08 fA per V/rtHz of supply noise
+  f= 100000 Hz  |H|=2.06e+05 V/A  PSRR   13.2 dB  i_eq = 1.06e+09 fA per V/rtHz of supply noise
+  f= 300000 Hz  |H|=8.38e+04 V/A  PSRR   11.2 dB  i_eq = 3.29e+09 fA per V/rtHz of supply noise
+  f=  1e+06 Hz  |H|=9.35e+03 V/A  PSRR   22.4 dB  i_eq = 8.11e+09 fA per V/rtHz of supply noise

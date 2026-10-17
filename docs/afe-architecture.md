@@ -1165,3 +1165,62 @@ which the digital servo removes.
 Monte Carlo, no resistor mismatch (poly R1/R2/R3 ratio errors move the slow
 gain ≈ 1 % per 1 % R3 mismatch, §20), no capacitor mismatch, no W/L (geometry)
 mismatch, and the A_VT values are assumptions not taken from the PDK.
+
+## 27. Supply rejection (PSRR): poor, and it sets a supply-noise budget (2026-10-17)
+
+Tool: `simulation/spice/tools/psrr.py`; raw data `simulation/spice/results/psrr.txt`.
+Full chain (T-network, real bias mirror, VCM 1.4 V, tt/27 °C, VDD 3.3 V,
+I_DC = 100 nA): AC on VDD → each output, divided by the measured signal gain, gives
+the input current that would produce the same output (i_eq, per 1 V/√Hz of supply noise).
+
+| slow path, 1 GΩ range | PSRR | i_eq per V/√Hz |
+|---|---|---|
+| 0.5 Hz | 30.5 dB | 30 pA |
+| 1 Hz | 24.8 dB | 58 pA |
+| 10 Hz | 4.8 dB | 575 pA |
+| 100 Hz | **−15.2 dB** | 5.75 nA |
+| 1 kHz | **−36.4 dB** | 57 nA |
+
+| wideband path | PSRR | i_eq per V/√Hz |
+|---|---|---|
+| 10 kHz | 29.5 dB | 131 nA |
+| 100 kHz | 13.2 dB | 1.06 µA |
+| 300 kHz | 11.3 dB | 3.3 µA |
+| 1 MHz | 22.8 dB | 8.0 µA |
+
+i_eq is the same for all three slow ranges (PSRR in V/V improves by 20 dB per
+decade of lower gain, the signal gain falls by the same amount). It does not change
+with the bias network (ideal sources instead of the real mirror, Cref 20 → 200 pF,
+wideband-TIA bias resistor 0.6 → 2 MΩ all give the same numbers), so the coupling is
+inside the op-amps.
+
+**Likely mechanism (inferred, not confirmed at node level).** The slow-path
+response rises ∝ f and matches ε·|1 + jωRf·Cj| (the TIA noise gain acting on a
+supply-induced input-referred voltage), with ε ≈ 0.5 at 10 Hz and ≈ 1 at 1 kHz
+(measured out/VDD = 66 vs 62.8 V/V predicted at 1 kHz). A two-stage op-amp with a PMOS
+current-source load (M7 ro against M6 ro) passes a large fraction of VDD to its
+output, and Miller coupling returns it to the input.
+
+**Supply-noise budget this implies** (noise from the supply must stay ≲ 20 % of the
+analog floor in each band):
+
+| band | analog floor (input-referred) | max supply noise density |
+|---|---|---|
+| slow, 10 Hz | 1.1 pA/√Hz | ≈ 0.4 µV/√Hz |
+| slow, 100 Hz | 0.44 pA/√Hz | **≈ 15 nV/√Hz** |
+| wide, 100 kHz | 0.6 pA/√Hz | ≈ 110 nV/√Hz |
+| wide, 300 kHz | 0.6 pA/√Hz | ≈ 36 nV/√Hz |
+
+Tones: a 1 mV supply ripple near 300 kHz looks like a 3.3 nA input signal (larger
+than the 2 nA legitimate perturbation at I_DC = 100 nA, m = 2 %), and tones matter
+as interference even though they are not correlated with the code. To stay below
+10 % of I_pert the ripple at ≈ 300 kHz must be < ≈ 60 µV. Typical LDO output noise
+(tens to hundreds of nV/√Hz) and any switching regulator ripple would therefore
+degrade both paths; a quiet LDO with heavy off-chip decoupling is a requirement
+unless the op-amp PSRR is improved (cascode or replica-biased second stage,
+isolated analog supply, which was not designed here).
+
+**Caveats.** PSRR measured only at tt/27 °C and I_DC = 100 nA; the effect on the
+Monte Carlo detection numbers of §16–§21 (which assume a noiseless supply) is not
+quantified beyond the budget above; the mechanism is not confirmed; supply-to-PPG
+cross-talk through the digital servo (ADC/DAC reference) is not included.
