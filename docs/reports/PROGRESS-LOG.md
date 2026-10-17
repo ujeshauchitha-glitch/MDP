@@ -49,8 +49,16 @@ numbers (§) refer to [`../afe-architecture.md`](../afe-architecture.md). Full h
 | `4c2608a`, `60f32a9`, `80525b0` | power, low-power bias, stability (§32) | 268 → 66 µW; phase margin 62–80° |
 | `39e56ba`, `b1965e8`, `7fceb56`, `875a8d7` | audit (§33) and cancel-device degeneration (§34) | engine and units verified; docs errors fixed; degeneration cuts slow noise 4.7–8x |
 
+## Phase 3b: after the audit (17 Oct)
+
+| Work | What | Learned |
+|---|---|---|
+| integration-time study (§35) | min I_DC vs code length | ∝ 1/√T_int: 10 nA needs ~0.6 ms at 2 % |
+| degenerated cancel device in the servo study (§36) | auto-range with the 0.3 V-drop sink noise | PPG SNR +13 dB at 100 nA, +17.5 dB at 1 µA |
+
 ## Phase 4: reports (from 17 Oct)
 
 | Report | Date | Covers |
 |---|---|---|
 | [`2026-10-17-overview.md`](2026-10-17-overview.md) | 10-17 | whole project so far, in plain language |
+| [`2026-10-17-02-audit-and-noise.md`](2026-10-17-02-audit-and-noise.md) | 10-17 | audit, cancel-device noise and degeneration, integration time |

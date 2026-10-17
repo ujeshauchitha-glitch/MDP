@@ -68,9 +68,10 @@ def make_plant(z0, f0, q):
 def noise_current(n, idc, seed):
     """Input-referred analog noise [A] from the SPICE PSD (nearest I_DC file)."""
     amps = {"5n": 5e-9, "10n": 10e-9, "30n": 30e-9, "100n": 100e-9, "300n": 300e-9, "1u": 1e-6, "2u": 2e-6}
-    have = [k for k in amps if (DATA / f"slow_psd_{k}.txt").exists()]
+    PSD = HERE / os.environ["SERVO_PSD_DIR"] if os.environ.get("SERVO_PSD_DIR") else DATA     # e.g. data_sd = degenerated-sink noise
+    have = [k for k in amps if (PSD / f"slow_psd_{k}.txt").exists()]
     ref = min(have, key=lambda k: abs(math.log(amps[k] / amps[idc])))
-    d = np.loadtxt(DATA / f"slow_psd_{ref}.txt")
+    d = np.loadtxt(PSD / f"slow_psd_{ref}.txt")
     d[:, 1] *= amps[idc] / amps[ref]             # measured noise scales ~linearly with the cancelled DC
     f, a = d[:, 0], d[:, 1]
     fr = np.fft.rfftfreq(n, DT)

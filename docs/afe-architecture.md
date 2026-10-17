@@ -1681,3 +1681,24 @@ and the verification can no longer be per 100 µs sample.
 sensor will have; the channel and the legitimate amplitude must stay stationary over the window;
 slow ambient flicker (100/120 Hz lighting) is not modelled. Treat the table as the white-noise
 limit, i.e. optimistic for T_int ≳ 1 ms.
+
+## 36. Degenerated cancel device in the servo/auto-range study (2026-10-17)
+
+§34's degenerated sink (R chosen for a ≈ 0.3 V drop at each I_DC: 30 MΩ at 10 nA, 10 MΩ at 30 nA,
+3 MΩ at 100 nA, 1 MΩ at 300 nA, 300 kΩ at 1 µA) was put into the servo co-simulation: noise
+spectra from `corner_run.py sdeg=…` (`simulation/servo/data_sd/`), `SERVO_PSD_DIR=data_sd`,
+auto-ranging from power-up, 2 % modulation, 7 s runs (`simulation/servo/results_sdeg.txt`).
+Lock time (24 ms), range choice and switch time (125 ms), PPG gain (0.9987 – 0.9991), and
+re-acquisitions (0) are unchanged; only the noise changes:
+
+| I_DC | PPG (2 %, RMS) | noise before → after | SNR before → after |
+|---|---|---|---|
+| 5 nA | 71 pA | 0.8 → 0.7 pA | 38.9 → 40.1 dB (+1.2) |
+| 30 nA | 424 pA | 2.9 → 1.4 pA | 43.3 → 49.6 dB (+6.3) |
+| 100 nA | 1.41 nA | 8.4 → 1.8 pA | 44.5 → 57.9 dB (**+13.4**) |
+| 300 nA | 4.24 nA | 24.5 → 4.2 pA | 44.8 → 60.1 dB (+15.3) |
+| 1 µA | 14.1 nA | 78.7 → 10.5 pA | 45.1 → 62.6 dB (**+17.5**) |
+
+Before degeneration the PPG SNR was ≈ 44 – 45 dB at every I_DC from 30 nA up (the cancel
+device's noise scales with I_DC like the signal); degeneration makes it grow with I_DC.
+Same caveats as §34 (behavioral sink, ideal resistor, flicker model unverified, tt/27 °C).

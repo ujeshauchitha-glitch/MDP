@@ -1,0 +1,12 @@
+# servo auto-range from power-up with the degenerated-sink noise (SERVO_PSD_DIR=data_sd; R = 0.3 V / I_DC), PPG 2 %
+auto I_DC=5n   PPG 2.0%: final range 1G, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9987 phase +2.2 noise 0.7 pA, re-acq 0
+auto I_DC=30n  PPG 2.0%: final range 100M, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9989 phase +2.3 noise 1.4 pA, re-acq 0
+auto I_DC=100n PPG 2.0%: final range 100M, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9991 phase +2.4 noise 1.8 pA, re-acq 0
+auto I_DC=300n PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9989 phase +2.3 noise 4.2 pA, re-acq 0
+auto I_DC=1u   PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9990 phase +2.4 noise 10.5 pA, re-acq 0
+# reference without degeneration
+auto I_DC=5n   PPG 2.0%: final range 1G, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9987 phase +2.1 noise 0.8 pA, re-acq 0
+auto I_DC=30n  PPG 2.0%: final range 100M, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9988 phase +2.2 noise 2.9 pA, re-acq 0
+auto I_DC=100n PPG 2.0%: final range 100M, switched at 0.12499 s, lock 0.02449; PPG (last 3 s) gain 0.9988 phase +2.3 noise 8.4 pA, re-acq 0
+auto I_DC=300n PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9986 phase +2.3 noise 24.5 pA, re-acq 0
+auto I_DC=1u   PPG 2.0%: final range 10M, switched at -1.0 s, lock 0.02449; PPG (last 3 s) gain 0.9986 phase +2.3 noise 78.7 pA, re-acq 0
