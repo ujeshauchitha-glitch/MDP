@@ -96,18 +96,15 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    12-bit 0.5 nA DAC + sigma-delta fine path, SAR acquisition (≈ 24 ms) then a
    0.05 Hz integrator; locks in ≈ 90 ms from power-up, adds no measurable noise,
    PPG gain 0.994; 1 GΩ clipping PPG above ≈ 150–250 pA is solved by 3 switchable
-   ranges with auto-ranging (§24, real switches §31). Still open: the DAC/ADC
-   circuits, **DAC noise: the cancel device supplies 85–95 % of the slow-path
-   noise (§33), and the DAC is assumed to match one NMOS sink**, glitch/INL, and
-   digital power.
+   ranges with auto-ranging (§24, real switches §31). Now also as RTL (§44) and with a gate-voltage DAC design (§41, §45). Still open: the DAC string/switch and ADC
+   *circuits* at transistor level, range-switch glitches of the extra resistors, and silicon confirmation of the cancel-device noise (§48).
 3. **Security is weaker than the early docs claimed (§25).** A correlation-only
    detector accepts a blind random injection 16 % of the time (50 % when loud);
    a residual (goodness-of-fit) test fixes the blind case at 0.1 %-pt cost in
    legitimate Pd, but attackers with ≥ 90 % of the chips pass 8–29 %, and a
    **real-time optical relay with ≤ 130 ns latency passes 97–100 %**. A plain
    LFSR chip generator is fully predictable after 64 observed chips (133 µs).
-   Needs a keyed nonlinear stream cipher + TRNG (cryptographer) and a decision
-   on whether relay attacks are in scope.
+   Now: Trivium keyed generator and a key/IV protocol (§40, §46); relay attacks are out of scope for Layer 1 (needs module-level measures). Still needs a cryptographer's review, the TRNG/OTP circuits, and power-analysis resistance.
 4. **Supply rejection: fixed (§27–§29).** Two body-effect paths (the wideband input PMOS Mc and
    the op-amp input pairs, wells tied to VDD) and resistor-from-VDD bias references were the
    cause. Wells moved to quiet nodes / their own source and bias references made supply-
@@ -116,9 +113,8 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    (min I_DC 21–29 nA). The references are ideal sources in the simulation.
 5. **Not simulated:** random mismatch Monte Carlo (worst-case offsets only, §26: ≤ 1 %
    effect), ambient light
-   (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,
-   the 50 pF coupling cap area (~25 000 µm², about a third of a 334×225 µm
-   tile) and ~20 MΩ of series poly.
+   (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics, any
+   place-and-route (the area figure ≈ 161 000 µm² is a synthesis-based estimate, §44) and ambient interference above 10 % / 1 % (§47).
 6. Poly resistors are ideal in SPICE; absolute tolerance (±20 %) moves the slow
    gain proportionally (a calibratable constant).
 7. Ideal elements still in the netlist: the digital servo, Rref/Rs/R1–R3, the
