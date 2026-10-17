@@ -129,7 +129,7 @@ sigma, dn_, need, _ = w.metric(fw, Hwm, Sn, w.tonum(idc))
 i = lambda fr: int(np.argmin(np.abs(np.log(fw / fr))))
 rti = lambda fr: Sn[i(fr)] / abs(Hwm[i(fr)]) * 1e15
 
-print(f"{name:22s} {corner}/{temp}C IDC={idc}: Vsg={vsg:.4f} s_out={so:.3f} | slow Z10Hz={gs10:.3g} BW={bw_s:.3g}Hz "
+print(f"{name:22s} {corner}/{temp}C IDC={idc}: Vsg={vsg:.6f} s_out={so:.3f} | slow Z10Hz={gs10:.3g} BW={bw_s:.3g}Hz "
       f"noise@10Hz={d10:.0f}fA RMS0.5-100Hz={rms_s:.1f}pA | Ixc/Iw={ix:.0f}/{iw:.0f}nA xc={parse(out,'xc'):.2f} "
       f"w_in={parse(out,'w_in'):.3f} | wide |H|100k={abs(Hwm[i(1e5)]):.3g} RTI100k={rti(1e5):.0f}fA "
       f"minIDC(m2%)={need:.1f}nA", flush=True)

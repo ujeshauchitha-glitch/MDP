@@ -44,6 +44,8 @@ ngspice 47 with the sky130 models, not built or measured**.
 | **Supply ±10 % × PVT (VCM 1.4 V)** | slow Z within 1.5 % of 1 GΩ; wide min I_DC 20.8–29.2 nA | §22 |
 | Chip-rate trade | 240→480 kchip/s costs only 12 %; T_int 200 µs cuts need by 37 % | §21 |
 
+The detection numbers were re-verified on the final front end (§30, identical within 0.5 %).
+
 Detection is evaluated by a Monte Carlo of random 48-chip codes through the
 simulated channel (`simulation/detect/coherent_mc.py`), noise-only correlator
 output Gaussian to 4σ. **Pfa = 1e-8 relies on the Gaussian-noise assumption**

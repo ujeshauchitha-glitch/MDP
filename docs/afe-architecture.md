@@ -1369,3 +1369,30 @@ supply rejection and noise are unmodelled); each fix needs isolated n-wells
 (Mc, and four input PMOS) and a quiet 1.4 V well bias for Mc; PSRR measured at tt/27 °C,
 I_DC = 100 nA, 1 GΩ range only; the isolated input-pair wells add well
 capacitance to the tail node, which had no visible effect on gain or noise here.
+
+## 30. Detection numbers re-verified on the final front end (2026-10-17)
+
+The coherent-detection Monte Carlo (§16, §18) was re-run on a channel extracted from the
+**final** circuit: T-network slow TIA, VCM = 1.4 V, real PMOS bias mirror with a
+supply-independent reference, Mc well on VCM, op-amp input pairs in their own wells,
+constant op-amp bias currents (`FINAL=1 make_chan_opt.py`; data
+`simulation/spice/results_final/`, 20 000 trials per point, 48 chips, 480 kchip/s,
+100 µs, Pfa 1e-8; noise-only correlator kurtosis 3.01–3.04).
+
+| I_DC | m = 2 % | m = 1 % | m = 0.5 % |
+|---|---|---|---|
+| 10 nA | 11.6 dB, Pd 0.040 | 5.5 dB | −0.6 dB |
+| 30 nA | 21.1 dB, Pd 1 | 15.1 dB, Pd 0.52 | 9.0 dB |
+| 100 nA | 31.1 dB | 25.1 dB | 19.1 dB, Pd 0.997 |
+| 300 nA | 39.7 dB | 33.7 dB | 27.6 dB |
+| 1 µA | 47.6 dB | 41.6 dB | 35.6 dB |
+
+**Minimum I_DC for Pd ≥ 99.9 % at Pfa = 1e-8: ≈ 24.2 nA (m = 2 %), ≈ 48.5 nA
+(m = 1 %), ≈ 97 nA (m = 0.5 %)**, identical (within 0.5 %) to §18, i.e. the slow-path,
+op-amp and supply-rejection changes did not move the detection reach.
+
+**Process note.** The first extraction used tight solver tolerances and gave a
+30 nA noise 30 % too low (σ₀ = 5.9 µV against 8.5 µV), the same artifact documented
+in §9/§14; with default tolerances (the gate voltage is fixed, so no lock is needed)
+the numbers above are monotonic in I_DC. Slow-path gate voltages must be given with
+six digits (a 5e-5 V rounding error at 1 µA is ≈ 1.5 V of output).
