@@ -805,7 +805,8 @@ a thermal-noise shunt on the shared node `x` at high temperature.
   the slow-path numbers with tight tolerances (abstol 1e-16 A). Reason: same
   netlist, tight tolerances intermittently gave a wideband `.noise` result ~40 %
   too low (e.g. 391 vs 624 fA/√Hz at tt27, changing with R3 = 102 k vs 101 k),
-  which was treated as an analysis artifact. This also means the earlier §19
+  which was treated as an analysis artifact (its cause could not be reproduced in the §33
+  audit; see there). This also means the earlier §19
   table's wideband entries (run with tight tolerances) should be read with that
   caveat; this section supersedes them.
 - Only I_DC = 100 nA; mismatch Monte Carlo and supply variation not done.
@@ -1285,14 +1286,12 @@ I_DC = 100 nA, tt/27 °C** (raw `results/psrr_fix.txt`):
 | wide 300 kHz | 3.3 µA | 275 nA | 12x |
 | wide 1 MHz | 8.0 µA | 3.7 µA | 2.2x |
 
-**New supply-noise budget** (≤ 20 % of the analog floor): slow 10 Hz ≲ 26 mV/√Hz,
-100 Hz ≲ 3 mV/√Hz, 1 kHz ≲ 0.17 mV/√Hz (any practical supply meets these); wide
-100 kHz ≲ 3.4 µV/√Hz, 300 kHz ≲ 0.33 µV/√Hz, **1 MHz ≲ 20 nV/√Hz**. Tolerable
-tone amplitude for ≤ 10 % of I_pert (200 pA at I_DC = 100 nA, m = 2 %): ≈ 7 mV at
-100 kHz, ≈ 0.7 mV at 300 kHz, **≈ 55 µV at 1 MHz**. So only switching-regulator
-ripple above ≈ 500 kHz still needs attention (a ferrite/RC pre-filter or a
-post-regulator, which §27's 15 nV/√Hz low-frequency requirement no longer needs).
-The residual coupling at 300 kHz – 1 MHz was not traced.
+**New supply-noise budget** (≤ 20 % of the analog floor; **corrected in the §33 audit**: the
+first version used a 0.5 pA floor at 1 MHz where the input-referred floor is ≈ 5.5 pA):
+slow 10 Hz ≲ 26 mV/√Hz, 100 Hz ≲ 3 mV/√Hz; wide 100 kHz ≲ 4.7 µV/√Hz, 300 kHz ≲ 0.9 µV/√Hz,
+1 MHz ≲ 0.3 µV/√Hz. Tolerable tone amplitude for ≤ 10 % of I_pert (200 pA at I_DC = 100 nA,
+m = 2 %): ≈ 7 mV at 100 kHz, ≈ 0.7 mV at 300 kHz, ≈ 54 µV at 1 MHz. §29 improves all of this
+by a further 7–700x. The residual coupling at 300 kHz – 1 MHz was not traced.
 
 **PVT × supply with the fix** (corner_run, I_DC = 100 nA, VCM 1.4 V, T-network,
 Mc bulk = VCM, Iref; `psrr_fix.txt`): slow Z 0.990 – 0.997 GΩ, −3 dB 2.4 – 3.2 kHz,
@@ -1350,12 +1349,14 @@ other input is the ideal VCM reference).
 | wide 300 kHz | 3.3 µA | 275 nA | **19.7 nA** | 167x |
 | wide 1 MHz | 8.0 µA | 3.7 µA | **330 nA** | 24x |
 
-Supply-noise limits for ≤ 20 % of the analog floor are now ≳ 0.2 mV/√Hz
-(slow, up to 100 Hz) and wide: ≲ 66 µV/√Hz at 100 kHz, ≲ 6 µV/√Hz at 300 kHz,
-**≲ 0.36 µV/√Hz at 1 MHz**; a tone ≤ 10 % of I_pert (200 pA) is tolerated up to
-≈ 110 µV at 1 MHz and ≈ 10 mV at 100 kHz. In practice any normal low-noise supply
-now meets the budget; a switching regulator with > 100 µV of ripple at ≥ 1 MHz
-would still need a filter.
+Supply-noise limits for ≤ 20 % of the analog floor (**recomputed in the §33 audit** from the
+table above and the measured input-referred floors; the first version of this paragraph had
+arithmetic errors): slow 10 Hz ≲ 210 mV/√Hz, 100 Hz ≲ 42 mV/√Hz, 1 kHz ≲ 2.5 mV/√Hz; wide
+10 kHz ≲ 11 mV/√Hz, 100 kHz ≲ 69 µV/√Hz, 300 kHz ≲ 12 µV/√Hz, **1 MHz ≲ 3.3 µV/√Hz**.
+A tone ≤ 10 % of I_pert (200 pA at I_DC = 100 nA, m = 2 %) is tolerated up to ≈ 110 mV at
+100 kHz, ≈ 10 mV at 300 kHz and **≈ 0.6 mV at 1 MHz**. In practice any normal low-noise
+supply now meets the budget; a switching regulator with more than a few hundred µV of ripple
+at ≥ 1 MHz would still need a filter.
 
 **PVT × supply with all four fixes** (11 points: tt 2.97/3.3/3.63 V, ss/125 °C and
 ff/−40 °C at ±10 % supply, sf and fs, tt/125 °C, tt/−40 °C): slow Z
@@ -1393,7 +1394,8 @@ op-amp and supply-rejection changes did not move the detection reach.
 
 **Process note.** The first extraction used tight solver tolerances and gave a
 30 nA noise 30 % too low (σ₀ = 5.9 µV against 8.5 µV), the same artifact documented
-in §9/§14; with default tolerances (the gate voltage is fixed, so no lock is needed)
+in §9/§14 (not reproducible in the §33 audit, where every tolerance setting gave identical
+results; the low values were also below the circuit's own noise floor); with default tolerances (the gate voltage is fixed, so no lock is needed)
 the numbers above are monotonic in I_DC. Slow-path gate voltages must be given with
 six digits (a 5e-5 V rounding error at 1 µA is ≈ 1.5 V of output).
 
@@ -1525,3 +1527,57 @@ with the measured 0.986 – 0.998 GΩ.
 **Caveats.** tt/27, ss/125, ff/−40 corners only; I_DC = 100 nA; Cj = 10 pF assumed (a larger
 photodiode capacitance lowers the margin); the injection method is approximate for the
 slow loop at its crossover (1 – 4 kHz), where the T-network impedance is highest.
+
+## 33. Audit of the work so far (2026-10-17)
+
+A review pass over the whole record: re-running checks independently, recomputing derived
+numbers from the raw files, and hunting for stale statements. Tools:
+`simulation/detect/test_mc_analytic.py`, and the scratch checks summarised below.
+
+**Confirmed (independent checks that passed):**
+* **Detection Monte Carlo vs closed form.** For a flat channel with white noise the analytic
+  answer is `d = (m·I_DC/√S_in)·√(2·T_int)`. The Monte Carlo gave d = 53.32 against 53.26
+  (0.11 %), σ₀ = 3.751 vs 3.755 µV, and a Gaussian noise-only correlator (kurtosis 3.015).
+  Together with the earlier analytic-vs-Monte-Carlo agreement on the real channel (σ₀ 24.30 vs
+  24.13 µV), the detection numbers (§16–§21, §30) rest on a validated engine.
+* **Original runner.** `run-tia-sim.sh` still reproduces the `TIA-DESIGN.md` §9 numbers exactly
+  (0.997 GΩ, 2.33 kHz, 136 µs rise, 85.3 µW, 1.56 mV).
+* **The slow-path noise is dominated by the cancel device.** Replacing the NMOS sink by an
+  ideal noiseless sink of the same DC current removes most of it: input-referred 3.2 / 1.16 /
+  0.44 / 0.22 pA/√Hz at 1 / 10 / 100 / 1000 Hz (I_DC = 100 nA) becomes 0.47 / 0.17 / 0.08 /
+  0.10 pA/√Hz, independent of I_DC (the 1 µA case with the real device is 30 / 10.8 / 3.9 /
+  1.5 pA/√Hz). So 85 – 95 % of the slow-path noise at 100 nA comes from the cancel device
+  (6.7x at 10 Hz), and the real DAC's noise sets the slow path's performance; what the sky130
+  HV flicker model gives is unverified against silicon.
+* **Slow-path results are tolerance independent** (Z = 0.9962 GΩ and identical noise at 1, 10,
+  100, 1000 Hz with default and tight solver settings).
+
+**Corrected:**
+* **Supply-noise budgets in §28 and §29** (arithmetic errors; the 1 MHz limit used a 0.5 pA
+  noise floor where the input-referred floor is ≈ 5.5 pA because the channel gain has rolled
+  off). Now: §28 (before the §29 fixes) 1 MHz ≲ 0.3 µV/√Hz, tone ≲ 54 µV; §29 (final)
+  100 kHz ≲ 69 µV/√Hz, 300 kHz ≲ 12 µV/√Hz, **1 MHz ≲ 3.3 µV/√Hz**, tones ≲ 110 mV / 10 mV /
+  **0.6 mV** at 100 kHz / 300 kHz / 1 MHz; slow ≲ 210 mV/√Hz at 10 Hz, 42 mV/√Hz at 100 Hz,
+  2.5 mV/√Hz at 1 kHz. (The §27 budget is the superseded pre-fix one.)
+* **The "tight tolerances corrupt `.noise`" explanation (§9, §14, §20, §30) is not
+  established.** In the audit the wideband input-referred noise was *identical* under
+  default, abstol 1e-13 … 1e-16, reltol 1e-5/1e-6, vntol and gmin variations (574.6 / 587.9 /
+  5523 fA/√Hz at 10 kHz / 100 kHz / 1 MHz with the slow path removed; 627.5 fA at 100 kHz with
+  it, for tight 0 and 1, at gate-voltage offsets of ±2e-5 V). The 391 fA/√Hz outliers could not
+  be reproduced by any variation tried (tolerances, AC start frequency, a second noise
+  analysis, R3 = 101 vs 102 kΩ). They were nevertheless wrong: 391 fA is **below the 588 fA/√Hz
+  floor of the same wideband chain with the slow path removed**, and adding the slow path can
+  only add noise. The cause is unidentified (possibly a transient file/parse problem in the
+  first version of the driver); all headline numbers use default tolerances and agree with the
+  independent validations above. §19's wideband columns (obtained in that flow) remain
+  superseded by §20.
+* **`STATUS.md` stale entries** (still listing already-finished work as open, an outdated bias
+  spread, and an out-of-date reproduce block): fixed in the same commit.
+
+**Known weak points that the audit could not remove (unchanged, restated):**
+* the noise *magnitudes* depend on the sky130 HV device flicker model (no silicon data);
+* the DAC is behavioral and its noise is *assumed* to equal one NMOS sink (the dominant
+  slow-path noise source, see above);
+* all bias references, the poly resistors and the supply are ideal elements;
+* the relay-attack and cryptography items (§25) are unresolved design questions;
+* digital power, layout, and area (Cc ≈ 50 pF ≈ 25 000 µm²) have not been addressed.

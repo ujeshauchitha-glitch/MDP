@@ -1,4 +1,4 @@
-# TrustSense Layer 1 AFE: status (2026-10-17)
+# TrustSense Layer 1 AFE: status (2026-10-17, audited §33)
 
 One-page summary of where the design stands. Details, derivations and every
 failed attempt are in [`afe-architecture.md`](afe-architecture.md) (§ numbers
@@ -39,8 +39,8 @@ ngspice 47 with the sky130 models, not built or measured**.
 | Wideband bandwidth / gain | ≈ 250–300 kHz (target 480), 314 kΩ | §15 |
 | Wideband input noise | ≈ 0.6 pA/√Hz at 100 kHz (hand budget was 0.24) | §17 |
 | **Min I_DC for Pd ≥ 99.9 % at Pfa = 1e-8** | **24 nA (m = 2 %), 49 nA (1 %), 97 nA (0.5 %)** | §18 |
-| Same across PVT (m = 2 %) | 21–28 nA | §20 |
-| Bias current spread over PVT / supply | 241–363 nA (nominal 300) | §19, §22 |
+| Same across PVT (m = 2 %) | 21–29 nA | §20, §29 |
+| Bias current over PVT / supply | exactly 300 nA with the supply-independent reference (241–363 nA with a resistor reference; the reference is ideal here) | §19, §22, §28 |
 | **Supply ±10 % × PVT (VCM 1.4 V)** | slow Z within 1.5 % of 1 GΩ; wide min I_DC 20.8–29.2 nA | §22 |
 | Stability (§32) | slow-loop PM 65–80°, wideband-loop PM 62–71° (GM 13–21 dB) at the low-power bias, corners checked; baseline slow loop 48° was weakest | §32 |
 | **Analog power** | 241–299 µW at baseline bias; **61–74 µW with a 4x lower op-amp bias (Cf 150 fF/500 fF/1.5 pF), detection reach 2–4 % worse**; digital excluded | §32 |
@@ -81,10 +81,11 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
 2. **Digital servo: sized and simulated, not built (§23).** 10-bit ADC @ 2 kS/s,
    12-bit 0.5 nA DAC + sigma-delta fine path, SAR acquisition (≈ 24 ms) then a
    0.05 Hz integrator; locks in ≈ 90 ms from power-up, adds no measurable noise,
-   PPG gain 0.994. Still open: the DAC/ADC circuits, DAC noise (assumed = one
-   NMOS sink), glitch/INL, power, and **a switchable transimpedance range**,
-   because 1 GΩ clips PPG amplitudes above ≈ 150–250 pA and is unusable above
-   ≈ 1 µA of I_DC.
+   PPG gain 0.994; 1 GΩ clipping PPG above ≈ 150–250 pA is solved by 3 switchable
+   ranges with auto-ranging (§24, real switches §31). Still open: the DAC/ADC
+   circuits, **DAC noise: the cancel device supplies 85–95 % of the slow-path
+   noise (§33), and the DAC is assumed to match one NMOS sink**, glitch/INL, and
+   digital power.
 3. **Security is weaker than the early docs claimed (§25).** A correlation-only
    detector accepts a blind random injection 16 % of the time (50 % when loud);
    a residual (goodness-of-fit) test fixes the blind case at 0.1 %-pt cost in
@@ -100,7 +101,7 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    V/√Hz; wide 100 kHz 1.06 µA → 1.8 nA). Performance across PVT × supply unchanged
    (min I_DC 21–29 nA). The references are ideal sources in the simulation.
 5. **Not simulated:** random mismatch Monte Carlo (worst-case offsets only, §26: ≤ 1 %
-   effect), supply noise/PSRR, ambient light
+   effect), ambient light
    (I_amb), photodiode model beyond Cj = 10 pF + Rs = 100 Ω, layout parasitics,
    the 50 pF coupling cap area (~25 000 µm², about a third of a 334×225 µm
    tile) and ~20 MΩ of series poly.
@@ -119,9 +120,12 @@ export NGSPICE=<path>/ngspice_con.exe  SKY130_FD_PR=<skywater-pdk-libs-sky130_fd
 bash simulation/spice/run-tia-sim.sh                         # builds sky130_min.lib, slow TIA alone
 python simulation/spice/tools/gen_afe_direct.py              # writes afe_direct.spice
 TAG=k_ python simulation/spice/tools/corner_run.py NAME tt 27 100n tnet=1 t1=10Meg t3=102k tcf=50f
-TAG=o_ REAL=1 python simulation/spice/tools/make_chan_opt.py 100n 0.5522   # channel file
-python simulation/detect/coherent_mc.py simulation/spice/results_real     # Pd / Pfa Monte Carlo
+TAG=o_ FINAL=1 python simulation/spice/tools/make_chan_opt.py 100n 0.552389   # final-design channel (6-digit Msv gate V from corner_run)
+python simulation/detect/coherent_mc.py simulation/spice/results_final    # Pd / Pfa Monte Carlo
+python simulation/detect/test_mc_analytic.py                              # engine check vs closed form (§33)
 python simulation/detect/chip_rate_sweep.py                               # §21
 ```
 (`TAG` prefixes scratch files so runs can go in parallel; results live in
 `simulation/spice/results*/`.)
+
+**Audit (§33):** the detection engine matches a closed-form check to 0.1 %; the original runner reproduces its numbers; two documentation errors (supply-noise budgets, an unproven tolerance explanation) and the stale lists above were corrected.
