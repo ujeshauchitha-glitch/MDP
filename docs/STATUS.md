@@ -5,6 +5,8 @@ failed attempt are in [`afe-architecture.md`](afe-architecture.md) (§ numbers
 below) and [`TIA-DESIGN.md`](TIA-DESIGN.md). Everything here is **simulated in
 ngspice 47 with the sky130 models, not built or measured**.
 
+![architecture](architecture.svg)
+
 ## Current design (what the numbers below are for)
 
 ```
@@ -95,8 +97,9 @@ outputs could not reach 1.65 V (min I_DC rose to 82–135 nA). Fixed in §22.
    gain proportionally (a calibratable constant).
 6. Ideal elements still in the netlist: the digital servo, Rref/Rs/R1–R3, the
    wide TIA's ideal Rf (314 kΩ).
-7. `hardware/afe/tia.sch` matches the old single-TIA netlist, not
-   `afe_direct.spice`.
+7. `hardware/afe/tia.sch` is the old single-TIA drawing, marked superseded;
+   there is no xschem schematic of the final design. A block diagram with the
+   simulated values is in [`architecture.svg`](architecture.svg).
 
 ## Reproduce
 
