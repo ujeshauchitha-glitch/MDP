@@ -1224,3 +1224,15 @@ isolated analog supply, which was not designed here).
 Monte Carlo detection numbers of §16–§21 (which assume a noiseless supply) is not
 quantified beyond the budget above; the mechanism is not confirmed; supply-to-PPG
 cross-talk through the digital servo (ADC/DAC reference) is not included.
+
+**§27 addendum: why the obvious op-amp fix does not fit (headroom check, 2026-10-17).**
+The natural fix for a PMOS-load second stage that passes VDD ripple to its output
+is to cascode the load. In the simulated op-amps `amp_out` sits at **2.67 V (slow) and
+2.68 V (wide) with VDD = 3.3 V, VCM = 1.4 V** (the output NMOS source follower
+needs Vgs ≈ 1.3 V above its 1.4 V output), so only ≈ 0.62 V is left across the
+PMOS load. A cascoded load needs about 2 × Vdsat ≈ 0.7 V or more, so it does not fit.
+Realistic routes, none simulated: (a) lower VCM to ≈ 1.2 V (frees ≈ 0.2 V but moves the
+input pair, Mc and mirror headroom), (b) replace the NMOS source-follower output
+by a lower-Vgs buffer, or (c) take the supply requirement to the board: an
+ultra-low-noise LDO (single-digit nV/√Hz class, > 80 dB PSRR) with heavy
+decoupling meets the budget above without touching the op-amp.
